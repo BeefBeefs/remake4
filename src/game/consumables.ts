@@ -13,7 +13,34 @@ export interface ItemEffect {
   learn?: number;
   /** seconds of invincibility for the whole party */
   shield?: number;
+  /** cast this spell number for free (Fire Ball / Ice Ball items) */
+  cast?: number;
+  /** kill the devils near the party (Soul Scroll) */
+  smite?: boolean;
+  /** timed party buff: multipliers for damage taken / dealt and the stats; lasts `BUFF_SECONDS` */
+  buff?: Buff;
 }
+
+export interface Buff {
+  taken?: number;
+  dealt?: number;
+  strength?: number;
+  dexterity?: number;
+  skill?: number;
+}
+
+export const BUFF_SECONDS = 60;
+
+/** items 151-160 are shop goods whose text only says what they do, not for how long: a minute is a guess */
+const BUFFS: Record<number, Buff> = {
+  151: { taken: 0.5 },
+  152: { taken: 0.2 },
+  153: { dealt: 2 },
+  154: { dealt: 3 },
+  155: { dexterity: 1.5 },
+  156: { strength: 1.3, dexterity: 1.3 },
+  159: { skill: 1.2 },
+};
 
 const STAT_WORDS: Record<string, StatName> = {
   health: 'HEALTH',
@@ -33,6 +60,11 @@ export const SHIELD_SCROLL_SECONDS = 20;
  */
 export function itemEffect(id: number, desc: string): ItemEffect | null {
   if (id >= 185 && id <= 196) return { learn: id - 184 };
+  if (BUFFS[id]) return { buff: BUFFS[id] };
+  if (id === 160) return { stats: { HEALTH: 20 } }; // Dragon Heart "Life+100" = 20 Health at 5 life each
+  if (id === 174) return { cast: 10 }; // Ice Ball: the Ice Rain effect
+  if (id === 175) return { cast: 2 };
+  if (id === 178) return { smite: true };
   const d = desc.toLowerCase();
   const fx: ItemEffect = {};
   if (/fully recover life/.test(d)) fx.life = 1;

@@ -540,5 +540,10 @@ test('consumable effects are read from the item descriptions; passive and unsupp
   assert.equal(fx(182)?.money, 500);
   assert.ok((fx(179)?.shield ?? 0) > 0);
   assert.deepEqual(fx(190), { learn: 6 });
-  for (const passive of [151, 153, 155, 156, 158, 159, 160, 176, 177]) assert.equal(fx(passive), null, `item ${passive}`);
+  assert.deepEqual(fx(152), { buff: { taken: 0.2 } });
+  assert.deepEqual(fx(154), { buff: { dealt: 3 } });
+  assert.deepEqual(fx(160), { stats: { HEALTH: 20 } });
+  assert.deepEqual(fx(175), { cast: 2 });
+  assert.deepEqual(fx(178), { smite: true });
+  for (const none of [157, 158, 176, 177, 184]) assert.equal(fx(none), null, `item ${none}`);
 });

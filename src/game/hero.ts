@@ -36,6 +36,8 @@ export class Hero {
   speedMul = 1;
   /** seconds of Buddha Shield left: no damage while above 0 */
   invuln = 0;
+  /** multiplier on damage taken (Angel's Touch / Shield buffs) */
+  guard = 1;
   get dead(): boolean {
     return this.hp <= 0;
   }
@@ -55,7 +57,7 @@ export class Hero {
   /** placeholder combat: flat damage, brief stagger, death animation at 0 hp */
   takeDamage(n: number): void {
     if (this.dead || this.invuln > 0) return;
-    this.hp = Math.max(0, this.hp - n);
+    this.hp = Math.max(0, this.hp - Math.max(1, Math.round(n * this.guard)));
     this.target = null;
     this.setState(this.dead ? 'dead' : 'hurt');
   }

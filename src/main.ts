@@ -11,6 +11,7 @@ import { directionFromVector } from './game/anim';
 import { arrow, aura, Effect, effectFrame, fireBall, fireWall, ghostBolt, lightning, rain, shell, updateEffect, visual } from './game/effects';
 import { derive, LEVEL_GAIN, mitigate, Slot, slotOf, traitOf, xpToNext } from './game/stats';
 import { InventoryUI } from './ui/inventory';
+import { Buff, BUFF_SECONDS } from './game/consumables';
 import { QuestLog } from './ui/quests';
 import { GAME_TRACKS, MoviePlayer, showTitle, WorldMapUI } from './ui/overlays';
 import { Party } from './game/party';
@@ -501,11 +502,11 @@ async function boot(): Promise<void> {
     fx.length = 0;
   }
   const HERO_SFX: Record<string, string> = { LEELIM: 'lee', KUSA: 'kusa', RINING: 'ren' };
-  function castSpell(): void {
+  function castSpell(free?: number): void {
     const h = party.leader;
-    const k = knownSpells().includes(spellSel) ? spellSel : knownSpells()[0];
+    const k = free ?? (knownSpells().includes(spellSel) ? spellSel : knownSpells()[0]);
     if (!k || h.dead || running || dlg.open) return;
-    const cost = manaCost(k);
+    const cost = free ? 0 : manaCost(k);
     if (h.mana < cost) {
       toast('Not enough mana');
       return;
@@ -572,16 +573,27 @@ async function boot(): Promise<void> {
   }
 
   /** recompute every hero's numbers from stats, level and gear; keeps each hero's life fraction */
+  let buff: Buff = {};
+  let buffT = 0;
+  /** the base stats with the running potion-like buff applied */
+  function buffedStats(): typeof story.stats {
+    const s = { ...story.stats };
+    s.STRENGTH = Math.round(s.STRENGTH * (buff.strength ?? 1));
+    s.DEXTERITY = Math.round(s.DEXTERITY * (buff.dexterity ?? 1));
+    s.SKILL = Math.round(s.SKILL * (buff.skill ?? 1));
+    return s;
+  }
   function refreshHeroStats(): void {
     for (const h of heroes) {
-      const d = derive(db, story.stats, story.level, h.gear, traitOf(h.name));
+      const d = derive(db, buffedStats(), story.level, h.gear, traitOf(h.name));
+      h.guard = buff.taken ?? 1;
       const frac = h.maxHp ? h.hp / h.maxHp : 1;
       h.maxHp = d.maxHp;
       h.hp = h.dead ? 0 : Math.max(1, Math.round(d.maxHp * frac));
       const mf = h.maxMana ? h.mana / h.maxMana : 1;
       h.maxMana = d.maxMana;
       h.mana = Math.round(d.maxMana * mf);
-      h.attackPower = d.attack;
+      h.attackPower = Math.round(d.attack * (buff.dealt ?? 1));
       h.defense = d.defense;
       h.speedMul = d.speedMul;
     }
@@ -637,6 +649,30 @@ async function boot(): Promise<void> {
       if (fx.learn !== undefined && !story.magic.has(fx.learn)) {
         dlg.trade?.learn(fx.learn);
         used = true;
+      }
+      if (fx.buff) {
+        buff = { ...buff, ...fx.buff };
+        buffT = BUFF_SECONDS;
+        refreshHeroStats();
+        used = true;
+      }
+      if (fx.cast) {
+        inv.toggle();
+        castSpell(fx.cast);
+        used = true;
+      }
+      if (fx.smite) {
+        const lead = party.leader;
+        const under = index.indexOf(mapEntry) >= UNDERWORLD_OFFSET;
+        let n = 0;
+        for (const en of enemies) {
+          // devils live below; an event boss ("drop" names an event) is left to its own story
+          const boss = en.e.drop > 0 && en.e.drop < 150;
+          if (!under || boss || en.e.dead || Math.hypot(en.e.x - lead.x, (en.e.y - lead.y) / 0.625) > 320) continue;
+          en.e.damage(99999);
+          n++;
+        }
+        used = n > 0;
       }
       if (fx.shield) {
         for (const h of alive) h.invuln = Math.max(h.invuln, fx.shield);
@@ -924,6 +960,11 @@ async function boot(): Promise<void> {
     if (world) {
       if (!dlg.open) readKeys();
       else party.leader.input.x = party.leader.input.y = 0;
+      if (buffT > 0 && (buffT -= dt) <= 0) {
+        buff = {};
+        refreshHeroStats();
+        toast('The effect wears off');
+      }
       party.update(dt, world, metas);
       party.ensureLeaderAlive();
       const lead = party.leader;
