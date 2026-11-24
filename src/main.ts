@@ -20,7 +20,7 @@ import { GAME_TRACKS, MoviePlayer, showSlides, showTitle, WorldMapUI } from './u
 import { Party } from './game/party';
 import { applyStory, makeSave, parseSave, SAVE_KEY, SaveData } from './game/save';
 import { TILE_H, TILE_W, World } from './game/world';
-import { loadItemStats, loadLang, loadMonsters, loadMap, loadMapIndex, loadSpriteMeta, loadText, loadTilesets } from './data/loaders';
+import { assetUrl, loadItemStats, loadLang, loadMonsters, loadMap, loadMapIndex, loadSpriteMeta, loadText, loadTilesets } from './data/loaders';
 import { MapIndexEntry, SpriteSheetMeta, TilesetTable } from './data/types';
 import { GameRenderer, SpriteActor, VIEW_H, VIEW_W } from './render/renderer';
 import { Arg, EvtBlock, EvtFile, parseEvt } from './script/parser';
@@ -87,6 +87,7 @@ async function boot(): Promise<void> {
   }
   const party = new Party(heroes);
   const itemMeta = await loadSpriteMeta('ITEM');
+  const iconMeta = await loadSpriteMeta('ICON1');
   const spriteMeta = await loadSpriteMeta('SPRITE');
   const backMeta = await loadSpriteMeta('BACK');
   const ground: GroundItem[] = [];
@@ -646,6 +647,11 @@ async function boot(): Promise<void> {
       toast(`Level ${story.level}!`);
     }
   }
+
+  dlg.heroName = () => party.leader.name;
+  const faceRec = iconMeta.records[24];
+  if (faceRec)
+    dlg.setPortraits(assetUrl(`sprites/${iconMeta.pages[0].file}`), faceRec.frames, () => ({ Elim: 0, Raening: 1, Kusa: 2 })[party.leader.name as 'Elim'] ?? 0);
 
   /** apply a consumable's effect; false when it would change nothing (the item is then kept) */
   async function applyItemEffect(fx: ItemEffect): Promise<boolean> {
@@ -1282,6 +1288,7 @@ async function boot(): Promise<void> {
       statusT += dt;
       if (statusT > 0.25) {
         statusT = 0;
+        quickEl.style.visibility = dlg.open || menu.open ? 'hidden' : 'visible';
         yearNum.textContent = String(Math.floor(story.year));
         yearOrb.style.left = `${(story.year % 1) * 100}%`;
         const l = party.leader;

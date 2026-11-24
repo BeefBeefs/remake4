@@ -25,7 +25,10 @@ export class DialogueUI implements ScriptHost {
   private lines: { text: string; color: RGB }[] = [];
   private color: RGB = [255, 255, 255];
   private face: FaceSpec = null;
+  /** who 'FACE HERO' speaks as (the party leader's name) */
+  heroName: () => string = () => 'Hero';
   private waiter: (() => void) | null = null;
+  private portraits: { url: string; frames: { x: number; y: number; w: number; h: number }[]; hero: () => number } | null = null;
 
   constructor(
     private el: HTMLElement,
@@ -62,9 +65,17 @@ export class DialogueUI implements ScriptHost {
   }
 
   private render(extra?: HTMLElement, hint?: string): void {
-    const name = this.face && this.face.kind === 'npc' ? this.face.name : this.face?.kind === 'hero' ? 'Hero' : '';
+    const name = this.face && this.face.kind === 'npc' ? this.face.name : this.face?.kind === 'hero' ? this.heroName() : '';
     const nameColor = this.face ? css(this.face.color) : '#fff';
     this.el.innerHTML = '';
+    const pf = this.portraits;
+    const frame = pf && this.face ? pf.frames[this.face.kind === 'npc' ? this.face.id : pf.hero()] : undefined;
+    if (pf && frame) {
+      const f = document.createElement('div');
+      f.className = 'face';
+      f.style.cssText = `width:${frame.w}px;height:${frame.h}px;background:url(${pf.url}) -${frame.x}px -${frame.y}px`;
+      this.el.appendChild(f);
+    }
     if (name) {
       const n = document.createElement('div');
       n.className = 'name';
@@ -104,6 +115,10 @@ export class DialogueUI implements ScriptHost {
   }
   setColor(c: RGB): void {
     this.color = c;
+  }
+  /** the portrait sheet (ICON1.GOS record 24: frame n is FACE n; heroes use `hero()`) */
+  setPortraits(url: string, frames: { x: number; y: number; w: number; h: number }[], hero: () => number): void {
+    this.portraits = { url, frames, hero };
   }
   setFace(f: FaceSpec): void {
     this.face = f;
