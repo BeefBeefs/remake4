@@ -82,7 +82,8 @@ Roles (inferred by drawing the maps and checking against scripts):
 - NPC sprites: SPRITE.GOS record chosen from the NPC's script name (`src/game/npcs.ts`; Blacksmith 9, Jeweler 12, ...).
 
 ## AKUMA.EXE data tables (.data section, file offset 0x8c000)
-- Monster table at 0x8e35c: 59 records x 52 bytes: `id u8, family u8, name[20], hp u16, b0..b9, u16 x5 sound ids ...`.
+- Monster table at 0x8e35c: 59 records x 52 bytes: `sheet u8, family u8, name[20], hp u16, b0..b9, u16 x5 sound ids ...`.
+  The first byte is the index of the monster's sprite sheet in the enemy list (A..P = 0-15, A1..N3 = 16-28, BIRD..WATER = 29-41; it matches all the sprite-verified kinds, and gives the story monsters their sheets: Hell Witch = L, Western Demon = O, Doldoras / Galapagos = A1, Dragon Warrior = N1, Hellminor = M1, Mantitus / Manutis = F1, Skeleton King = G2...).
   b0 attack, b1 defense, b3 move speed are plausible from the spread over monsters (b2, b4-b7 unexplained, kept raw).
   Record i is LOCATE_ENEMY kind i+2 (LANG.GOS has an extra "Hooks" at kind 1; Cymon / Cyclopean are named Two head demon /
   Cyclop in the table). Two Satans (hp 300 and 600) and several Iron Knight / Skeleton variants. `build_assets.py monsters`.

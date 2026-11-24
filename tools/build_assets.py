@@ -426,7 +426,7 @@ def build_stats(disc, out):
 
 def build_monsters(disc, out):
     """AKUMA.EXE .data holds the monster table: 59 records of 52 bytes from the first record "Measel":
-    [id u8][family u8] name[20] hp u16, then bytes b0..b9 (b0 attack, b1 defense, b3 move speed look right from the
+    [sheet u8: index into the enemy sprite list A..P, A1.., BIRD.. WATER][family u8] name[20] hp u16, then bytes b0..b9 (b0 attack, b1 defense, b3 move speed look right from the
     pattern across monsters; b2 b4 b5 b6 b7 are unexplained and kept raw), then u16 sound ids. Record i belongs to
     LOCATE_ENEMY kind i+2 (the LANG.GOS list has an extra "Hooks" first), so kind 1 has no record."""
     import struct
@@ -441,7 +441,7 @@ def build_monsters(disc, out):
         if lang[kind - 1] != name and (kind, name) not in ((15, "Two head demon"), (49, "Cyclop")):
             raise SystemExit("monster table misaligned at kind %d: %r vs %r" % (kind, lang[kind - 1], name))
         table[kind] = {
-            "name": name, "hp": struct.unpack_from("<H", r, 22)[0], "atk": r[24], "def": r[25], "speed": r[27],
+            "name": name, "sheet": r[0], "hp": struct.unpack_from("<H", r, 22)[0], "atk": r[24], "def": r[25], "speed": r[27],
             "raw": list(r[24:34]), "sfx": [v for v in struct.unpack_from("<5H", r, 38)],
         }
     with open(os.path.join(out, "text", "monsters.json"), "w") as f:

@@ -136,6 +136,9 @@ Open: kind -> sheet mapping, enemy stats/AI, hero HP and damage, trailer tables,
 - Help overlay (? button), favicon stub; smoke test enters all 42 maps without page errors (tools: see /home/claude/work/web/smoke.mjs, not in repo).
 - Not implemented: STONE map amount (the Magician at Veddyn turns the party to stone for a while; amount shrinks with level).
 
+- Monster sprites: the first byte of every monster-table record is its sprite sheet index, so the story monsters (30-47) no longer
+  use guessed sheets (`sheetForKind(kind, table)`); the byte agrees with every kind that had been verified by eye.
+
 ## Next ideas
 - Per-hero growth / real stat formulas; monster bytes b2 b4-b7; hero base stats / level / experience, magic (12 spells with names known), real enemy stats.
 - NEW_OBJECT, BASIC event triggers (GO_BASIC_EVENT), save / load.

@@ -238,7 +238,7 @@ async function boot(): Promise<void> {
       if (name === 'LOCATE_ENEMY' && args.length >= 5 && Number(args[0]) === index.findIndex((m) => m.id === mapEntry.id) + 1) {
         // map x y kind power drop; kind -> sheet is a guess (see game/enemies.ts)
         const p = world!.nearestFree(Number(args[1]), Number(args[2]));
-        await spawnEnemy(sheetForKind(Number(args[3])), p.x, p.y, Number(args[3]), Number(args[4]), Number(args[5] ?? 0));
+        await spawnEnemy(sheetForKind(Number(args[3]), monsterTable), p.x, p.y, Number(args[3]), Number(args[4]), Number(args[5] ?? 0));
       }
       if (name === 'LOCATE_ITEM' && args.length >= 4 && Number(args[0]) === index.findIndex((m) => m.id === mapEntry.id) + 1) {
         await dropItem(Number(args[3]), Number(args[1]) * TILE_W + TILE_W / 2, Number(args[2]) * TILE_H + TILE_H - 2);
@@ -890,7 +890,7 @@ async function boot(): Promise<void> {
         const py = pm.o.y * TILE_H + TILE_H - 2;
         if (Math.hypot(px - lead.x, (py - lead.y) / 0.625) < 340) {
           pm.done = true;
-          void spawnEnemy(sheetForKind(pm.o.kind), px, py, pm.o.kind, 6 + pm.o.kind * 3, pm.o.extra);
+          void spawnEnemy(sheetForKind(pm.o.kind, monsterTable), px, py, pm.o.kind, 6 + pm.o.kind * 3, pm.o.extra);
         }
       }
       for (const p of props) {

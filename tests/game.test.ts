@@ -162,6 +162,11 @@ test('enemies: every sheet loads, walks toward the hero, swings and dies', async
   const lang = json<{ monsters: string[] }>('text/lang.json');
   assert.equal(lang.monsters[9], 'Tiger');
   for (let k = 1; k <= 60; k++) assert.ok(ENEMY_SHEETS.includes(sheetForKind(k) as never), `kind ${k}`);
+  // the EXE table's first byte is the sheet index: it agrees with every sprite-verified fallback and settles the story monsters
+  const table = json<import('../src/data/types').MonsterTable>('text/monsters.json');
+  for (let k = 2; k <= 60; k++) if (k <= 29 || k >= 48) assert.equal(sheetForKind(k, table), sheetForKind(k), `kind ${k}`);
+  assert.equal(sheetForKind(30, table), 'ENEMY-L'); // Hell Witch looks like the Dark Witch
+  assert.equal(sheetForKind(42, table), 'ENEMY-M1'); // Hellminor flies like the Vampire Bat
   const meta = json<SpriteSheetMeta>('sprites/enemy-a.json');
   const e = new Enemy('ENEMY-A', open.x + 100, open.y);
   const target = { x: open.x, y: open.y };

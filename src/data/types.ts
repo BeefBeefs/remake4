@@ -98,6 +98,8 @@ export type ItemStats = Record<string, ItemStat>;
 /** one row of AKUMA.EXE's monster table (tools/build_assets.py `monsters`), keyed by LOCATE_ENEMY kind */
 export interface MonsterStat {
   name: string;
+  /** index into the enemy sprite sheet list (game/enemies.ts ENEMY_SHEETS) */
+  sheet: number;
   hp: number;
   atk: number;
   def: number;
