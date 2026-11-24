@@ -85,7 +85,14 @@ Open: kind -> sheet mapping, enemy stats/AI, hero HP and damage, trailer tables,
   Buddha Shield are not playable yet.
 - Bows fire ARROW.GOS arrows (32 angle frames) with the bow's range from the manual; effects live in `src/game/effects.ts`.
 
+## Session 1i
+- Monster table found in the EXE (hp / attack / defense / speed for 59 monsters, `monsters.json`): enemies now use it
+  (hp x0.25 and attack x0.4 so early fights stay short - placeholder factors), defense softens hero hits, xp from the stats.
+- Music: the EXE shuffles CD tracks 7+ regardless of the map, so the game now shuffles track08-15 (no per-map music exists).
+- World map: markers sit at the EXE's positions (map index carries wx / wy / world); real world vs underworld tab by order.
+- Z / X / C select Elim / Kusa / Raening (manual hot keys).
+
 ## Next ideas
-- Per-hero growth / real stat formulas / level / experience, magic (12 spells with names known), real enemy stats.
+- Per-hero growth / real stat formulas; monster bytes b2 b4-b7; hero base stats / level / experience, magic (12 spells with names known), real enemy stats.
 - NEW_OBJECT, BASIC event triggers (GO_BASIC_EVENT), save / load.
-- Real collision rules, trailer class meanings; world-map hotspots; per-map music.
+- Real collision rules, trailer class meanings.

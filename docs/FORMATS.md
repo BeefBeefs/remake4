@@ -77,6 +77,17 @@ Roles (inferred by drawing the maps and checking against scripts):
 - class 1-47: monster, `kind` = LANG.GOS monster number; `extra` looks like the drop item; class meaning unknown.
 - NPC sprites: SPRITE.GOS record chosen from the NPC's script name (`src/game/npcs.ts`; Blacksmith 9, Jeweler 12, ...).
 
+## AKUMA.EXE data tables (.data section, file offset 0x8c000)
+- Monster table at 0x8e35c: 59 records x 52 bytes: `id u8, family u8, name[20], hp u16, b0..b9, u16 x5 sound ids ...`.
+  b0 attack, b1 defense, b3 move speed are plausible from the spread over monsters (b2, b4-b7 unexplained, kept raw).
+  Record i is LOCATE_ENEMY kind i+2 (LANG.GOS has an extra "Hooks" at kind 1; Cymon / Cyclopean are named Two head demon /
+  Cyclop in the table). Two Satans (hp 300 and 600) and several Iron Knight / Skeleton variants. `build_assets.py monsters`.
+- Map table at 0x95a88: 42 records x 92 bytes: `file[16] tileset[24] name[24]`, then 7 ints at +64. Ints 2 and 3 are the place's
+  (x, y) on the 800x600 world pictures; the first 22 records are the real world (WORLD1), the rest the underworld
+  (WORLD2). Int 0 (0-5) and the others are unexplained and not music: it is only used by drawing code.
+- Music: the CD helper (0x47def0) plays audio tracks 1-6 (track02..07, short) as jingles from fixed call sites and, for
+  gameplay, picks a random track from 7 up (track08..15), choosing again when one ends. There is no per-map music.
+
 ## Prices and item stats
 Not in the EXE or GOS files: the printed manual on the disc (`MANUAL/WEAPONL.HTM`, cp949 HTML tables) lists every item
 with attack, attack speed, durability (`life`), defense, bow range, weight, shop price and spell mana cost. Rows are
@@ -90,5 +101,5 @@ Every shop NPC has a BASIC block (the default shop / small talk) next to its sto
 the village they serve), see `basicBlockFor` in `src/game/npcs.ts` (village mapping is a guess).
 
 ## Open questions
-Exact meaning of the 10000 object flag; trailer class numbers other than the ones below; real collision rules; unarmed stance and
-actions 3-5, 11-13, 18-20; which music plays where; walking speed and animation timing.
+Exact meaning of the 10000 object flag; monster table bytes b2, b4-b7; trailer class numbers other than the ones below; real collision rules; unarmed stance and
+actions 3-5, 11-13, 18-20; walking speed and animation timing.

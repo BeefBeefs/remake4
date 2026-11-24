@@ -23,6 +23,10 @@ export interface MapIndexEntry {
   w: number;
   h: number;
   order: number;
+  /** position on the 800x600 world pictures, and which one (1 real world, 2 underworld) */
+  wx: number;
+  wy: number;
+  world: 1 | 2;
 }
 
 export interface MapData {
@@ -88,3 +92,15 @@ export interface ItemStat {
   effect?: string;
 }
 export type ItemStats = Record<string, ItemStat>;
+
+/** one row of AKUMA.EXE's monster table (tools/build_assets.py `monsters`), keyed by LOCATE_ENEMY kind */
+export interface MonsterStat {
+  name: string;
+  hp: number;
+  atk: number;
+  def: number;
+  speed: number;
+  raw: number[];
+  sfx: number[];
+}
+export type MonsterTable = Record<string, MonsterStat>;

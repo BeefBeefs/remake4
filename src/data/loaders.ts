@@ -1,4 +1,4 @@
-import { MapData, MapIndexEntry, SpriteSheetMeta, TilesetTable, LangData, ItemStats } from './types';
+import { MapData, MapIndexEntry, SpriteSheetMeta, TilesetTable, LangData, ItemStats, MonsterTable } from './types';
 
 const ASSETS = 'assets/';
 
@@ -62,4 +62,5 @@ export async function loadText(path: string): Promise<string> {
   return r.text();
 }
 export const loadLang = () => getJson<LangData>('text/lang.json');
+export const loadMonsters = () => getJson<MonsterTable>('text/monsters.json');
 export const loadItemStats = () => getJson<ItemStats>('text/itemstats.json');

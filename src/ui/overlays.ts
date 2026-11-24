@@ -1,7 +1,7 @@
 import { assetUrl } from '../data/loaders';
 import { MapIndexEntry } from '../data/types';
 
-/** The two world pictures with a button per place (the original's clickable hotspots are not decoded yet). */
+/** The two world pictures with a marker per place, positioned from the EXE's map table. */
 export class WorldMapUI {
   private tab: 'world' | 'under' = 'world';
   constructor(
@@ -21,7 +21,8 @@ export class WorldMapUI {
       this.el.style.display = 'none';
       return;
     }
-    if (current) this.tab = /^[cd]/.test(current) ? 'under' : 'world';
+    const here = this.maps.find((m) => m.id === current);
+    if (here) this.tab = here.world === 2 ? 'under' : 'world';
     this.el.style.display = 'block';
     this.render(current);
   }
@@ -48,21 +49,28 @@ export class WorldMapUI {
     const pic = document.createElement('div');
     pic.className = 'pic';
     pic.style.backgroundImage = `url(${assetUrl(this.tab === 'world' ? 'images/world1.webp' : 'images/world2.webp')})`;
-    const chips = document.createElement('div');
-    chips.className = 'chips';
+    const world = this.tab === 'world' ? 1 : 2;
     for (const m of this.maps) {
-      const under = /^[cd]/.test(m.id);
-      if (under !== (this.tab === 'under')) continue;
+      if (m.world !== world) continue;
+      // positions come from the EXE's map table, in the 800x600 picture's coordinates
+      const left = `${(m.wx / 800) * 100}%`;
+      const top = `${(m.wy / 600) * 100}%`;
       const b = document.createElement('button');
-      b.textContent = m.name;
-      if (m.id === current) b.className = 'here';
+      b.className = 'spot' + (/^[cd]/.test(m.id) ? ' cave' : '') + (m.id === current ? ' here' : '');
+      b.style.left = left;
+      b.style.top = top;
+      b.title = m.name;
       b.onclick = () => {
         this.toggle();
         this.onGo(m.id);
       };
-      chips.appendChild(b);
+      const l = document.createElement('div');
+      l.className = 'lbl';
+      l.textContent = m.name;
+      l.style.left = left;
+      l.style.top = top;
+      pic.append(b, l);
     }
-    pic.appendChild(chips);
     this.el.appendChild(pic);
   }
 }
@@ -103,10 +111,5 @@ export function showTitle(el: HTMLElement, onStart: () => void): void {
   };
 }
 
-/** Music by map family. Which track the original plays where is not decoded; this is a placeholder. */
-export function trackForMap(entry: MapIndexEntry, orderInFamily: number): number {
-  const family = entry.id[0];
-  const pools: Record<string, number[]> = { t: [2, 3], a: [4, 5, 6, 7], b: [8, 9], c: [10, 11], d: [12, 13, 14, 15] };
-  const pool = pools[family] ?? [2];
-  return pool[orderInFamily % pool.length];
-}
+/** CD tracks the original shuffles through while playing (audio tracks 7-14 = track08..track15); the shorter tracks are jingles. */
+export const GAME_TRACKS = [8, 9, 10, 11, 12, 13, 14, 15];

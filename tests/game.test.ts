@@ -334,3 +334,22 @@ test('effects: arrows pick the 32-way frame, fire balls travel and burst, walls 
   for (let i = 0; i < 40; i++) fx.updateEffect(a, 1 / 30, world, [d3], []);
   assert.equal(d3.hits, 7);
 });
+
+test('monster table: records line up with the string table and drive Enemy stats', async () => {
+  const { Enemy } = await import('../src/game/enemy');
+  const table = json<import('../src/data/types').MonsterTable>('text/monsters.json');
+  const lang = json<LangData>('text/lang.json');
+  assert.equal(Object.keys(table).length, 59);
+  for (const [k, m] of Object.entries(table)) {
+    if (k === '15' || k === '49') continue; // Cymon / Cyclopean are named differently in the string table
+    assert.equal(lang.monsters[Number(k) - 1], m.name, `kind ${k}`);
+  }
+  assert.equal(table['16'].name, 'Satan');
+  assert.ok(table['16'].hp === 300 && table['44'].hp === 600, 'two Satans: the story one is tougher');
+  const tiger = new Enemy('ENEMY-J', 0, 0, 10, 20, 0, table['10']);
+  assert.equal(tiger.hp, 50);
+  const before = tiger.hp;
+  tiger.damage(10);
+  assert.ok(before - tiger.hp < 10 && before - tiger.hp >= 1, 'defense softens the hit');
+  assert.ok(tiger.xp > 5);
+});

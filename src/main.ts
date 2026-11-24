@@ -9,12 +9,12 @@ import { findPickup, GroundItem } from './game/ground';
 import { ItemDb } from './game/itemdb';
 import { directionFromVector } from './game/anim';
 import { arrow, Effect, effectFrame, fireBall, fireWall, ghostBolt, lightning, updateEffect, visual } from './game/effects';
-import { derive, enemyXp, LEVEL_GAIN, mitigate, Slot, slotOf, xpToNext } from './game/stats';
+import { derive, LEVEL_GAIN, mitigate, Slot, slotOf, xpToNext } from './game/stats';
 import { InventoryUI } from './ui/inventory';
-import { MoviePlayer, showTitle, trackForMap, WorldMapUI } from './ui/overlays';
+import { GAME_TRACKS, MoviePlayer, showTitle, WorldMapUI } from './ui/overlays';
 import { Party } from './game/party';
 import { TILE_H, TILE_W, World } from './game/world';
-import { loadItemStats, loadLang, loadMap, loadMapIndex, loadSpriteMeta, loadText, loadTilesets } from './data/loaders';
+import { loadItemStats, loadLang, loadMonsters, loadMap, loadMapIndex, loadSpriteMeta, loadText, loadTilesets } from './data/loaders';
 import { MapIndexEntry, SpriteSheetMeta, TilesetTable } from './data/types';
 import { GameRenderer, SpriteActor, VIEW_H, VIEW_W } from './render/renderer';
 import { Arg, EvtBlock, EvtFile, parseEvt } from './script/parser';
@@ -38,12 +38,13 @@ async function boot(): Promise<void> {
   const dlgEl = document.getElementById('dialogue')!;
   status.textContent = 'loading…';
 
-  const [index, tilesets, files, lang, itemStats] = await Promise.all([
+  const [index, tilesets, files, lang, itemStats, monsterTable] = await Promise.all([
     loadMapIndex(),
     loadTilesets() as Promise<TilesetTable>,
     Promise.all(['sam.evt', 'under.evt'].map(async (f) => parseEvt(await loadText(`scripts/${f}`)))),
     loadLang(),
     loadItemStats(),
+    loadMonsters(),
   ]);
   const db = new ItemDb(lang, itemStats);
   const scriptFiles: { tag: string; file: EvtFile }[] = [
@@ -89,7 +90,7 @@ async function boot(): Promise<void> {
   async function spawnEnemy(sheet: string, x: number, y: number, kind = 0, power = 20, drop = 0): Promise<void> {
     if (!metas.has(sheet)) metas.set(sheet, await loadSpriteMeta(sheet));
     const actor = await renderer.createSprite(metas.get(sheet)!);
-    enemies.push({ e: new Enemy(sheet, x, y, kind, power, drop), actor });
+    enemies.push({ e: new Enemy(sheet, x, y, kind, power, drop, monsterTable[String(kind)]), actor });
   }
   function clearEnemies(): void {
     for (const en of enemies) renderer.removeSprite(en.actor);
@@ -168,7 +169,7 @@ async function boot(): Promise<void> {
     clearEffects();
     await buildMapObjects(index.findIndex((m) => m.id === entry.id) + 1, parseMapObjects(map.trailer, map.w, map.h));
     party.placeAt(spawn.x, spawn.y);
-    audio.setMusic(trackForMap(entry, index.filter((m) => m.id[0] === entry.id[0]).findIndex((m) => m.id === entry.id)));
+    audio.setPlaylist(GAME_TRACKS);
     history.replaceState(null, '', `#${entry.id}`);
     mapSelect.value = entry.id;
     refreshNpcList();
@@ -524,6 +525,8 @@ async function boot(): Promise<void> {
     audio.unlock();
     keys.add(e.key.toLowerCase());
     if (e.key >= '1' && e.key <= '3' && !heroes[Number(e.key) - 1].dead) party.setLeader(Number(e.key) - 1);
+    const zxc = 'zxc'.indexOf(e.key.toLowerCase());
+    if (zxc >= 0 && !heroes[zxc].dead) party.setLeader(zxc); // the manual's Z / X / C hot keys
     if (e.key.toLowerCase() === 'i') inv.toggle();
     if (e.key.toLowerCase() === 'f') castSpell();
     if (e.key.toLowerCase() === 'q') cycleSpell();
@@ -649,7 +652,7 @@ async function boot(): Promise<void> {
       for (let i = enemies.length - 1; i >= 0; i--)
         if (enemies[i].e.dead) {
           const dead = enemies[i].e;
-          addXp(enemyXp(dead.power));
+          addXp(dead.xp);
           const id = dead.drop > 0 ? dead.drop : Math.random() < 0.35 ? 200 : 0; // 200 = money; drop rates are placeholders
           if (id) void dropItem(id, dead.x, dead.y);
           renderer.removeSprite(enemies[i].actor);

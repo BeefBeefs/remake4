@@ -3,7 +3,7 @@
 
 usage:
   python3 tools/build_assets.py --disc <dir containing MAP/ IMG/ WAV/ *.EVT> [--bin AKUMA.bin] [--out public/assets]
-        [--only tiles,maps,sprites,images,audio,scripts,lang,stats,cdaudio,video] [--sprites KUSA,RINING,...|all]
+        [--only tiles,maps,sprites,images,audio,scripts,lang,stats,monsters,cdaudio,video] [--sprites KUSA,RINING,...|all]
 
 Original data is never copied verbatim except the small PCM WAV sound effects.
 """
@@ -99,8 +99,24 @@ def b64(a):
     return base64.b64encode(np.ascontiguousarray(a, dtype="<u2").tobytes()).decode()
 
 
+def read_map_records(disc):
+    """AKUMA.EXE keeps one 92-byte record per map (file name, tileset, name, then ints). Ints 2 and 3 are the place's
+    position on the 800x600 world pictures; the first 22 records are the real world, the rest the underworld."""
+    import struct
+    d = open(find(disc, "AKUMA.EXE"), "rb").read()
+    a = d.find(b"a1.map\0", 0x95000)
+    out = {}
+    for n in range(len(MAPS)):
+        r = d[a + n * 92: a + (n + 1) * 92]
+        mid = r[0:16].split(b"\0")[0].decode()[:-4]
+        f = struct.unpack_from("<7i", r, 64)
+        out[mid] = {"wx": f[2], "wy": f[3], "world": 1 if n < 22 else 2}
+    return out
+
+
 def build_maps(disc, out):
     index = []
+    recs = read_map_records(disc)
     for i, (mid, ts, name) in enumerate(MAPS):
         m = af.parse_map(open(find(disc, "MAP", mid + ".map"), "rb").read())
         # drop the unused right/bottom border: the game stores a fixed 128x128 buffer
@@ -109,7 +125,7 @@ def build_maps(disc, out):
             "ground": b64(m["ground"]), "objects": b64(m["objects"]),
             "trailer": base64.b64encode(m["trailer"]).decode(),
         })
-        index.append({"id": mid, "name": name, "tileset": ts, "w": m["w"], "h": m["h"], "order": i})
+        index.append({"id": mid, "name": name, "tileset": ts, "w": m["w"], "h": m["h"], "order": i, **recs[mid]})
     write_json(os.path.join(out, "maps", "index.json"), index)
     print("maps", len(index))
 
@@ -395,12 +411,37 @@ def build_stats(disc, out):
     print("stats", len(stats), "items,", sum(1 for e in stats.values() if "price" in e), "with prices")
 
 
+def build_monsters(disc, out):
+    """AKUMA.EXE .data holds the monster table: 59 records of 52 bytes from the first record "Measel":
+    [id u8][family u8] name[20] hp u16, then bytes b0..b9 (b0 attack, b1 defense, b3 move speed look right from the
+    pattern across monsters; b2 b4 b5 b6 b7 are unexplained and kept raw), then u16 sound ids. Record i belongs to
+    LOCATE_ENEMY kind i+2 (the LANG.GOS list has an extra "Hooks" first), so kind 1 has no record."""
+    import struct
+    d = open(find(disc, "AKUMA.EXE"), "rb").read()
+    first = d.find(b"Measel", 0x8E000) - 2
+    lang = json.load(open(os.path.join(out, "text", "lang.json")))["monsters"]
+    table = {}
+    for n in range(59):
+        r = d[first + n * 52: first + (n + 1) * 52]
+        name = r[2:22].split(b"\0")[0].decode("latin1")
+        kind = n + 2
+        if lang[kind - 1] != name and (kind, name) not in ((15, "Two head demon"), (49, "Cyclop")):
+            raise SystemExit("monster table misaligned at kind %d: %r vs %r" % (kind, lang[kind - 1], name))
+        table[kind] = {
+            "name": name, "hp": struct.unpack_from("<H", r, 22)[0], "atk": r[24], "def": r[25], "speed": r[27],
+            "raw": list(r[24:34]), "sfx": [v for v in struct.unpack_from("<5H", r, 38)],
+        }
+    with open(os.path.join(out, "text", "monsters.json"), "w") as f:
+        json.dump(table, f, sort_keys=True)
+    print("monsters", len(table), "records")
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--disc", required=True)
     ap.add_argument("--bin")
     ap.add_argument("--out", default=os.path.join(os.path.dirname(__file__), "..", "public", "assets"))
-    ap.add_argument("--only", default="tiles,maps,sprites,images,audio,scripts,lang,stats")
+    ap.add_argument("--only", default="tiles,maps,sprites,images,audio,scripts,lang,stats,monsters")
     ap.add_argument("--sprites", default=",".join(DEFAULT_SPRITES))
     a = ap.parse_args()
     out = os.path.abspath(a.out)
@@ -413,6 +454,7 @@ def main():
     if "scripts" in todo: build_scripts(a.disc, out)
     if "lang" in todo: build_lang(a.disc, out)
     if "stats" in todo: build_stats(a.disc, out)
+    if "monsters" in todo: build_monsters(a.disc, out)
     if "cdaudio" in todo: build_cdaudio(a.bin, out)
     if "video" in todo: build_video(a.disc, out)
 

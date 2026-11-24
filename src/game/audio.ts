@@ -8,9 +8,39 @@ export class AudioPlayer {
   private musicOn = false;
   private current = '';
 
+  private playlist: number[] = [];
+
   constructor() {
     this.music.loop = true;
     this.music.volume = 0.5;
+    this.music.addEventListener('ended', () => {
+      if (this.playlist.length) this.playRandom();
+    });
+  }
+
+  private trackUrl(track: number): string {
+    return assetUrl(`music/track${String(track).padStart(2, '0')}.ogg`);
+  }
+
+  private playRandom(): void {
+    const others = this.playlist.filter((t) => this.trackUrl(t) !== this.current);
+    const pool = others.length ? others : this.playlist;
+    const url = this.trackUrl(pool[Math.floor(Math.random() * pool.length)]);
+    this.current = url;
+    this.music.src = url;
+    if (this.musicOn) void this.music.play().catch(() => {});
+  }
+
+  /**
+   * In-game music: the EXE plays the CD's tracks 7 and up in random order (it picks the next one when a track ends),
+   * independent of the map. Calling this again with the same list keeps the current track playing.
+   */
+  setPlaylist(tracks: number[]): void {
+    const same = tracks.length === this.playlist.length && tracks.every((t, i) => t === this.playlist[i]);
+    if (same) return;
+    this.playlist = tracks;
+    this.music.loop = false;
+    this.playRandom();
   }
 
   /** must be called from a user gesture */
@@ -45,7 +75,9 @@ export class AudioPlayer {
   }
 
   setMusic(track: number): void {
-    const url = assetUrl(`music/track${String(track).padStart(2, '0')}.ogg`);
+    this.playlist = [];
+    this.music.loop = true;
+    const url = this.trackUrl(track);
     if (url === this.current) return;
     this.current = url;
     this.music.src = url;
