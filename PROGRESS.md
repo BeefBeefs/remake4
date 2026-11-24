@@ -179,3 +179,4 @@ Open: kind -> sheet mapping, enemy stats/AI, hero HP and damage, trailer tables,
 - Mantis Trainer needs level >= 16 and Strength >= 60; placeholder growth gave Strength 40 at level 16, so STRENGTH per level is now 4 (70 at 16). Test added.
 - Looked at the d6 white patches: six bone-floor tiles in the source art, left alone.
 - Companion revive from the manual: a living hero standing within ~44px of a fallen one for 2 s revives them at 30% life (unless the whole party is down). Browser-tested.
+- Script warning audit (all blocks x 4 choice walks, now a test): only CANCEL_MAGIC (witch "give up training", now a no-op because spells are learnt instantly) and two declines that jump to labels missing from the original data (BlueMoon#17 `청아2`, Witch fortune `마법소명령`); a missing label ends the talk, which is the sensible outcome.

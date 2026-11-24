@@ -39,6 +39,8 @@ const SHOP_END: Partial<Record<ShopKind, string>> = {
 };
 const WORLD_EFFECTS = new Set([
   'WARP', 'LOCATE_ENEMY', 'LOCATE_ITEM', 'NEW_OBJECT', 'REMOVE_OBJECT', 'CHANGE', 'CHANGE_GOS', 'UNSEAL', 'STONE',
+  // the Witch's "give up magic training" answer: there is no training period here (spells are learnt on the spot)
+  'CANCEL_MAGIC',
 ]);
 
 /** normalise odd spellings like "N-UM" or lower case to the keyword the engine knows */

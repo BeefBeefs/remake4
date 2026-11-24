@@ -118,3 +118,20 @@ test('"GO_ DOWN" typo in a CASE still parses as GO_DOWN', () => {
   assert.ok(c && c.t === 'case');
   assert.deepEqual(c.action, ['GO_DOWN', 'X']);
 });
+
+test('no block of any script produces an interpreter warning except the two known missing labels', async () => {
+  for (const f of ['sam.evt', 'under.evt', 'multi1.evt', 'multi2.evt']) {
+    const evt = parseEvt(read(f));
+    for (const b of evt.blocks) {
+      for (const pick of [0, 1, 2, 3]) {
+        const st = new StoryState();
+        st.money = 1_000_000;
+        st.level = 99;
+        const { host, log } = mockHost(new Array(40).fill(pick));
+        await new EvtInterpreter(evt, b, st, host, 20000).run();
+        const warns = log.filter((l) => l.startsWith('WARN') && !l.includes('청아2') && !l.includes('마법소명령')); // two declines (BlueMoon#17, the Witch's fortune) jump to labels that do not exist in the data: the talk just ends
+        assert.deepEqual(warns, [], `${f} ${b.name}#${b.id} pick ${pick}`);
+      }
+    }
+  }
+});
