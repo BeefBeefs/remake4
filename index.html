@@ -68,6 +68,7 @@
     #title .menu button { background: #000a; color: #eed; border: 2px solid #8aa0d8; border-radius: 6px; padding: 10px 22px; font: inherit; font-size: 18px; }
     #title div { font-size: 16px; letter-spacing: .1em; opacity: .8; animation: blink 1.6s infinite; }
     @keyframes blink { 50% { opacity: .25; } }
+    #minimap { position: fixed; right: 6px; top: 84px; width: 112px; height: 90px; border: 2px solid #6a5a40; border-radius: 3px; background: #000; opacity: .85; pointer-events: none; image-rendering: pixelated; z-index: 2; }
     #status { position: fixed; left: 8px; bottom: 6px; color: #cbb; text-shadow: 0 0 3px #000; pointer-events: none; }
     #dialogue { position: fixed; left: 50%; bottom: 4%; transform: translateX(-50%); width: min(92vw, 620px); display: none;
       background: #101830ee; border: 2px solid #8aa0d8; border-radius: 6px; padding: 10px 12px; }
@@ -92,6 +93,7 @@
   <div id="toast"></div>
   <div id="party"></div>
   <div id="over">Exhausted my body and soul...<br>Now I'm going to have a rest at my place.</div>
+  <canvas id="minimap" width="112" height="90"></canvas>
   <div id="status"></div>
   <div id="act"></div>
   <div id="dialogue"></div>

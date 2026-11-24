@@ -15,6 +15,7 @@ import { advanceYear } from './game/clock';
 import { Buff, BUFF_SECONDS } from './game/consumables';
 import { QuestLog } from './ui/quests';
 import { GameMenu } from './ui/menu';
+import { Minimap } from './ui/minimap';
 import { GAME_TRACKS, MoviePlayer, showSlides, showTitle, WorldMapUI } from './ui/overlays';
 import { Party } from './game/party';
 import { applyStory, makeSave, parseSave, SAVE_KEY, SaveData } from './game/save';
@@ -70,6 +71,7 @@ async function boot(): Promise<void> {
   // statue / table events of the underworld script: a shared pool, not an NPC on one map object (see game/instant.ts)
   const instant = instantBlocks(files[1], INSTANT_UNDER_MAP + UNDERWORLD_OFFSET);
   const renderer = new GameRenderer(canvas);
+  const minimap = new Minimap(document.getElementById('minimap') as HTMLCanvasElement);
   const audio = new AudioPlayer();
   const story = new StoryState();
   // a #map or ?map= link is a debugging jump: it neither loads nor writes the save
@@ -229,6 +231,7 @@ async function boot(): Promise<void> {
     const map = await loadMap(entry.id);
     const meta = tilesets[map.tileset];
     world = new World(map, meta);
+    minimap.setWorld(world);
     await renderer.setWorld(world, meta, map.tileset);
     mapEntry = entry;
     if (/^t\d$/.test(entry.id)) lastTown = entry.id;
@@ -1213,6 +1216,11 @@ async function boot(): Promise<void> {
         }
       }
       renderer.render(party.leader.x, party.leader.y - 20);
+      minimap.draw(party.leader.x, party.leader.y - 20, VIEW_W, VIEW_H, [
+        ...npcs.map((n) => ({ x: n.x, y: n.y, color: '#ffd84a' })),
+        ...enemies.filter((en) => !en.e.dead).map((en) => ({ x: en.e.x, y: en.e.y, color: '#ff3a3a' })),
+        ...heroes.map((h) => ({ x: h.x, y: h.y, color: h === party.leader ? '#fff' : '#6cf' })),
+      ]);
       saveT += dt;
       questT += dt;
       if (questT > 0.5) {
