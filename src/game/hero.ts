@@ -1,6 +1,7 @@
 import { World } from './world';
 import { directionFromVector, HERO_ANIM, recordIndex } from './anim';
 import { SpriteSheetMeta } from '../data/types';
+import { Loadout, UNARMED_ATTACK } from './stats';
 
 export type HeroState = 'idle' | 'walk' | 'attack' | 'hurt' | 'dead';
 
@@ -26,6 +27,11 @@ export class Hero {
   target: { x: number; y: number } | null = null;
   maxHp = 100;
   hp = 100;
+  /** worn items by slot, and the numbers derived from them (set by the game, see game/stats.ts) */
+  gear: Loadout = {};
+  attackPower = UNARMED_ATTACK;
+  defense = 0;
+  speedMul = 1;
   get dead(): boolean {
     return this.hp <= 0;
   }
@@ -107,7 +113,7 @@ export class Hero {
     if (this.state !== 'attack' && this.state !== 'hurt' && this.state !== 'dead') {
       if (vx || vy) {
         // the 20px-tall tiles imply a squashed ground plane: walk slower along y
-        const step = WALK_SPEED * dt;
+        const step = WALK_SPEED * this.speedMul * dt;
         const moved = this.tryMove(world, vx * step, vy * step * 0.625);
         this.dir = directionFromVector(vx, vy);
         this.setState(moved ? 'walk' : 'idle');

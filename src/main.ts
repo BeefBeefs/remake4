@@ -7,6 +7,7 @@ import { MapObject, monsterSpawns, objectRole, parseMapObjects } from './data/ma
 import { basicBlockFor, npcSpriteRecord, pickBlock } from './game/npcs';
 import { findPickup, GroundItem } from './game/ground';
 import { ItemDb } from './game/itemdb';
+import { derive, enemyXp, LEVEL_GAIN, mitigate, Slot, slotOf, xpToNext } from './game/stats';
 import { InventoryUI } from './ui/inventory';
 import { MoviePlayer, showTitle, trackForMap, WorldMapUI } from './ui/overlays';
 import { Party } from './game/party';
@@ -16,7 +17,7 @@ import { MapIndexEntry, SpriteSheetMeta, TilesetTable } from './data/types';
 import { GameRenderer, SpriteActor, VIEW_H, VIEW_W } from './render/renderer';
 import { Arg, EvtBlock, EvtFile, parseEvt } from './script/parser';
 import { EvtInterpreter } from './script/interpreter';
-import { StoryState } from './script/state';
+import { StatName, StoryState } from './script/state';
 import { DialogueUI } from './ui/dialogue';
 
 const HERO_DEFS = [
@@ -110,7 +111,8 @@ async function boot(): Promise<void> {
     const scripted = new Set<number>();
     scriptFiles.forEach((sf) => sf.file.blocks.forEach((b) => b.map === mapNo && scripted.add(b.object)));
     const free = objs.filter((o) => !scripted.has(o.index));
-    pendingMonsters = monsterSpawns(free).map((o) => ({ o, done: false }));
+    // villages (t1-t6) list class 1-47 entries too (a Satan in the Western Village), so those are not monsters there
+    pendingMonsters = mapEntry.id.startsWith('t') ? [] : monsterSpawns(free).map((o) => ({ o, done: false }));
     for (const o of free) {
       const role = objectRole(o);
       if (role !== 'prop' && role !== 'scenery') continue;
@@ -298,6 +300,35 @@ async function boot(): Promise<void> {
   });
   hud.append(mapSelect, npcSelect, spawnSelect, ...leaderBtns, markerBtn, musicBtn);
 
+  /** recompute every hero's numbers from stats, level and gear; keeps each hero's life fraction */
+  function refreshHeroStats(): void {
+    for (const h of heroes) {
+      const d = derive(db, story.stats, story.level, h.gear);
+      const frac = h.maxHp ? h.hp / h.maxHp : 1;
+      h.maxHp = d.maxHp;
+      h.hp = h.dead ? 0 : Math.max(1, Math.round(d.maxHp * frac));
+      h.attackPower = d.attack;
+      h.defense = d.defense;
+      h.speedMul = d.speedMul;
+    }
+  }
+  refreshHeroStats();
+  function addXp(n: number): void {
+    story.xp += n;
+    let up = false;
+    while (story.xp >= xpToNext(story.level)) {
+      story.xp -= xpToNext(story.level);
+      story.level++;
+      for (const k of Object.keys(LEVEL_GAIN) as StatName[]) story.stats[k] += LEVEL_GAIN[k];
+      up = true;
+    }
+    if (up) {
+      refreshHeroStats();
+      for (const h of heroes) if (!h.dead) h.hp = h.maxHp;
+      toast(`Level ${story.level}!`);
+    }
+  }
+
   const inv = new InventoryUI(
     document.getElementById('inv')!,
     db,
@@ -310,6 +341,30 @@ async function boot(): Promise<void> {
       return true;
     },
     toast,
+    {
+      names: HERO_DEFS.map((d) => d.name),
+      gear: (i) => heroes[i].gear,
+      derived: (i) => derive(db, story.stats, story.level, heroes[i].gear),
+      hp: (i) => [Math.ceil(heroes[i].hp), heroes[i].maxHp],
+      equip(i, id) {
+        const slot = slotOf(db, id);
+        if (!slot || story.itemCount(id) < 1) return;
+        const h = heroes[i];
+        const old = h.gear[slot];
+        story.removeItem(id);
+        if (old) story.giveItem(old);
+        h.gear[slot] = id;
+        refreshHeroStats();
+      },
+      unequip(i, slot) {
+        const h = heroes[i];
+        const id = h.gear[slot as Slot];
+        if (!id) return;
+        delete h.gear[slot as Slot];
+        story.giveItem(id);
+        refreshHeroStats();
+      },
+    },
   );
   const worldUI = new WorldMapUI(document.getElementById('world')!, index, (id) => void enterMap(id));
   const movies = new MoviePlayer(document.getElementById('movie')!);
@@ -345,6 +400,9 @@ async function boot(): Promise<void> {
     partyEl.appendChild(row);
     return { row, fill };
   });
+  const lvEl = document.createElement('div');
+  lvEl.style.textAlign = 'right';
+  partyEl.prepend(lvEl);
   let respawnT = 0;
 
   // ---------------------------------------------------------------- input
@@ -419,7 +477,7 @@ async function boot(): Promise<void> {
       for (const en of enemies) {
         const e = en.e;
         e.update(dt, world, metas.get(e.sheet)!, lead);
-        if (lead.swung && !e.dead && Math.hypot(e.x - lead.x, (e.y - lead.y) / 0.625) < 64) e.damage(1);
+        if (lead.swung && !e.dead && Math.hypot(e.x - lead.x, (e.y - lead.y) / 0.625) < 64) e.damage(lead.attackPower);
         if (e.swung) {
           e.swung = false;
           // the swing hits the nearest living hero in reach
@@ -433,13 +491,14 @@ async function boot(): Promise<void> {
               best = h;
             }
           }
-          best?.takeDamage(e.damageOut);
+          best?.takeDamage(mitigate(e.damageOut, best.defense));
           if (best) void audio.play('attack1.wav', 0.5);
         }
       }
       for (let i = enemies.length - 1; i >= 0; i--)
         if (enemies[i].e.dead) {
           const dead = enemies[i].e;
+          addXp(enemyXp(dead.power));
           const id = dead.drop > 0 ? dead.drop : Math.random() < 0.35 ? 200 : 0; // 200 = money; drop rates are placeholders
           if (id) void dropItem(id, dead.x, dead.y);
           renderer.removeSprite(enemies[i].actor);
@@ -498,6 +557,7 @@ async function boot(): Promise<void> {
       }
       if (toastT > 0 && (toastT -= dt) <= 0) toastEl.style.display = 'none';
       heroes.forEach((h, i) => {
+        lvEl.textContent = `Lv ${story.level} · xp ${story.xp}/${xpToNext(story.level)}`;
         bars[i].fill.style.width = `${(100 * h.hp) / h.maxHp}%`;
         bars[i].row.className = 'row' + (h === party.leader ? ' lead' : '');
         bars[i].row.style.opacity = h.dead ? '0.4' : '1';

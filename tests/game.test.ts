@@ -171,7 +171,7 @@ test('enemies: every sheet loads, walks toward the hero, swings and dies', async
   }
   assert.ok(Math.hypot(e.x - target.x, e.y - target.y) < 60, 'closed in on the hero');
   assert.ok(swung, 'attacked');
-  e.damage(3);
+  e.damage(e.hp);
   assert.ok(e.dead);
 });
 
@@ -282,4 +282,30 @@ test('item stats: manual prices line up with the string table names', async () =
     for (const o of file.ops) if (o.t === 'list' && db.kind(o.n) !== 'quest' && db.price(o.n) === undefined && !(o.n >= 111 && o.n <= 124) && !(o.n >= 184 && o.n <= 196)) missing.add(o.n);
   }
   assert.deepEqual([...missing], []);
+});
+
+test('stats: gear bonuses parse, derived numbers, mitigation, xp curve', async () => {
+  const { derive, parseBonuses, mitigate, xpToNext, slotOf, LEVEL_GAIN } = await import('../src/game/stats');
+  const { ItemDb } = await import('../src/game/itemdb');
+  const db = new ItemDb(json<LangData>('text/lang.json'), json<ItemStats>('text/itemstats.json'));
+  const b = parseBonuses('Strength+3 Magic+10 Life+30 M.Speed+6 Skill+20% ALL Attributes+2');
+  assert.equal(b.stats.STRENGTH, 5);
+  assert.equal(b.stats.MAGIC, 12);
+  assert.equal(b.life, 30);
+  assert.equal(b.speed, 6);
+  assert.equal(b.pct.SKILL, 20);
+  const base = { HEALTH: 10, STRENGTH: 10, MAGIC: 10, DEXTERITY: 10, BRAIN: 10, SKILL: 10 };
+  const bare = derive(db, base, 1, {});
+  assert.equal(bare.maxHp, 100);
+  assert.equal(bare.attack, 4 + 5);
+  const armed = derive(db, base, 1, { weapon: 1, armor: 81, shield: 62 }); // Copper Sword, Leather Armor, Brass Shield
+  assert.equal(armed.attack, 6 + 5);
+  assert.equal(armed.defense, 10 + 10);
+  assert.ok(mitigate(20, 20) < 20 && mitigate(1, 500) === 1);
+  assert.equal(slotOf(db, 1), 'weapon');
+  assert.equal(slotOf(db, 41), 'weapon'); // bows share the weapon slot
+  assert.equal(slotOf(db, 161), null);
+  assert.ok(xpToNext(2) > xpToNext(1));
+  // level 16 should reach the trainer's Dexterity requirement (>60) from the starting 10
+  assert.ok(base.DEXTERITY + 15 * LEVEL_GAIN.DEXTERITY > 50);
 });

@@ -11,6 +11,8 @@ export class StoryState {
   orders = new Map<number, { title: string; ment: string[] }>();
   money = 0;
   level = 1;
+  /** experience towards the next level (party-wide) */
+  xp = 0;
   stats: Record<StatName, number> = { HEALTH: 10, STRENGTH: 10, MAGIC: 10, DEXTERITY: 10, BRAIN: 10, SKILL: 10 };
   magic = new Map<number, number>();
   /** the quest log's capacity is not known yet; scripts only test whether there is room */

@@ -32,7 +32,7 @@ export class Enemy {
     readonly power = 20,
     readonly drop = 0,
   ) {
-    this.hp = 2 + Math.floor(power / 12);
+    this.hp = 8 + power; // placeholder; hero hits do weapon attack + Strength/2
     this.damageOut = 3 + Math.floor(power / 8);
   }
 

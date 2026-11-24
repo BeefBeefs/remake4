@@ -70,7 +70,13 @@ Open: kind -> sheet mapping, enemy stats/AI, hero HP and damage, trailer tables,
 - GO_BASIC_EVENT implemented (falls back to the NPC's BASIC shop block; village-specific variants are a guess).
 - Still missing: ring prices, spell learning cost, repairs, equipping items (bought gear just sits in the bag).
 
+## Session 1g
+- Equipment: items equip per hero from the inventory (slot by LANG.GOS category; bows share the weapon slot), gear
+  bonuses parsed from the item text, attack / defense / speed / max life derived (`src/game/stats.ts`, placeholder formulas).
+- Experience: kills give xp, party-wide level-ups raise stats (placeholder curve and gains), heal the party, HUD shows Lv / xp.
+- Trailer monsters no longer spawn in villages (T1 lists a Satan there: class 1-47 entries mean something else in towns).
+
 ## Next ideas
-- Equip items and use their stats; hero stats / level / experience, magic (12 spells with names known), real enemy stats.
+- Per-hero growth / real stat formulas / level / experience, magic (12 spells with names known), real enemy stats.
 - NEW_OBJECT, BASIC event triggers (GO_BASIC_EVENT), save / load.
 - Real collision rules, trailer class meanings; world-map hotspots; per-map music.
