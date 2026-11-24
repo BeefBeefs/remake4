@@ -22,6 +22,7 @@ import { GameRenderer, SpriteActor, VIEW_H, VIEW_W } from './render/renderer';
 import { Arg, EvtBlock, EvtFile, parseEvt } from './script/parser';
 import { EvtInterpreter } from './script/interpreter';
 import { shiftMapNumbers, UNDERWORLD_OFFSET } from './script/mapnumbers';
+import { INSTANT_UNDER_MAP, InstantKind, instantBlocks, instantKindOfSprite } from './game/instant';
 import { StatName, StoryState } from './script/state';
 import { DialogueUI } from './ui/dialogue';
 
@@ -59,6 +60,8 @@ async function boot(): Promise<void> {
   ];
 
   const arrivals = collectArrivals(files);
+  // statue / table events of the underworld script: a shared pool, not an NPC on one map object (see game/instant.ts)
+  const instant = instantBlocks(files[1], INSTANT_UNDER_MAP + UNDERWORLD_OFFSET);
   const renderer = new GameRenderer(canvas);
   const audio = new AudioPlayer();
   const story = new StoryState();
@@ -113,7 +116,7 @@ async function boot(): Promise<void> {
   /** the script object whose entry is running (what THIS means in REMOVE_OBJECT / CHANGE_GOS) */
   let curNpc: Npc | null = null;
   let pendingMonsters: { o: MapObject; done: boolean }[] = [];
-  interface Prop { object: number; x: number; y: number; meta: SpriteSheetMeta; record: number; actor: SpriteActor; t: number }
+  interface Prop { object: number; x: number; y: number; meta: SpriteSheetMeta; record: number; actor: SpriteActor; t: number; instant?: InstantKind }
   const props: Prop[] = [];
 
   // Places a script can UNSEAL start out sealed (shop keepers and quest givers tell you about new places one by one;
@@ -152,7 +155,7 @@ async function boot(): Promise<void> {
     for (const p of props) renderer.removeSprite(p.actor);
     props.length = 0;
     const scripted = new Set<number>();
-    scriptFiles.forEach((sf) => sf.file.blocks.forEach((b) => b.map === mapNo && scripted.add(b.object)));
+    scriptFiles.forEach((sf) => sf.file.blocks.forEach((b) => b.map === mapNo && !instant.all.has(b) && scripted.add(b.object)));
     objs = objs.filter((o) => !story.removed.has(`${mapNo}:${o.index}`)); // removed by a script earlier
     const free = objs.filter((o) => !scripted.has(o.index));
     // villages (t1-t6) list class 1-47 entries too (a Satan in the Western Village), so those are not monsters there
@@ -162,10 +165,11 @@ async function boot(): Promise<void> {
       if (role !== 'prop' && role !== 'scenery') continue;
       const meta = role === 'prop' ? spriteMeta : backMeta;
       if (!meta.records[o.kind]?.frames.length) continue;
-      props.push({ object: o.index, x: o.x * TILE_W + TILE_W / 2, y: o.y * TILE_H + TILE_H - 2, meta, record: o.kind, actor: await renderer.createSprite(meta), t: Math.random() * 2 });
+      const inst = role === 'prop' && o.cls === 0 && mapNo > UNDERWORLD_OFFSET ? instantKindOfSprite(o.kind) : null;
+      props.push({ object: o.index, x: o.x * TILE_W + TILE_W / 2, y: o.y * TILE_H + TILE_H - 2, meta, record: o.kind, actor: await renderer.createSprite(meta), t: Math.random() * 2, instant: inst ?? undefined });
     }
     const objectIds = new Set<number>();
-    scriptFiles.forEach((sf) => sf.file.blocks.forEach((b) => b.map === mapNo && objectIds.add(b.object)));
+    scriptFiles.forEach((sf) => sf.file.blocks.forEach((b) => b.map === mapNo && !instant.all.has(b) && objectIds.add(b.object)));
     for (const objectId of objectIds) {
       const key = `${mapNo}:${objectId}`;
       if (story.removed.has(key)) continue;
@@ -770,6 +774,11 @@ async function boot(): Promise<void> {
         return;
       }
     }
+    const tappedInstant = nearestInstant(wx, wy - 16, 36);
+    if (tappedInstant && Math.hypot(tappedInstant.x - party.leader.x, (tappedInstant.y - party.leader.y) / 0.625) < 80) {
+      if (!running) useInstant(tappedInstant);
+      return;
+    }
     const foe = enemies.find((en) => !en.e.dead && Math.hypot(en.e.x - wx, en.e.y - 14 - wy) < 34);
     attackTarget = foe ? foe.e : null;
     party.leader.target = foe ? { x: foe.e.x, y: foe.e.y } : { x: wx, y: wy };
@@ -783,9 +792,40 @@ async function boot(): Promise<void> {
   let attackTarget: Enemy | null = null;
   const isBow = (h: Hero) => !!h.gear.weapon && db.lang.weapons[String(h.gear.weapon)]?.category === 'bow';
 
+  /** a dungeon statue or table within reach: touching it runs one random event of its kind, once */
+  function nearestInstant(x: number, y: number, reach: number): Prop | null {
+    let best: Prop | null = null;
+    let bd = reach;
+    for (const p of props) {
+      if (!p.instant || !instant[p.instant].length) continue;
+      const d = Math.hypot(p.x - x, (p.y - y) / 0.625);
+      if (d < bd) {
+        bd = d;
+        best = p;
+      }
+    }
+    return best;
+  }
+  function useInstant(p: Prop): void {
+    const pool = instant[p.instant!];
+    const block = pool[Math.floor(Math.random() * pool.length)];
+    story.removed.add(`${mapEntryNo()}:${p.object}`); // each statue / table works once
+    const i = props.indexOf(p);
+    if (i >= 0) props.splice(i, 1);
+    renderer.removeSprite(p.actor);
+    audio.unlock();
+    void runBlock(files[1], block);
+  }
+
   function talkToNearest(): void {
+    if (running) return;
     const n = nearestNpc(party.leader.x, party.leader.y, 70);
-    if (!n || running) return;
+    const ip = nearestInstant(party.leader.x, party.leader.y, 70);
+    if (ip && (!n || Math.hypot(ip.x - party.leader.x, (ip.y - party.leader.y) / 0.625) < Math.hypot(n.x - party.leader.x, (n.y - party.leader.y) / 0.625))) {
+      useInstant(ip);
+      return;
+    }
+    if (!n) return;
     const pick = pickBlock(n.blocks, story.entry.get(`${mapEntryNo()}:${n.object}`));
     audio.unlock();
     void runBlock(scriptFiles[pick.fi].file, pick.block);
@@ -1029,7 +1069,7 @@ async function boot(): Promise<void> {
   }
 
   // handy for poking around in the browser console
-  (window as unknown as Record<string, unknown>).akuma = { story, party, renderer, enterMap, index, db, dropItem, spawnEnemy, castSpell, npcs, scriptFiles, runBlock, dlg, selectSpell: (k: number) => { spellSel = k; }, enemies };
+  (window as unknown as Record<string, unknown>).akuma = { story, party, renderer, enterMap, index, db, dropItem, spawnEnemy, castSpell, npcs, scriptFiles, runBlock, dlg, props, selectSpell: (k: number) => { spellSel = k; }, enemies };
 }
 
 boot().catch((e) => {

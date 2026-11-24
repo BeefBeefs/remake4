@@ -459,3 +459,19 @@ test('STONE is a known script command with a frame count (statue puzzle)', async
   assert.equal(stones.length, 3);
   assert.deepEqual(stones.map((o) => (o.t === 'cmd' ? o.args[1] : 0)).sort(), [300, 500, 700]);
 });
+
+test('instant events: statue and table pools exclude map-bound puzzle blocks', async () => {
+  const { parseEvt } = await import('../src/script/parser');
+  const { instantBlocks, instantKindOfSprite, INSTANT_UNDER_MAP } = await import('../src/game/instant');
+  const { shiftMapNumbers, UNDERWORLD_OFFSET } = await import('../src/script/mapnumbers');
+  const file = shiftMapNumbers(parseEvt(readFileSync(A('scripts/under.evt'), 'utf8')), UNDERWORLD_OFFSET);
+  const pools = instantBlocks(file, INSTANT_UNDER_MAP + UNDERWORLD_OFFSET);
+  assert.ok(pools.all.size >= 20, `all ${pools.all.size}`);
+  assert.ok(pools.statue.length >= 8 && pools.table.length >= 6, `${pools.statue.length}/${pools.table.length}`);
+  const ids = [...pools.statue, ...pools.table].map((b) => b.id);
+  for (const bound of [170, 171, 172, 180, 181]) assert.ok(!ids.includes(bound), `block ${bound} is map-bound`);
+  assert.ok(ids.includes(152) && ids.includes(157));
+  assert.equal(instantKindOfSprite(26), 'statue');
+  assert.equal(instantKindOfSprite(43), 'table');
+  assert.equal(instantKindOfSprite(5), null);
+});
