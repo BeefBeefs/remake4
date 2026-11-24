@@ -151,8 +151,15 @@ test('enemies: every sheet loads, walks toward the hero, swings and dies', async
     // attack action must have frames in all five stored directions
     for (let d = 0; d < 5; d++) assert.ok((meta.records[2 * 5 + d]?.frames.length ?? 0) > 0, `${name} attack dir ${d}`);
   }
-  assert.equal(sheetForKind(0), 'ENEMY-A');
-  assert.equal(sheetForKind(42), 'ENEMY-A'); // wraps: kinds 42+ have no sheet yet
+  assert.equal(sheetForKind(1), 'ENEMY-A'); // Hooks
+  assert.equal(sheetForKind(10), 'ENEMY-J'); // Tiger
+  assert.equal(sheetForKind(16), 'ENEMY-P'); // Satan
+  assert.equal(sheetForKind(25), 'ENEMY-J2'); // Golden Tiger
+  assert.equal(sheetForKind(49), 'CYCLOP'); // Cyclopean
+  assert.equal(sheetForKind(60), 'WATER'); // Wiceli
+  const lang = json<{ monsters: string[] }>('text/lang.json');
+  assert.equal(lang.monsters[9], 'Tiger');
+  for (let k = 1; k <= 60; k++) assert.ok(ENEMY_SHEETS.includes(sheetForKind(k) as never), `kind ${k}`);
   const meta = json<SpriteSheetMeta>('sprites/enemy-a.json');
   const e = new Enemy('ENEMY-A', open.x + 100, open.y);
   const target = { x: open.x, y: open.y };
@@ -166,4 +173,35 @@ test('enemies: every sheet loads, walks toward the hero, swings and dies', async
   assert.ok(swung, 'attacked');
   e.damage(3);
   assert.ok(e.dead);
+});
+
+test('combat: hurt, death, revive, leader hand-over', async () => {
+  const { Party } = await import('../src/game/party');
+  const ts = json<TilesetTable>('tiles/tilesets.json');
+  const m = parseMap(json('maps/t1.json'));
+  const w = new World(m, ts[m.tileset]);
+  const s = w.findSpawn();
+  const metas = new Map<string, SpriteSheetMeta>();
+  const defs = [['Elim', 'LEELIM'], ['Kusa', 'KUSA'], ['Raening', 'RINING']];
+  for (const [, sheet] of defs) metas.set(sheet, json<SpriteSheetMeta>(`sprites/${sheet.toLowerCase()}.json`));
+  const party = new Party(defs.map(([n, sh]) => new Hero(n, sh, s.x, s.y)));
+  const lead = party.leader;
+  lead.takeDamage(30);
+  assert.equal(lead.hp, 70);
+  assert.equal(lead.state, 'hurt');
+  for (let i = 0; i < 60; i++) party.update(1 / 60, w, metas);
+  assert.equal(lead.state, 'idle', 'stagger ends');
+  lead.takeDamage(500);
+  assert.ok(lead.dead);
+  for (let i = 0; i < 200; i++) party.update(1 / 60, w, metas);
+  const f = lead.drawFrame();
+  assert.equal(f.record, 21 * 5 + Math.min(lead.dir, 8 - lead.dir));
+  assert.ok(f.frame >= 8, 'death animation holds its last frame');
+  party.ensureLeaderAlive();
+  assert.notEqual(party.leader, lead);
+  for (const h of party.heroes) h.takeDamage(999);
+  assert.ok(party.allDead);
+  party.heroes.forEach((h) => h.revive());
+  assert.ok(!party.allDead);
+  assert.equal(lead.hp, lead.maxHp);
 });

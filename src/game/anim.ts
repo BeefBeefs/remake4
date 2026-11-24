@@ -18,6 +18,7 @@ export const HERO_ANIM = {
   attack: 8,
   attack2: 9,
   attack3: 10,
+  hurt: 11, // 3 frames; GUESS: the first of the (3, 2, 3)-frame actions after the attacks
   death: 21,
 } as const;
 

@@ -2,10 +2,10 @@ import { World } from './world';
 import { directionFromVector, HERO_ANIM, recordIndex } from './anim';
 import { SpriteSheetMeta } from '../data/types';
 
-export type HeroState = 'idle' | 'walk' | 'attack';
+export type HeroState = 'idle' | 'walk' | 'attack' | 'hurt' | 'dead';
 
 export const WALK_SPEED = 96; // px/s, tuned by eye until the original's timing is measured
-const FRAME_TIME: Record<HeroState, number> = { idle: 1 / 6, walk: 1 / 14, attack: 1 / 16 };
+const FRAME_TIME: Record<HeroState, number> = { idle: 1 / 6, walk: 1 / 14, attack: 1 / 16, hurt: 1 / 12, dead: 1 / 8 };
 const HALF_WIDTH = 7; // foot box half width for collision
 
 export interface DrawFrame {
@@ -24,6 +24,11 @@ export class Hero {
   /** true for one update when an attack reaches its hit frame */
   swung = false;
   target: { x: number; y: number } | null = null;
+  maxHp = 100;
+  hp = 100;
+  get dead(): boolean {
+    return this.hp <= 0;
+  }
   /** direct input vector (keyboard), unit-ish; overrides target */
   input = { x: 0, y: 0 };
 
@@ -37,8 +42,21 @@ export class Hero {
     this.y = y;
   }
 
+  /** placeholder combat: flat damage, brief stagger, death animation at 0 hp */
+  takeDamage(n: number): void {
+    if (this.dead) return;
+    this.hp = Math.max(0, this.hp - n);
+    this.target = null;
+    this.setState(this.dead ? 'dead' : 'hurt');
+  }
+
+  revive(): void {
+    this.hp = this.maxHp;
+    this.setState('idle');
+  }
+
   attack(): void {
-    if (this.state === 'attack') return;
+    if (this.dead || this.state === 'attack' || this.state === 'hurt') return;
     this.state = 'attack';
     this.frame = 0;
     this.t = 0;
@@ -67,6 +85,7 @@ export class Hero {
 
   update(dt: number, world: World, meta: SpriteSheetMeta): void {
     this.swung = false;
+    if (this.dead) this.input.x = this.input.y = 0;
     let vx = 0;
     let vy = 0;
     if (this.input.x || this.input.y) {
@@ -85,7 +104,7 @@ export class Hero {
       }
     }
 
-    if (this.state !== 'attack') {
+    if (this.state !== 'attack' && this.state !== 'hurt' && this.state !== 'dead') {
       if (vx || vy) {
         // the 20px-tall tiles imply a squashed ground plane: walk slower along y
         const step = WALK_SPEED * dt;
@@ -104,10 +123,11 @@ export class Hero {
     }
     const n = this.frameCountNow(meta);
     if (this.state === 'attack' && this.frame === Math.floor(n / 2) && this.t < dt + 1e-6) this.swung = true;
-    if (this.state === 'attack' && this.frame >= n) {
+    if ((this.state === 'attack' || this.state === 'hurt') && this.frame >= n) {
       this.state = 'idle';
       this.frame = 0;
-    } else if (n > 0) this.frame %= n;
+    } else if (this.state === 'dead') this.frame = Math.min(this.frame, Math.max(0, n - 1));
+    else if (n > 0) this.frame %= n;
   }
 
   private setState(s: HeroState): void {
@@ -119,7 +139,18 @@ export class Hero {
   }
 
   private action(): number {
-    return this.state === 'walk' ? HERO_ANIM.walk : this.state === 'attack' ? HERO_ANIM.attack : HERO_ANIM.idle;
+    switch (this.state) {
+      case 'walk':
+        return HERO_ANIM.walk;
+      case 'attack':
+        return HERO_ANIM.attack;
+      case 'hurt':
+        return HERO_ANIM.hurt;
+      case 'dead':
+        return HERO_ANIM.death;
+      default:
+        return HERO_ANIM.idle;
+    }
   }
 
   private frameCountNow(meta: SpriteSheetMeta): number {

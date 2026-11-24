@@ -31,12 +31,24 @@ tiles need something underneath: **?** how the original fills the base). Solid g
 `83507b` tiles (also two-tone ones) are editor markers: collision / void. **?** exact semantics of each.
 Assets are repacked to 32 tiles per row so the sheet stays under 4096 px.
 
+## LANG.GOS - the string table (`IMG/LANG.GOS`, cp949 text, CRLF; `tools/build_assets.py --only lang` -> `text/lang.json`)
+Lines 0-76 UI text; 77-136 monster names; 137-228 consumable items as (name, effect) pairs; 229-283 quest items
+(one line each); 284-486 equipment; 487-528 the 42 map names (identical to the EXE order, which confirms it);
+205+ magic as (name, effect) pairs (12 spells).
+- `LOCATE_ENEMY` kind k = monster name k (1-based). 1-16 = sheets A-P, 17-29 = the 13 recoloured variants (both checked
+  against the art: Tiger = J, Satan = P, Bull Demon = red axe), 48-60 = the 13 named sheets in EXE order. 30-47 (Hell Witch
+  ... Skeleton) have no sheet of their own: guessed.
+- Item ids: consumables id i -> line 2*i-165 (effect on the next line), 151-196; quest items id i -> line i+29, 200-254
+  (checked on six items). Magic k -> line 205+2(k-1).
+- Equipment ids (shop LIST numbers): swords 1-33, bows 41-56, shields 61-69, caps 71-77, armour 81-91, shoes 101-110,
+  rings 111-124, necklaces 131-142. Shop lists fall inside these ranges.
+
 ## Scripts: placement commands
 `WARP map cellX cellY` (map = 1-based index in the map order above; all 22 targets verified in bounds).
 `LOCATE_ENEMY map cellX cellY kind power drop` (468 uses; kind 2-47, power 8-210, drop 0 = none, otherwise an
 item id **?**). The cluster of 5-7 lines with nearby cells is one group spawn. `NEW_OBJECT` / `LOCATE_ITEM` are not
 decoded. Kind -> sprite sheet: the EXE lists the enemy sheets in order (A-P, 13 recoloured variants, 13 named
-monsters = 42), but kinds go up to 47, so the mapping used (`src/game/enemies.ts`) is a **guess**.
+monsters = 42), but kinds go up to 47, so kinds 30-47 are guessed (see LANG.GOS above).
 
 ## Enemy sheets
 `ENEMY-A..P`, variants `A1 B1 B2 E1 F1 G1 G2 J1 J2 M1 N1 N2 N3` (recolours, same frame layout), monsters

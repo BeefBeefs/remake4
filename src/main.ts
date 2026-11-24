@@ -55,10 +55,10 @@ async function boot(): Promise<void> {
   const party = new Party(heroes);
   const enemies: { e: Enemy; actor: SpriteActor }[] = [];
 
-  async function spawnEnemy(sheet: string, x: number, y: number, kind = 0): Promise<void> {
+  async function spawnEnemy(sheet: string, x: number, y: number, kind = 0, power = 20): Promise<void> {
     if (!metas.has(sheet)) metas.set(sheet, await loadSpriteMeta(sheet));
     const actor = await renderer.createSprite(metas.get(sheet)!);
-    enemies.push({ e: new Enemy(sheet, x, y, kind), actor });
+    enemies.push({ e: new Enemy(sheet, x, y, kind, power), actor });
   }
   function clearEnemies(): void {
     for (const en of enemies) renderer.removeSprite(en.actor);
@@ -99,7 +99,7 @@ async function boot(): Promise<void> {
       if (name === 'LOCATE_ENEMY' && args.length >= 5 && Number(args[0]) === index.findIndex((m) => m.id === mapEntry.id) + 1) {
         // map x y kind power drop; kind -> sheet is a guess (see game/enemies.ts)
         const p = world!.nearestFree(Number(args[1]), Number(args[2]));
-        await spawnEnemy(sheetForKind(Number(args[3])), p.x, p.y, Number(args[3]));
+        await spawnEnemy(sheetForKind(Number(args[3])), p.x, p.y, Number(args[3]), Number(args[4]));
       }
       lastEffect = `${name} ${args.join(' ')}`;
       console.info('[script effect]', lastEffect);
@@ -171,10 +171,29 @@ async function boot(): Promise<void> {
   const leaderBtns = HERO_DEFS.map((d, i) => {
     const b = document.createElement('button');
     b.textContent = `${i + 1} ${d.name}`;
-    b.onclick = () => party.setLeader(i);
+    b.onclick = () => {
+      if (!heroes[i].dead) party.setLeader(i);
+    };
     return b;
   });
   hud.append(mapSelect, npcSelect, spawnSelect, ...leaderBtns, markerBtn, musicBtn);
+
+  const partyEl = document.getElementById('party')!;
+  const overEl = document.getElementById('over')!;
+  const bars = heroes.map((h) => {
+    const row = document.createElement('div');
+    row.className = 'row';
+    const name = document.createElement('span');
+    name.textContent = h.name;
+    const bar = document.createElement('div');
+    bar.className = 'bar';
+    const fill = document.createElement('i');
+    bar.appendChild(fill);
+    row.append(name, bar);
+    partyEl.appendChild(row);
+    return { row, fill };
+  });
+  let respawnT = 0;
 
   // ---------------------------------------------------------------- input
   const keys = new Set<string>();
@@ -182,7 +201,7 @@ async function boot(): Promise<void> {
     if (dlg.open) return;
     audio.unlock();
     keys.add(e.key.toLowerCase());
-    if (e.key >= '1' && e.key <= '3') party.setLeader(Number(e.key) - 1);
+    if (e.key >= '1' && e.key <= '3' && !heroes[Number(e.key) - 1].dead) party.setLeader(Number(e.key) - 1);
     if (e.key === ' ') {
       party.leader.attack();
       e.preventDefault();
@@ -223,13 +242,27 @@ async function boot(): Promise<void> {
       if (!dlg.open) readKeys();
       else party.leader.input.x = party.leader.input.y = 0;
       party.update(dt, world, metas);
+      party.ensureLeaderAlive();
       const lead = party.leader;
       for (const en of enemies) {
         const e = en.e;
         e.update(dt, world, metas.get(e.sheet)!, lead);
         if (lead.swung && !e.dead && Math.hypot(e.x - lead.x, (e.y - lead.y) / 0.625) < 64) e.damage(1);
         if (e.swung) {
-          e.swung = false; // hero damage is not modelled yet
+          e.swung = false;
+          // the swing hits the nearest living hero in reach
+          let best: Hero | null = null;
+          let bd = 46;
+          for (const h of heroes) {
+            if (h.dead) continue;
+            const d = Math.hypot(e.x - h.x, (e.y - h.y) / 0.625);
+            if (d < bd) {
+              bd = d;
+              best = h;
+            }
+          }
+          best?.takeDamage(e.damageOut);
+          if (best) void audio.play('attack1.wav', 0.5);
         }
       }
       for (let i = enemies.length - 1; i >= 0; i--)
@@ -247,6 +280,23 @@ async function boot(): Promise<void> {
         const f = en.e.drawFrame(FLIP_SIDES);
         en.actor.set(f.record, f.frame, en.e.x, en.e.y, f.flip);
         en.actor.mesh.visible = en.actor.mesh.visible && !(en.e.hurt > 0 && Math.floor(en.e.hurt * 20) % 2 === 0);
+      }
+      heroes.forEach((h, i) => {
+        bars[i].fill.style.width = `${(100 * h.hp) / h.maxHp}%`;
+        bars[i].row.className = 'row' + (h === party.leader ? ' lead' : '');
+        bars[i].row.style.opacity = h.dead ? '0.4' : '1';
+      });
+      if (party.allDead) {
+        overEl.style.display = 'flex';
+        respawnT += dt;
+        if (respawnT > 3) {
+          respawnT = 0;
+          overEl.style.display = 'none';
+          clearEnemies();
+          heroes.forEach((h) => h.revive());
+          party.setLeader(0);
+          void enterMap(mapEntry.id);
+        }
       }
       renderer.render(party.leader.x, party.leader.y - 20);
       statusT += dt;

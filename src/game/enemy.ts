@@ -13,7 +13,9 @@ const HALF_WIDTH = 8;
 export class Enemy {
   dir = 4;
   state: EnemyState = 'idle';
-  hp = 3;
+  hp: number;
+  /** damage dealt per swing; placeholder scaling from the script's power value */
+  readonly damageOut: number;
   hurt = 0;
   dead = false;
   private t = 0;
@@ -27,7 +29,11 @@ export class Enemy {
     public x: number,
     public y: number,
     readonly kind = 0,
-  ) {}
+    readonly power = 20,
+  ) {
+    this.hp = 2 + Math.floor(power / 12);
+    this.damageOut = 3 + Math.floor(power / 8);
+  }
 
   damage(n: number): void {
     this.hp -= n;

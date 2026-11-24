@@ -25,10 +25,25 @@ export class Party {
     });
   }
 
+  get allDead(): boolean {
+    return this.heroes.every((h) => h.dead);
+  }
+
+  /** if the leader fell, hand control to the first hero still standing */
+  ensureLeaderAlive(): void {
+    if (!this.leader.dead) return;
+    const i = this.heroes.findIndex((h) => !h.dead);
+    if (i >= 0) this.setLeader(i);
+  }
+
   update(dt: number, world: World, metas: Map<string, SpriteSheetMeta>): void {
     const lead = this.leader;
     let slot = 0;
     for (const h of this.heroes) {
+      if (h.dead) {
+        h.update(dt, world, metas.get(h.sheet)!);
+        continue;
+      }
       if (h !== lead) {
         const d = Math.hypot(lead.x - h.x, lead.y - h.y);
         const want = 34 + slot * 26;

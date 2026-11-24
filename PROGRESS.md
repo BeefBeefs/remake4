@@ -41,3 +41,10 @@ Dev
 - Side-facing default is now "stored dir 2 faces left" (true for every sheet).
 - Overhead flag makes y-sorting against buildings unnecessary (roofs above, walls below).
 Open: kind -> sheet mapping, enemy stats/AI, hero HP and damage, trailer tables, NEW_OBJECT / LOCATE_ITEM, items.
+
+## Session 1d
+- Found the English string table (IMG/LANG.GOS): monster, item, weapon, magic and map names; kind -> sheet mapping is now
+  mostly verified; item / equipment id numbering decoded. `public/assets/text/lang.json`.
+- Combat v0: hero HP, hurt / death animations (action 11 / 21), enemy swings hurt the nearest hero, party HUD, leader
+  hand-over when one falls, "party has fallen" then respawn. Damage / HP numbers are placeholders (scaled from the
+  script's power value) - the real stat tables have not been found.

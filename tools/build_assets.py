@@ -3,7 +3,7 @@
 
 usage:
   python3 tools/build_assets.py --disc <dir containing MAP/ IMG/ WAV/ *.EVT> [--bin AKUMA.bin] [--out public/assets]
-        [--only tiles,maps,sprites,images,audio,scripts,cdaudio,video] [--sprites KUSA,RINING,...|all]
+        [--only tiles,maps,sprites,images,audio,scripts,lang,cdaudio,video] [--sprites KUSA,RINING,...|all]
 
 Original data is never copied verbatim except the small PCM WAV sound effects.
 """
@@ -221,6 +221,48 @@ def build_images(disc, out):
     print("images", sorted(os.listdir(odir)))
 
 
+def build_lang(disc, out):
+    """IMG/LANG.GOS is the game's English string table (cp949 text, CRLF). Index meaning was worked out from the
+    scripts: kind k of LOCATE_ENEMY is monster name k (1-based); consumable item id i -> line 2*i-165 (+ effect line);
+    quest item id i -> line i+29; magic k -> line 205+2(k-1); weapon ids are category base + position."""
+    path = find(disc, "IMG", "LANG.GOS")
+    t = open(path, "rb").read().decode("cp949").split("\r\n")
+    monsters = t[77:137]
+    maps = t[487:529]
+    magic = {k: {"name": t[205 + 2 * (k - 1)], "desc": t[206 + 2 * (k - 1)]} for k in range(1, 13)}
+    items = {}
+    for i in range(151, 197):
+        items[i] = {"name": t[2 * i - 165], "desc": t[2 * i - 164]}
+    for i in range(200, 255):
+        items[i] = {"name": t[i + 29], "desc": ""}
+    # equipment: (category, first line, last line, id base, "stat lines are parenthesised" vs strict name/stat pairs)
+    cats = [("sword", 284, 341, 1, "paren"), ("bow", 342, 368, 41, "paren"), ("shield", 369, 386, 61, "paren"),
+            ("cap", 387, 397, 71, "paren"), ("armor", 398, 414, 81, "paren"), ("shoes", 415, 434, 101, "pair"),
+            ("ring", 435, 462, 111, "pair"), ("necklace", 463, 486, 131, "pair")]
+    weapons = {}
+    counts = {}
+    for cat, a, b, base, mode in cats:
+        entries = []
+        for ln in range(a, b + 1):
+            line = t[ln]
+            if mode == "pair":
+                if (ln - a) % 2 == 0:
+                    entries.append({"name": line, "stats": ""})
+                else:
+                    entries[-1]["stats"] = line.strip("()")
+            elif line.startswith("("):
+                entries[-1]["stats"] = line.strip("()")
+            else:
+                entries.append({"name": line, "stats": ""})
+        counts[cat] = len(entries)
+        for k, e in enumerate(entries):
+            weapons[base + k] = dict(e, category=cat)
+    ui = t[:77]
+    write_json(os.path.join(out, "text", "lang.json"),
+               {"ui": ui, "monsters": monsters, "maps": maps, "magic": magic, "items": items, "weapons": weapons})
+    print("lang: monsters", len(monsters), "items", len(items), "weapons", counts)
+
+
 def build_scripts(disc, out):
     odir = os.path.join(out, "scripts")
     os.makedirs(odir, exist_ok=True)
@@ -298,7 +340,7 @@ def main():
     ap.add_argument("--disc", required=True)
     ap.add_argument("--bin")
     ap.add_argument("--out", default=os.path.join(os.path.dirname(__file__), "..", "public", "assets"))
-    ap.add_argument("--only", default="tiles,maps,sprites,images,audio,scripts")
+    ap.add_argument("--only", default="tiles,maps,sprites,images,audio,scripts,lang")
     ap.add_argument("--sprites", default=",".join(DEFAULT_SPRITES))
     a = ap.parse_args()
     out = os.path.abspath(a.out)
@@ -309,6 +351,7 @@ def main():
     if "images" in todo: build_images(a.disc, out)
     if "audio" in todo: build_audio(a.disc, out)
     if "scripts" in todo: build_scripts(a.disc, out)
+    if "lang" in todo: build_lang(a.disc, out)
     if "cdaudio" in todo: build_cdaudio(a.bin, out)
     if "video" in todo: build_video(a.disc, out)
 
