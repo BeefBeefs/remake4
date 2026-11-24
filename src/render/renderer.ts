@@ -26,7 +26,7 @@ export class SpriteActor {
 
   constructor(
     readonly meta: SpriteSheetMeta,
-    private pages: THREE.Texture[],
+    _pages: THREE.Texture[],
     private materials: THREE.MeshBasicMaterial[],
   ) {
     const g = new THREE.PlaneGeometry(1, 1);
