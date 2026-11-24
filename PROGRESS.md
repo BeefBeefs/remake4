@@ -157,3 +157,7 @@ Open: kind -> sheet mapping, enemy stats/AI, hero HP and damage, trailer tables,
 - Found: under.evt numbers maps from the first underworld place (1 = b1), sam.evt from the overworld. Added `shiftMapNumbers` (+22) so under.evt blocks, WARP, LOCATE_*, NEW_OBJECT, REMOVE_OBJECT, UNSEAL and inline IF/CASE actions all use the unified map list. Underworld villages (t5/t6) and Satan's castle (c4) now get their NPCs. Confirms b1 as the GO_END1 target (under.evt map 1 = Knight Devil).
 - Underworld UNSEALs are now part of the initial seal set (villages stay open).
 - Still open: STONE, sprite-70 bosses, class-0 crowd objects, real combat formulas.
+
+## Session 1p – quest turn-in
+- Re-ran the T1 NPC walk with a loop-avoiding harness: all 7 NPCs run to the end with no script warnings. Shopkeeper scales quest verified end to end (accept -> UNSEAL 13 -> hand in item 209 -> Flygon dagger, order cleared).
+- `CHANGE 0` is used 54x, mostly right after a quest finishes. It now stores entry -1 = the object's plain BASIC entry (shop / chat) instead of the first FLOW entry, so finished quests are not offered again. Falls back to the default entry when the object has no BASIC block. Old saves are unaffected (entry 0 was never stored).

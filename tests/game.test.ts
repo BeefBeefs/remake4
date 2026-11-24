@@ -8,6 +8,8 @@ import { buildChunk, CHUNK } from '../src/render/tilemesh';
 import { Hero } from '../src/game/hero';
 import { applyStory, makeSave, parseSave } from '../src/game/save';
 import { StoryState } from '../src/script/state';
+import { pickBlock } from '../src/game/npcs';
+import type { EvtBlock } from '../src/script/parser';
 import { ItemStats, LangData, SpriteSheetMeta, TilesetTable } from '../src/data/types';
 
 const A = (p: string) => new URL(`../public/assets/${p}`, import.meta.url);
@@ -440,4 +442,12 @@ test('pickBlock honours CHANGE: an object answers with the entry the script chos
   assert.equal(pickBlock(blocks).block.id, 68);
   assert.equal(pickBlock(blocks, 70).block.id, 70);
   assert.equal(pickBlock(blocks, 99).block.id, 68); // unknown id: the default entry
+});
+
+test('pickBlock: entry -1 (CHANGE 0) falls back to the BASIC entry, else the default', () => {
+  const mk = (id: number, kind: 'FLOW' | 'BASIC') => ({ fi: 0, block: { id, kind } as unknown as EvtBlock });
+  const both = [mk(103, 'FLOW'), mk(104, 'BASIC')];
+  assert.equal(pickBlock(both, -1).block.id, 104);
+  assert.equal(pickBlock(both, 0).block.id, 103);
+  assert.equal(pickBlock([mk(5, 'FLOW')], -1).block.id, 5);
 });

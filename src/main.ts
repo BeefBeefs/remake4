@@ -315,11 +315,11 @@ async function boot(): Promise<void> {
         }
       }
       if (name === 'CHANGE' && curNpc) {
-        // this object answers with entry n from now on (0 = its first entry again)
+        // this object answers with entry n from now on (0 = back to its plain BASIC entry, stored as -1)
         const n = Number(args[0]);
         const key = `${mapNoNow}:${curNpc.object}`;
         if (n > 0) story.entry.set(key, n);
-        else story.entry.delete(key);
+        else story.entry.set(key, -1);
       }
       if (name === 'CHANGE_GOS' && curNpc && Number.isFinite(Number(args[0]))) {
         // the speaking object turns into SPRITE.GOS record n (a shattered door, a revealed demon...)

@@ -34,12 +34,17 @@ export function npcSpriteRecord(name: string): number | null {
 /**
  * All blocks sharing one object id on a map: conversation (FLOW) entries first, then BASIC ones. A quest NPC has several
  * entries (one per stage); the script command `CHANGE n` makes entry id n the one it answers with, `CHANGE 0` goes back
- * to the first.
+ * to the plain BASIC entry (stored as -1), which is what keeps finished quests from being offered again.
  */
 export function pickBlock(blocks: { fi: number; block: EvtBlock }[], entryId = 0): { fi: number; block: EvtBlock } {
   if (entryId > 0) {
     const chosen = blocks.find((b) => b.block.id === entryId);
     if (chosen) return chosen;
+  }
+  if (entryId < 0) {
+    // CHANGE 0 after a quest: the object falls back to its plain BASIC entry (shop / chat), not the quest-giving FLOW
+    const basic = blocks.find((b) => b.block.kind === 'BASIC');
+    if (basic) return basic;
   }
   return blocks.find((b) => b.block.kind === 'FLOW') ?? blocks[0];
 }
