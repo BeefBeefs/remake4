@@ -1,4 +1,5 @@
 import { ItemDb } from '../game/itemdb';
+import { ItemEffect, itemEffect } from '../game/consumables';
 import { StoryState } from '../script/state';
 import { Derived, Loadout, SLOTS, slotOf } from '../game/stats';
 
@@ -18,7 +19,7 @@ export class InventoryUI {
     private el: HTMLElement,
     private db: ItemDb,
     private state: StoryState,
-    private onHeal: (fraction: number) => boolean,
+    private onUse: (fx: ItemEffect) => boolean,
     private toast: (msg: string) => void,
     private equipHost: EquipHost,
   ) {
@@ -113,15 +114,15 @@ export class InventoryUI {
           row.appendChild(b);
         });
       }
-      const heal = this.db.healFraction(id);
-      if (heal !== null) {
+      const fx = this.db.kind(id) === 'consumable' ? itemEffect(id, this.db.desc(id)) : null;
+      if (fx) {
         const b = document.createElement('button');
         b.textContent = 'Use';
         b.onclick = () => {
-          if (this.onHeal(heal)) {
+          if (this.onUse(fx)) {
             this.state.removeItem(id);
             this.toast(`Used ${this.db.name(id)}`);
-          } else this.toast('Life is already full');
+          } else this.toast('No effect right now');
           this.render();
         };
         row.appendChild(b);

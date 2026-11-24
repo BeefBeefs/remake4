@@ -74,13 +74,4 @@ export class ItemDb {
     if (/map/.test(n)) return 6;
     return 7;
   }
-
-  /** life restored by using the item: fraction of max life (1 = full), or null if it does not heal */
-  healFraction(id: number): number | null {
-    const d = this.desc(id);
-    if (!/life/i.test(d) || this.kind(id) !== 'consumable') return null;
-    if (/fully recover life/i.test(d)) return 1;
-    const m = d.match(/life\+(\d+)%/i);
-    return m ? Number(m[1]) / 100 : null;
-  }
 }

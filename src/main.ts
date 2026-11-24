@@ -607,12 +607,42 @@ async function boot(): Promise<void> {
     document.getElementById('inv')!,
     db,
     story,
-    (fraction) => {
-      // heal the most wounded living hero
-      const h = heroes.filter((x) => !x.dead).sort((a, b) => a.hp / a.maxHp - b.hp / b.maxHp)[0];
-      if (!h || h.hp >= h.maxHp) return false;
-      h.hp = Math.min(h.maxHp, h.hp + Math.round(h.maxHp * fraction));
-      return true;
+    (fx) => {
+      const alive = heroes.filter((x) => !x.dead);
+      let used = false;
+      if (fx.life !== undefined) {
+        // heal the most wounded living hero
+        const h = [...alive].sort((a, b) => a.hp / a.maxHp - b.hp / b.maxHp)[0];
+        if (h && h.hp < h.maxHp) {
+          h.hp = Math.min(h.maxHp, h.hp + Math.round(h.maxHp * fx.life));
+          used = true;
+        }
+      }
+      if (fx.mana !== undefined) {
+        const h = [...alive].sort((a, b) => a.mana / a.maxMana - b.mana / b.maxMana)[0];
+        if (h && h.mana < h.maxMana) {
+          h.mana = Math.min(h.maxMana, h.mana + Math.round(h.maxMana * fx.mana));
+          used = true;
+        }
+      }
+      if (fx.stats) {
+        for (const [k, v] of Object.entries(fx.stats)) story.stats[k as StatName] += v;
+        refreshHeroStats();
+        used = true;
+      }
+      if (fx.money) {
+        story.money += fx.money;
+        used = true;
+      }
+      if (fx.learn !== undefined && !story.magic.has(fx.learn)) {
+        dlg.trade?.learn(fx.learn);
+        used = true;
+      }
+      if (fx.shield) {
+        for (const h of alive) h.invuln = Math.max(h.invuln, fx.shield);
+        used = true;
+      }
+      return used;
     },
     toast,
     {

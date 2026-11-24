@@ -224,9 +224,6 @@ test('item database: ids from scripts and shops all resolve to real names', asyn
   assert.equal(db.name(201), 'Deer Horn');
   assert.equal(db.name(234), 'Holy Well Water');
   assert.equal(db.name(1), 'Copper Sword');
-  assert.equal(db.healFraction(161), 0.5);
-  assert.equal(db.healFraction(162), 1);
-  assert.equal(db.healFraction(169), null);
   const unknown = new Set<number>();
   for (const f of ['sam.evt', 'under.evt']) {
     const file = parseEvt(readFileSync(A(`scripts/${f}`), 'utf8'));
@@ -521,4 +518,27 @@ test('hero traits: Elim tougher, Kusa more mana and spell power, Raening hits ha
   assert.ok(HERO_TRAITS.Kusa.mana > HERO_TRAITS.Elim.mana && HERO_TRAITS.Kusa.spell > HERO_TRAITS.Raening.spell);
   assert.ok(HERO_TRAITS.Raening.bow > 1);
   assert.equal(traitOf('nobody').hp, 1);
+});
+
+test('consumable effects are read from the item descriptions; passive and unsupported items give none', async () => {
+  const { itemEffect } = await import('../src/game/consumables');
+  const { ItemDb } = await import('../src/game/itemdb');
+  const db = new ItemDb(json<LangData>('text/lang.json'), json<ItemStats>('text/itemstats.json'));
+  const fx = (id: number) => itemEffect(id, db.desc(id));
+  assert.deepEqual(fx(161), { life: 0.5 });
+  assert.deepEqual(fx(162), { life: 1 });
+  assert.deepEqual(fx(163), { mana: 0.5 });
+  assert.deepEqual(fx(164), { mana: 1 });
+  assert.deepEqual(fx(166), { life: 0.7, mana: 0.7 });
+  assert.deepEqual(fx(167), { life: 1, mana: 1 });
+  assert.deepEqual(fx(168), { life: 1, mana: 1, stats: { HEALTH: 1 } });
+  assert.deepEqual(fx(183), { life: 1, mana: 1, stats: { HEALTH: 5 } });
+  assert.deepEqual(fx(169), { stats: { BRAIN: 1 } });
+  assert.deepEqual(fx(173), { stats: { DEXTERITY: 1 } });
+  assert.deepEqual(fx(180), { stats: { BRAIN: 10 } });
+  assert.deepEqual(fx(181)?.stats, { HEALTH: 1, STRENGTH: 1, MAGIC: 1, DEXTERITY: 1, BRAIN: 1 });
+  assert.equal(fx(182)?.money, 500);
+  assert.ok((fx(179)?.shield ?? 0) > 0);
+  assert.deepEqual(fx(190), { learn: 6 });
+  for (const passive of [151, 153, 155, 156, 158, 159, 160, 176, 177]) assert.equal(fx(passive), null, `item ${passive}`);
 });
