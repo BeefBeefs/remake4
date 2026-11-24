@@ -3,7 +3,7 @@ import { collectArrivals } from './game/arrivals';
 import { Enemy } from './game/enemy';
 import { ENEMY_SHEETS, sheetForKind } from './game/enemies';
 import { Hero } from './game/hero';
-import { MapObject, monsterSpawns, objectRole, parseMapObjects } from './data/mapobjects';
+import { isEditorFiller, MapObject, monsterSpawns, objectRole, parseMapObjects } from './data/mapobjects';
 import { basicBlockFor, npcSpriteRecord, pickBlock } from './game/npcs';
 import { findPickup, GroundItem } from './game/ground';
 import { ItemDb } from './game/itemdb';
@@ -22,6 +22,7 @@ import { GameRenderer, SpriteActor, VIEW_H, VIEW_W } from './render/renderer';
 import { Arg, EvtBlock, EvtFile, parseEvt } from './script/parser';
 import { EvtInterpreter } from './script/interpreter';
 import { shiftMapNumbers, UNDERWORLD_OFFSET } from './script/mapnumbers';
+import { breakableFrame, containerDrop, isBreakable } from './game/breakables';
 import { INSTANT_UNDER_MAP, InstantKind, instantBlocks, instantKindOfSprite } from './game/instant';
 import { StatName, StoryState } from './script/state';
 import { DialogueUI } from './ui/dialogue';
@@ -116,7 +117,7 @@ async function boot(): Promise<void> {
   /** the script object whose entry is running (what THIS means in REMOVE_OBJECT / CHANGE_GOS) */
   let curNpc: Npc | null = null;
   let pendingMonsters: { o: MapObject; done: boolean }[] = [];
-  interface Prop { object: number; x: number; y: number; meta: SpriteSheetMeta; record: number; actor: SpriteActor; t: number; instant?: InstantKind }
+  interface Prop { object: number; x: number; y: number; meta: SpriteSheetMeta; record: number; actor: SpriteActor; t: number; instant?: InstantKind; broke?: number }
   const props: Prop[] = [];
 
   // Places a script can UNSEAL start out sealed (shop keepers and quest givers tell you about new places one by one;
@@ -163,6 +164,7 @@ async function boot(): Promise<void> {
     for (const o of free) {
       const role = objectRole(o);
       if (role !== 'prop' && role !== 'scenery') continue;
+      if (isEditorFiller(o)) continue;
       const meta = role === 'prop' ? spriteMeta : backMeta;
       if (!meta.records[o.kind]?.frames.length) continue;
       const inst = role === 'prop' && o.cls === 0 && mapNo > UNDERWORLD_OFFSET ? instantKindOfSprite(o.kind) : null;
@@ -887,6 +889,17 @@ async function boot(): Promise<void> {
       party.update(dt, world, metas);
       party.ensureLeaderAlive();
       const lead = party.leader;
+      if (lead.swung && !isBow(lead)) {
+        // a swing smashes the crates, chests, barrels and jars in reach
+        for (const p of props) {
+          if (p.broke !== undefined || p.meta !== spriteMeta || !isBreakable(p.record)) continue;
+          if (Math.hypot(p.x - lead.x, (p.y - lead.y) / 0.625) > 56) continue;
+          p.broke = 0;
+          story.removed.add(`${mapEntryNo()}:${p.object}`); // gone for good once the debris has been left behind
+          const drop = containerDrop();
+          if (drop) void dropItem(drop, p.x, p.y + 6);
+        }
+      }
       if (lead.swung && isBow(lead)) {
         const w = lead.gear.weapon!;
         void addEffect(arrow(lead.x, lead.y, lead.dir, lead.attackPower, (db.stat(w).range ?? 6) * 32));
@@ -975,7 +988,10 @@ async function boot(): Promise<void> {
       for (const p of props) {
         p.t += dt;
         const cnt = p.meta.records[p.record].frames.length;
-        p.actor.set(p.record, Math.floor(p.t * 8) % cnt, p.x, p.y, false);
+        if (p.meta === spriteMeta && isBreakable(p.record)) {
+          if (p.broke !== undefined) p.broke += dt;
+          p.actor.set(p.record, breakableFrame(cnt, p.broke), p.x, p.y, false);
+        } else p.actor.set(p.record, Math.floor(p.t * 8) % cnt, p.x, p.y, false);
       }
       for (const n of npcs) {
         if (!n.actor || n.record === null) continue;

@@ -68,7 +68,7 @@ def build_tiles(disc, out):
         n = af.til_tile_count(sheet)
         rows = (n + NEW_COLS - 1) // NEW_COLS
         img = np.zeros((rows * af.TILE_H, NEW_COLS * af.TILE_W, 4), np.uint8)
-        solid, markers, editor = [], [], []
+        solid, markers, editor, punched = [], [], [], []
         for i in range(n):
             t = af.til_get(sheet, i)
             r, c = divmod(i, NEW_COLS)
@@ -77,8 +77,13 @@ def build_tiles(disc, out):
             # pure black is the colour key: transparent for overlay tiles.
             blk[..., 3] = np.where(t.sum(-1) == 0, 0, 255)
             # the editor's marker colours painted over part of a tile (always in bands of 4 rows) are never art: transparent
+            hole = np.zeros(t.shape[:2], bool)
             for mc in MARKER_RGB:
-                blk[..., 3] = np.where((t == np.array(mc, np.uint8)).all(-1), 0, blk[..., 3])
+                m_ = (t == np.array(mc, np.uint8)).all(-1)
+                hole |= m_
+                blk[..., 3] = np.where(m_, 0, blk[..., 3])
+            if hole.any() and not hole.all():
+                punched.append(i)  # art tile with marker-coloured pixels removed: needs a floor drawn underneath
             if (t == t[0, 0]).all():
                 solid.append([i, int(t[0, 0, 0]), int(t[0, 0, 1]), int(t[0, 0, 2])])
             # grey 8b898b / purple 83507b are editor markers (collision / void), never art. Some marker
@@ -101,7 +106,7 @@ def build_tiles(disc, out):
         os.makedirs(os.path.join(out, "tiles"), exist_ok=True)
         Image.fromarray(img).save(os.path.join(out, "tiles", ts + ".png"), optimize=True)
         meta[ts] = {"tileW": af.TILE_W, "tileH": af.TILE_H, "cols": NEW_COLS, "count": n,
-                    "width": img.shape[1], "height": img.shape[0], "solidTiles": solid, "markers": markers, "editor": editor}
+                    "width": img.shape[1], "height": img.shape[0], "solidTiles": solid, "markers": markers, "editor": editor, "punched": punched}
         print("tiles", ts, n, "tiles", img.shape, "solid:", [s[0] for s in solid][:12], "markers", len(markers), "editor", len(editor))
     write_json(os.path.join(out, "tiles", "tilesets.json"), meta)
 

@@ -40,20 +40,33 @@ export function buildChunk(
         t = objectTile(raw);
       }
       if (!world.isTile(t)) continue;
-      if (!showMarkers && world.isHidden(t)) continue;
-      const col = t % ts.cols;
-      const row = Math.floor(t / ts.cols);
-      const u0 = (col * ts.tileW) / ts.width;
-      const u1 = ((col + 1) * ts.tileW) / ts.width;
-      const vTop = 1 - (row * ts.tileH) / ts.height;
-      const vBot = 1 - ((row + 1) * ts.tileH) / ts.height;
       const px = cx * TILE_W;
       const py = cy * TILE_H;
-      pos.push(px, -py, 0, px + TILE_W, -py, 0, px + TILE_W, -py - TILE_H, 0, px, -py - TILE_H, 0);
-      uv.push(u0, vTop, u1, vTop, u1, vBot, u0, vBot);
-      const b = q * 4;
-      idx.push(b, b + 2, b + 1, b, b + 3, b + 2);
-      q++;
+      const quad = (tile: number): void => {
+        const col = tile % ts.cols;
+        const row = Math.floor(tile / ts.cols);
+        const u0 = (col * ts.tileW) / ts.width;
+        const u1 = ((col + 1) * ts.tileW) / ts.width;
+        const vTop = 1 - (row * ts.tileH) / ts.height;
+        const vBot = 1 - ((row + 1) * ts.tileH) / ts.height;
+        pos.push(px, -py, 0, px + TILE_W, -py, 0, px + TILE_W, -py - TILE_H, 0, px, -py - TILE_H, 0);
+        uv.push(u0, vTop, u1, vTop, u1, vBot, u0, vBot);
+        const b = q * 4;
+        idx.push(b, b + 2, b + 1, b, b + 3, b + 2);
+        q++;
+      };
+      if (!showMarkers && world.isHidden(t)) {
+        if (layer !== 'ground') continue;
+        const fill = world.groundFill(cx, cy); // a floor under hidden marker cells, so nothing shows black
+        if (fill >= 0) quad(fill);
+        continue;
+      }
+      // art tiles with the editor's marker colours punched out of them: floor underneath, so the holes are not black
+      if (layer === 'ground' && !showMarkers && world.isPunched(t)) {
+        const fill = world.groundFill(cx, cy);
+        if (fill >= 0) quad(fill);
+      }
+      quad(t);
     }
   }
   if (!q) return null;

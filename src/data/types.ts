@@ -15,6 +15,8 @@ export interface TilesetMeta {
   markers: number[];
   /** blue / red / green editor tiles (start points, triggers): hidden like markers but not solid */
   editor?: number[];
+  /** art tiles with marker-coloured pixels made transparent (a floor is drawn under them) */
+  punched?: number[];
 }
 export type TilesetTable = Record<string, TilesetMeta>;
 

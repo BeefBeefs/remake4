@@ -481,3 +481,35 @@ test('level growth makes the Mantis trainer requirement (level 16, strength 60) 
   assert.ok(10 + 15 * LEVEL_GAIN.STRENGTH >= 60, 'strength at level 16');
   assert.ok(10 + 17 * LEVEL_GAIN.DEXTERITY > 60, 'dexterity at level 18');
 });
+
+test('ground cells hidden as collision markers get a visible floor tile (no black holes)', async () => {
+  const ts = json<TilesetTable>('tiles/tilesets.json');
+  const m = parseMap(json('maps/t1.json'));
+  const world = new World(m, ts[m.tileset]);
+  let hidden = 0;
+  for (let cy = 0; cy < world.map.h; cy++)
+    for (let cx = 0; cx < world.map.w; cx++) {
+      const t = world.ground(cx, cy);
+      if (!world.isTile(t) || !world.isHidden(t)) continue;
+      hidden++;
+      const f = world.groundFill(cx, cy);
+      assert.ok(f >= 0 && !world.isHidden(f), `fill for ${cx},${cy}`);
+    }
+  assert.ok(hidden > 100);
+});
+
+test('breakable containers: kinds 5-8 only, static until broken, then run through their break frames', async () => {
+  const { isBreakable, breakableFrame, containerDrop } = await import('../src/game/breakables');
+  assert.deepEqual([4, 5, 8, 9].map(isBreakable), [false, true, true, false]);
+  assert.equal(breakableFrame(4, undefined), 0);
+  assert.deepEqual([0, 0.13, 0.26, 0.4, 5].map((t) => breakableFrame(4, t)), [1, 2, 3, 3, 3]);
+  assert.equal(breakableFrame(2, 3), 1);
+  assert.equal(containerDrop(() => 0.1), 200);
+  assert.equal(containerDrop(() => 0.9), 0);
+});
+
+test('unscripted NPC-model objects (kinds 9-12) are editor filler, containers and scenery are not', async () => {
+  const { isEditorFiller } = await import('../src/data/mapobjects');
+  const o = (cls: number, kind: number) => ({ index: 0, facing: 5, x: 0, y: 0, cls, kind, extra: 0 });
+  assert.deepEqual([o(0, 9), o(0, 12), o(0, 8), o(0, 13), o(98, 10), o(5, 9)].map(isEditorFiller), [true, true, false, false, false, false]);
+});

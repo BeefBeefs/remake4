@@ -50,3 +50,13 @@ export function objectRole(o: MapObject): ObjectRole {
 export function monsterSpawns(objs: MapObject[]): MapObject[] {
   return objs.filter((o) => objectRole(o) === 'monster');
 }
+
+/**
+ * Class-0 objects of kind 9-12 are the idle-animated figure models of the scripted NPCs (9 = the Blacksmith's, 12 = the
+ * Jeweler's ...). Unscripted ones number about 740 over all maps and sit in dense clumps among crates and barrels (about 40
+ * stacked blacksmiths in the Western Village market), so they are editor leftovers and are not drawn. Scripted NPCs reach the
+ * map through their script entry and are unaffected.
+ */
+export function isEditorFiller(o: MapObject): boolean {
+  return o.cls === 0 && o.kind >= 9 && o.kind <= 12;
+}

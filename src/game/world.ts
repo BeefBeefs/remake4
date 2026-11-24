@@ -17,6 +17,7 @@ export const TILE_H = 20;
 export class World {
   readonly markers: Set<number>;
   private readonly editor: Set<number>;
+  private readonly punched: Set<number>;
 
   constructor(
     readonly map: MapData,
@@ -24,6 +25,7 @@ export class World {
   ) {
     this.markers = new Set(tileset.markers);
     this.editor = new Set(tileset.editor ?? []);
+    this.punched = new Set(tileset.punched ?? []);
   }
 
   get pixelW(): number {
@@ -44,6 +46,32 @@ export class World {
   /** raw object cell: NONE, a tile index, or a tile index + OVERHEAD_FLAG */
   object(cx: number, cy: number): number {
     return this.inBounds(cx, cy) ? this.map.objects[cy * this.map.w + cx] : NONE;
+  }
+
+  /**
+   * A ground cell whose tile is an invisible collision marker has no floor art of its own (houses and walls are painted by the
+   * object layer on top, and many marker cells have nothing on top at all: those showed up as black squares). Returns the
+   * nearest visible ground tile to stand in for it, looking left / up first, or -1 when none is close.
+   */
+  groundFill(cx: number, cy: number): number {
+    for (let r = 1; r <= 4; r++) {
+      for (let dy = -r; dy <= r; dy++) {
+        for (let dx = -r; dx <= r; dx++) {
+          if (Math.max(Math.abs(dx), Math.abs(dy)) !== r) continue;
+          const x = cx + dx;
+          const y = cy + dy;
+          if (x < 0 || y < 0 || x >= this.map.w || y >= this.map.h) continue;
+          const t = this.ground(x, y);
+          if (this.isTile(t) && !this.isHidden(t)) return t;
+        }
+      }
+    }
+    return -1;
+  }
+
+  /** art tile that had editor marker colours removed from parts of it (transparent holes) */
+  isPunched(tile: number): boolean {
+    return this.punched.has(tile);
   }
 
   /** editor art that must not be drawn (collision markers and the coloured trigger tiles) */
