@@ -67,7 +67,16 @@ The interpreter (`src/script/interpreter.ts`) covers IF/GO*/SELECT/CASE/GIVE/REM
 world effects (WARP, LOCATE_ENEMY, NEW_OBJECT...) go to the host. One label (`마법소명령`) is missing in the
 original data; jumping to a missing label warns and ends the script.
 
+## MAP trailer = object table
+2003 bytes after the cell buffer: 10 arrays of 200 bytes, entry `i` of every array describes object `i`
+(`src/data/mapobjects.ts`): `facing(0), x(1), y(2), class(3), kind(4), extra(5)`; (0,0) = unused slot.
+Object ids in the EVT headers are indices into this table, so scripted NPCs get their position from it.
+Roles (inferred by drawing the maps and checking against scripts):
+- class 0: record `kind` of SPRITE.GOS - barrels, chests, villagers, guards, bull statues (26-28), skeletons.
+- class 98 / 99: record `kind` of BACK.GOS - grass, plants, fountain, pillars, trees (scenery, animated frames).
+- class 1-47: monster, `kind` = LANG.GOS monster number; `extra` looks like the drop item; class meaning unknown.
+- NPC sprites: SPRITE.GOS record chosen from the NPC's script name (`src/game/npcs.ts`; Blacksmith 9, Jeweler 12, ...).
+
 ## Open questions
-MAP trailer (10 blocks of 200 bytes, ~125 used entries each, small per-type values: looks like per-monster-type
-attribute tables, not positions); exact meaning of the 10000 object flag; NPC/enemy placement; real collision rules; unarmed stance and
+Exact meaning of the 10000 object flag; trailer class numbers other than the ones below; real collision rules; unarmed stance and
 actions 3-5, 11-13, 18-20; `GO_BASIC_EVENT`; which music plays where; walking speed and animation timing.

@@ -3,6 +3,8 @@ import { collectArrivals } from './game/arrivals';
 import { Enemy } from './game/enemy';
 import { ENEMY_SHEETS, sheetForKind } from './game/enemies';
 import { Hero } from './game/hero';
+import { MapObject, monsterSpawns, objectRole, parseMapObjects } from './data/mapobjects';
+import { npcSpriteRecord, pickBlock } from './game/npcs';
 import { findPickup, GroundItem } from './game/ground';
 import { ItemDb } from './game/itemdb';
 import { InventoryUI } from './ui/inventory';
@@ -60,6 +62,8 @@ async function boot(): Promise<void> {
   }
   const party = new Party(heroes);
   const itemMeta = await loadSpriteMeta('ITEM');
+  const spriteMeta = await loadSpriteMeta('SPRITE');
+  const backMeta = await loadSpriteMeta('BACK');
   const ground: GroundItem[] = [];
   const toastEl = document.getElementById('toast')!;
   let toastT = 0;
@@ -91,6 +95,57 @@ async function boot(): Promise<void> {
   let world: World | null = null;
   let mapEntry: MapIndexEntry = index[0];
   let lastEffect = '';
+  interface Npc { name: string; x: number; y: number; record: number | null; actor: SpriteActor | null; blocks: { fi: number; block: EvtBlock }[]; t: number }
+  const npcs: Npc[] = [];
+  let pendingMonsters: { o: MapObject; done: boolean }[] = [];
+  interface Prop { x: number; y: number; meta: SpriteSheetMeta; record: number; actor: SpriteActor; t: number }
+  const props: Prop[] = [];
+
+  async function buildMapObjects(mapNo: number, objs: MapObject[]): Promise<void> {
+    for (const n of npcs) if (n.actor) renderer.removeSprite(n.actor);
+    npcs.length = 0;
+    for (const p of props) renderer.removeSprite(p.actor);
+    props.length = 0;
+    const scripted = new Set<number>();
+    scriptFiles.forEach((sf) => sf.file.blocks.forEach((b) => b.map === mapNo && scripted.add(b.object)));
+    const free = objs.filter((o) => !scripted.has(o.index));
+    pendingMonsters = monsterSpawns(free).map((o) => ({ o, done: false }));
+    for (const o of free) {
+      const role = objectRole(o);
+      if (role !== 'prop' && role !== 'scenery') continue;
+      const meta = role === 'prop' ? spriteMeta : backMeta;
+      if (!meta.records[o.kind]?.frames.length) continue;
+      props.push({ x: o.x * TILE_W + TILE_W / 2, y: o.y * TILE_H + TILE_H - 2, meta, record: o.kind, actor: await renderer.createSprite(meta), t: Math.random() * 2 });
+    }
+    const byObject = new Map<number, { fi: number; block: EvtBlock }[]>();
+    scriptFiles.forEach((sf, fi) =>
+      sf.file.blocks.forEach((block) => {
+        if (block.map !== mapNo) return;
+        const list = byObject.get(block.object) ?? [];
+        list.push({ fi, block });
+        byObject.set(block.object, list);
+      }),
+    );
+    for (const [objectId, blocks] of byObject) {
+      const o = objs.find((x) => x.index === objectId);
+      if (!o) continue;
+      const record = npcSpriteRecord(blocks[0].block.name);
+      const actor = record === null ? null : await renderer.createSprite(spriteMeta);
+      npcs.push({ name: blocks[0].block.name.trim() || `object ${objectId}`, x: o.x * TILE_W + TILE_W / 2, y: o.y * TILE_H + TILE_H - 2, record, actor, blocks, t: Math.random() });
+    }
+  }
+  function nearestNpc(x: number, y: number, reach: number): Npc | null {
+    let best: Npc | null = null;
+    let bd = reach;
+    for (const n of npcs) {
+      const d = Math.hypot(n.x - x, (n.y - y) / 0.625);
+      if (d < bd) {
+        bd = d;
+        best = n;
+      }
+    }
+    return best;
+  }
 
   async function enterMap(id: string, cellX?: number, cellY?: number): Promise<void> {
     const entry = index.find((m) => m.id === id) ?? index[0];
@@ -105,6 +160,7 @@ async function boot(): Promise<void> {
     const spawn = dest ? world.nearestFree(dest.cx, dest.cy) : world.findSpawn();
     clearEnemies();
     clearGround();
+    await buildMapObjects(index.findIndex((m) => m.id === entry.id) + 1, parseMapObjects(map.trailer, map.w, map.h));
     party.placeAt(spawn.x, spawn.y);
     audio.setMusic(trackForMap(entry, index.filter((m) => m.id[0] === entry.id[0]).findIndex((m) => m.id === entry.id)));
     history.replaceState(null, '', `#${entry.id}`);
@@ -267,6 +323,7 @@ async function boot(): Promise<void> {
     if (e.key >= '1' && e.key <= '3' && !heroes[Number(e.key) - 1].dead) party.setLeader(Number(e.key) - 1);
     if (e.key.toLowerCase() === 'i') inv.toggle();
     if (e.key.toLowerCase() === 'm') worldUI.toggle(mapEntry.id);
+    if (e.key.toLowerCase() === 'e' || e.key === 'Enter') talkToNearest();
     if (e.key === ' ') {
       party.leader.attack();
       e.preventDefault();
@@ -281,6 +338,14 @@ async function boot(): Promise<void> {
     const cy = -renderer.camera.position.y;
     const wx = cx - VIEW_W / 2 + ((e.clientX - r.left) / r.width) * VIEW_W;
     const wy = cy - VIEW_H / 2 + ((e.clientY - r.top) / r.height) * VIEW_H;
+    const tapped = nearestNpc(wx, wy - 16, 30);
+    if (tapped) {
+      if (Math.hypot(tapped.x - party.leader.x, (tapped.y - party.leader.y) / 0.625) < 80) {
+        const pick = pickBlock(tapped.blocks);
+        if (!running) void runBlock(scriptFiles[pick.fi].file, pick.block);
+        return;
+      }
+    }
     party.leader.target = { x: wx, y: wy };
     party.leader.input.x = party.leader.input.y = 0;
   });
@@ -288,6 +353,14 @@ async function boot(): Promise<void> {
     e.preventDefault();
     party.leader.attack();
   });
+
+  function talkToNearest(): void {
+    const n = nearestNpc(party.leader.x, party.leader.y, 70);
+    if (!n || running) return;
+    const pick = pickBlock(n.blocks);
+    audio.unlock();
+    void runBlock(scriptFiles[pick.fi].file, pick.block);
+  }
 
   function readKeys(): void {
     const l = party.leader;
@@ -350,6 +423,26 @@ async function boot(): Promise<void> {
         en.actor.set(f.record, f.frame, en.e.x, en.e.y, f.flip);
         en.actor.mesh.visible = en.actor.mesh.visible && !(en.e.hurt > 0 && Math.floor(en.e.hurt * 20) % 2 === 0);
       }
+      for (const pm of pendingMonsters) {
+        if (pm.done || enemies.length >= 40) continue;
+        const px = pm.o.x * TILE_W + TILE_W / 2;
+        const py = pm.o.y * TILE_H + TILE_H - 2;
+        if (Math.hypot(px - lead.x, (py - lead.y) / 0.625) < 340) {
+          pm.done = true;
+          void spawnEnemy(sheetForKind(pm.o.kind), px, py, pm.o.kind, 6 + pm.o.kind * 3, pm.o.extra);
+        }
+      }
+      for (const p of props) {
+        p.t += dt;
+        const cnt = p.meta.records[p.record].frames.length;
+        p.actor.set(p.record, Math.floor(p.t * 8) % cnt, p.x, p.y, false);
+      }
+      for (const n of npcs) {
+        if (!n.actor || n.record === null) continue;
+        n.t += dt;
+        const cnt = spriteMeta.records[n.record]?.frames.length || 1;
+        n.actor.set(n.record, Math.floor(n.t * 8) % cnt, n.x, n.y, false);
+      }
       for (const g of ground) {
         g.t += dt;
         const n = itemMeta.records[g.record]?.frames.length || 1;
@@ -393,7 +486,8 @@ async function boot(): Promise<void> {
       if (statusT > 0.25) {
         statusT = 0;
         const l = party.leader;
-        status.textContent = `${mapEntry.id.toUpperCase()} ${mapEntry.name} · ${l.name} cell ${Math.floor(l.x / TILE_W)},${Math.floor(l.y / TILE_H)} · tiles ${renderer.stats.drawnTiles}${lastEffect ? ' · fx: ' + lastEffect : ''}`;
+        const near = dlg.open ? null : nearestNpc(lead.x, lead.y, 70);
+        status.textContent = (near ? `[E / tap] talk to ${near.name} · ` : '') + `${mapEntry.id.toUpperCase()} ${mapEntry.name} · ${l.name} cell ${Math.floor(l.x / TILE_W)},${Math.floor(l.y / TILE_H)} · tiles ${renderer.stats.drawnTiles}${lastEffect ? ' · fx: ' + lastEffect : ''}`;
       }
     }
     requestAnimationFrame(frame);

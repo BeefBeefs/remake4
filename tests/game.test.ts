@@ -231,3 +231,33 @@ test('item database: ids from scripts and shops all resolve to real names', asyn
   }
   assert.deepEqual([...unknown].sort((a, b) => a - b), [], 'every referenced item id is in the table');
 });
+
+test('map objects: trailer decodes to in-bounds placements that agree with the scripts', async () => {
+  const { parseMapObjects, monsterSpawns, objectRole } = await import('../src/data/mapobjects');
+  const { sheetForKind } = await import('../src/game/enemies');
+  const lang = json<{ monsters: string[] }>('text/lang.json');
+  const index = json<{ id: string }[]>('maps/index.json');
+  let total = 0;
+  for (const e of index) {
+    const m = parseMap(json(`maps/${e.id}.json`));
+    const objs = parseMapObjects(m.trailer, m.w, m.h);
+    assert.ok(objs.length > 0, e.id);
+    total += objs.length;
+    for (const o of monsterSpawns(objs)) assert.ok(ENEMY_OK(sheetForKind(o.kind)), e.id);
+  }
+  assert.ok(total > 3000);
+  // the Dragon cave table holds real monster spawns (Satan, Iron Knights, Hell Witches...) and bull statues (SPRITE 26-28)
+  const c1 = parseMap(json('maps/c1.json'));
+  const c1o = parseMapObjects(c1.trailer, c1.w, c1.h);
+  const names = new Set(monsterSpawns(c1o).map((o) => lang.monsters[o.kind - 1]));
+  assert.ok(names.has('Satan') && names.has('Iron Knight'), [...names].join());
+  assert.ok(c1o.some((o) => objectRole(o) === 'prop' && o.kind >= 26 && o.kind <= 28));
+  assert.ok(c1o.some((o) => objectRole(o) === 'scenery'));
+  // T1's blacksmith is object 1 at cell (40, 25)
+  const t1 = parseMap(json('maps/t1.json'));
+  const smith = parseMapObjects(t1.trailer, t1.w, t1.h).find((o) => o.index === 1);
+  assert.deepEqual([smith?.x, smith?.y], [40, 25]);
+});
+function ENEMY_OK(name: string): boolean {
+  return /^(ENEMY-[A-P]\d?|BIRD|CYCLOP|FIRE|FISH|FLY|GEAR|GEARBIG|LAMB|LION|ZAMBIE|STONE|DRAGON|WATER)$/.test(name);
+}

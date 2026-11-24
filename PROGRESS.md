@@ -56,7 +56,15 @@ Open: kind -> sheet mapping, enemy stats/AI, hero HP and damage, trailer tables,
   place - the original's clickable hotspots are not decoded), movie player for the four intro videos, music per map family
   (placeholder: which CD track belongs to which map is unknown).
 
+## Session 1e
+- The MAP trailer is the per-map object table (positions, class, kind). NPCs are placed from it (script object ids are
+  indices), drawn from SPRITE.GOS and talkable with E / Enter or a tap next to them ("[E / tap] talk to ...").
+- Props (SPRITE.GOS barrels, chests, statues) and animated scenery (BACK.GOS grass, fountains, trees) are placed from the
+  table; monsters wake up when the party comes within ~340px (cap 40 alive), kind = LANG.GOS monster id.
+- Converted BACK, ARMS, MENUICON, ICON1 banks (not used yet; ARMS looks like weapon / armour overlay frames).
+- NPC sprite choice and trailer class meanings are heuristics.
+
 ## Next ideas
 - Prices (shops cannot sell yet), hero stats / level / experience, magic (12 spells with names known), real enemy stats.
-- NPC placement on maps (NEW_OBJECT / object ids), BASIC event triggers (GO_BASIC_EVENT), save / load.
-- Real collision rules and the MAP trailer tables; world-map hotspots; per-map music.
+- NEW_OBJECT, BASIC event triggers (GO_BASIC_EVENT), save / load.
+- Real collision rules, trailer class meanings; world-map hotspots; per-map music.
