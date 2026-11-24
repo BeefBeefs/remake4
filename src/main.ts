@@ -283,6 +283,16 @@ async function boot(): Promise<void> {
           }
         }
       }
+      if (name === 'GO_END1') {
+        // the hellgate opens: on to the underworld (its first place on the map table is Death Rock; the real entry is a guess)
+        toast('The hellgate has opened...');
+        story.flags.add(9001);
+        await enterMap('b1');
+      }
+      if (name === 'GO_END2') {
+        toast('The End - thank you for playing');
+        story.flags.add(9002);
+      }
       if (name === 'UNSEAL') {
         const n = Number(args[0]);
         if (story.sealed.delete(n)) toast(`${index[n - 1]?.name ?? 'A place'} is open`);

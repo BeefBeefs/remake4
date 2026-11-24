@@ -20,7 +20,7 @@ export interface ScriptHost {
   select(choices: { text: string }[], color: RGB): Promise<number>;
   shop(kind: ShopKind, prompt: string, list: number[]): Promise<void>;
   play(sound: string): void;
-  /** world side effects: WARP, LOCATE_ENEMY, LOCATE_ITEM, NEW_OBJECT, REMOVE_OBJECT, CHANGE, CHANGE_GOS, UNSEAL, STONE, FULL_LIFE, FULL_MANA */
+  /** world side effects: WARP, LOCATE_ENEMY, LOCATE_ITEM, NEW_OBJECT, REMOVE_OBJECT, CHANGE, CHANGE_GOS, UNSEAL, STONE, FULL_LIFE, FULL_MANA, GO_END1, GO_END2 */
   effect(name: string, args: Arg[]): void | Promise<void>;
   /** whether the party can learn a spell right now (`IF LEARN_MAGIC`) */
   canLearnMagic?(): boolean;
@@ -188,6 +188,8 @@ export class EvtInterpreter {
         return this.jump(String(args[0]), name === 'GO_UP' ? 'up' : 'down');
       case 'GO_END1':
       case 'GO_END2':
+        // chapter ends: 1 = the hellgate opens (overworld done), 2 = Satan's riddle (the game's end)
+        await h.effect(name, []);
         return { kind: 'end', reason: 'END' };
       case 'CLEAR_BUFFER':
         return h.clear();

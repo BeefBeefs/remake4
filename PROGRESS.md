@@ -143,6 +143,9 @@ Open: kind -> sheet mapping, enemy stats/AI, hero HP and damage, trailer tables,
   ("Arghh, you defeated me... follow my spirit to the underworld"). Rule used: a drop below 150 that matches an unnamed entry of the
   current map runs that entry instead of dropping an item (only Hellminor matches in the shipped scripts).
 
+- GO_END1 (end of event 34, the hellgate) now moves to the underworld's first place (b1 Death Rock - a guess); GO_END2 (Satan's riddle,
+  the last script) shows "The End". The chain Satan -> hellgate -> underworld can be played start to finish in principle; untested as a whole.
+
 ## Next ideas
 - Per-hero growth / real stat formulas; monster bytes b2 b4-b7; hero base stats / level / experience, magic (12 spells with names known), real enemy stats.
 - NEW_OBJECT, BASIC event triggers (GO_BASIC_EVENT), save / load.
