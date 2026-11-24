@@ -628,7 +628,22 @@ async function boot(): Promise<void> {
   const questBtn = document.createElement('button');
   questBtn.textContent = 'Quests (J)';
   questBtn.onclick = () => quests.toggle();
-  hud.append(questBtn, gearBtn, devBox);
+  const helpEl = document.getElementById('help')!;
+  helpEl.innerHTML = `<h3>How to play</h3>
+    <b>Touch</b><ul><li>Tap the ground to walk, tap a monster to attack it, tap a villager next to you to talk.</li>
+    <li>Bottom buttons: change spell (the arrow), cast it, attack.</li><li>1 / 2 / 3 buttons pick who you lead.</li></ul>
+    <b>Keyboard</b><ul><li>Arrows / WASD move, Space attacks, E or Enter talks, F casts, Q changes spell.</li>
+    <li>1-3 or Z / X / C pick the leader, I items, J quests, M world map.</li></ul>
+    <b>Good to know</b><ul><li>The game saves itself; Continue appears on the title screen.</li>
+    <li>Some places on the world map stay locked until villagers tell you about them.</li>
+    <li>The gear button holds debug tools (jump to any map, spawn monsters).</li></ul>
+    <button>Close</button>`;
+  helpEl.addEventListener('click', (e) => e.stopPropagation());
+  helpEl.querySelector('button')!.addEventListener('click', () => (helpEl.style.display = 'none'));
+  const helpBtn = document.createElement('button');
+  helpBtn.textContent = '?';
+  helpBtn.onclick = () => (helpEl.style.display = helpEl.style.display === 'block' ? 'none' : 'block');
+  hud.append(questBtn, helpBtn, gearBtn, devBox);
   // announce quests as the scripts add / finish them
   let knownOrders = new Map(story.orders);
   function watchQuests(): void {

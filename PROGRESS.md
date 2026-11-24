@@ -133,6 +133,9 @@ Open: kind -> sheet mapping, enemy stats/AI, hero HP and damage, trailer tables,
 
 - HUD: map / NPC / spawn / marker / movie pickers moved behind the gear button (shown by default for #map debug links).
 
+- Help overlay (? button), favicon stub; smoke test enters all 42 maps without page errors (tools: see /home/claude/work/web/smoke.mjs, not in repo).
+- Not implemented: STONE map amount (the Magician at Veddyn turns the party to stone for a while; amount shrinks with level).
+
 ## Next ideas
 - Per-hero growth / real stat formulas; monster bytes b2 b4-b7; hero base stats / level / experience, magic (12 spells with names known), real enemy stats.
 - NEW_OBJECT, BASIC event triggers (GO_BASIC_EVENT), save / load.
