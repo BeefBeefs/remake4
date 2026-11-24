@@ -24,6 +24,8 @@ export class Enemy {
   readonly moveSpeed: number;
   readonly xp: number;
   hurt = 0;
+  /** seconds left turned to stone (Stone Curse): it neither moves nor attacks */
+  frozen = 0;
   dead = false;
   private t = 0;
   private frame = 0;
@@ -57,6 +59,11 @@ export class Enemy {
     this.maxHp = this.hp;
   }
 
+  freeze(secs: number): void {
+    this.frozen = Math.max(this.frozen, secs);
+    this.cooldown = Math.max(this.cooldown, 0.5);
+  }
+
   /** a hit of `n` raw damage, softened by this monster's defense (never below 1) */
   damage(n: number): void {
     if (this.dead) return;
@@ -80,6 +87,11 @@ export class Enemy {
   update(dt: number, world: World, meta: SpriteSheetMeta, target: { x: number; y: number }): void {
     this.hurt = Math.max(0, this.hurt - dt);
     this.cooldown = Math.max(0, this.cooldown - dt);
+    if (this.frozen > 0) {
+      this.frozen -= dt;
+      if (this.state === 'attack') this.set('idle');
+      return;
+    }
     const dx = target.x - this.x;
     const dy = (target.y - this.y) / 0.625;
     const d = Math.hypot(dx, dy);

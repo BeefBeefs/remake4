@@ -99,6 +99,11 @@ Open: kind -> sheet mapping, enemy stats/AI, hero HP and damage, trailer tables,
   writes the save (and only those links get the `#map` hash written back). Enemies and ground items are not saved
   (the map reloads fresh). Original save format is not decoded (not needed).
 
+## Session 1k
+- Spells 7-11 playable: Stone Curse (freezes enemies within 220px, stone shell art MGC-EFF 34), Buddha Shield (party
+  invulnerable ~10s, glow 33 follows each hero), Ice Rain (MGC-EFF 12) and Fire Rain (MGC-EFF 27) as 7 damaging patches
+  ahead of the caster. Durations / damage are placeholders. Seal magic (184) is a story item, not castable.
+
 ## Next ideas
 - Per-hero growth / real stat formulas; monster bytes b2 b4-b7; hero base stats / level / experience, magic (12 spells with names known), real enemy stats.
 - NEW_OBJECT, BASIC event triggers (GO_BASIC_EVENT), save / load.

@@ -398,3 +398,28 @@ test('save games reject damaged or foreign saves', () => {
   assert.ok(parseSave(ok, 3));
   assert.equal(parseSave(ok, 2), null); // wrong party size
 });
+
+test('spells: rain hurts what stands in it, the shield follows, stone stops an enemy and protects nothing else', async () => {
+  const fx = await import('../src/game/effects');
+  const { Enemy } = await import('../src/game/enemy');
+  const world = { blockedAt: () => false } as unknown as import('../src/game/world').World;
+  const rain = fx.rain(0, 14, 2, 5, 12); // centre 100px east
+  assert.equal(rain.length, 7);
+  const victim = { x: rain[0].x, y: rain[0].y + 14, dead: false, hits: 0, damage(n: number) { this.hits += n; } };
+  for (let i = 0; i < 100; i++) for (const e of rain) fx.updateEffect(e, 1 / 30, world, [victim], []);
+  assert.ok(victim.hits >= 15, String(victim.hits));
+  const hero = new Hero('H', 'x', 10, 10);
+  const glow = fx.aura(hero, 33, 5);
+  hero.x = 80;
+  fx.updateEffect(glow, 1 / 30, world, [], []);
+  assert.equal(glow.x, 80);
+  hero.invuln = 2;
+  hero.takeDamage(30);
+  assert.equal(hero.hp, 100);
+  const e = new Enemy('ENEMY-J', 100, 100, 0, 20, 0);
+  e.freeze(3);
+  const meta = { name: 'x', pages: [], records: [] } as unknown as SpriteSheetMeta;
+  e.update(1, world, meta, { x: 110, y: 100 });
+  assert.equal(e.x, 100);
+  assert.ok(e.frozen > 1.5 && e.frozen < 2.5);
+});

@@ -56,6 +56,8 @@ export interface Effect {
   spent: boolean;
   /** frame to show instead of animating (arrows) */
   fixedFrame: number;
+  /** keeps the effect on a moving character (shields, curses) */
+  follow?: { x: number; y: number };
   /** spawned when a ball detonates */
   burst?: { sheet: EffectSheet; record: number; frames: number };
 }
@@ -115,6 +117,30 @@ export function lightning(x: number, y: number, damage: number): Effect[] {
   return out;
 }
 
+/** a patch of falling ice / fire in front of the caster: scattered columns that keep hurting whatever stands in them */
+export function rain(x: number, y: number, dir: number, damage: number, record: number): Effect[] {
+  const [dx, dy] = DIR_VECTORS[dir];
+  const cx = x + dx * 100;
+  const cy = y + dy * 100 * FLAT;
+  const spots: [number, number][] = [[0, 0], [-46, 0], [46, 0], [-23, -40], [23, -40], [-23, 40], [23, 40]];
+  return spots.map(([ox, oy], i) =>
+    base({
+      kind: 'wall', sheet: 'MGC-EFF', record, x: cx + ox, y: cy + oy * FLAT, life: 3, damage, radius: 36, fps: 12 + (i % 3), tick: 0.6,
+      tickT: 0.1 * i,
+    }),
+  );
+}
+
+/** a glow that stays on a character for `secs` (Buddha Shield) */
+export function aura(target: { x: number; y: number }, record: number, secs: number): Effect {
+  return base({ kind: 'wall', sheet: 'MGC-EFF', record, x: target.x, y: target.y - 10, life: secs, radius: 0, fps: 8, follow: target });
+}
+
+/** the stone shell of Stone Curse; its last frame stays up until the curse ends */
+export function shell(target: { x: number; y: number }, secs: number): Effect {
+  return base({ kind: 'visual', sheet: 'MGC-EFF', record: 34, x: target.x, y: target.y, life: secs, fps: 10, follow: target });
+}
+
 export function visual(sheet: EffectSheet, record: number, frames: number, x: number, y: number, fps = 16): Effect {
   return base({ kind: 'visual', sheet, record, x, y, life: frames / fps, fps });
 }
@@ -122,6 +148,10 @@ export function visual(sheet: EffectSheet, record: number, frames: number, x: nu
 /** advance one effect; detonations and hits append to `spawn`. Returns false when the effect is finished. */
 export function updateEffect(e: Effect, dt: number, world: World, targets: Target[], spawn: Effect[]): boolean {
   e.t += dt;
+  if (e.follow) {
+    e.x = e.follow.x;
+    e.y = e.follow.y - (e.kind === 'visual' ? 0 : 10);
+  }
   if (e.spent || e.t >= e.life) {
     if (e.kind === 'ball' && !e.spent) detonate(e, targets, spawn);
     return false;

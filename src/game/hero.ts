@@ -34,6 +34,8 @@ export class Hero {
   attackPower = UNARMED_ATTACK;
   defense = 0;
   speedMul = 1;
+  /** seconds of Buddha Shield left: no damage while above 0 */
+  invuln = 0;
   get dead(): boolean {
     return this.hp <= 0;
   }
@@ -52,7 +54,7 @@ export class Hero {
 
   /** placeholder combat: flat damage, brief stagger, death animation at 0 hp */
   takeDamage(n: number): void {
-    if (this.dead) return;
+    if (this.dead || this.invuln > 0) return;
     this.hp = Math.max(0, this.hp - n);
     this.target = null;
     this.setState(this.dead ? 'dead' : 'hurt');
@@ -93,6 +95,7 @@ export class Hero {
 
   update(dt: number, world: World, meta: SpriteSheetMeta): void {
     this.swung = false;
+    this.invuln = Math.max(0, this.invuln - dt);
     if (this.dead) this.input.x = this.input.y = 0;
     let vx = 0;
     let vy = 0;

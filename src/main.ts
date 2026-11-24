@@ -8,7 +8,7 @@ import { basicBlockFor, npcSpriteRecord, pickBlock } from './game/npcs';
 import { findPickup, GroundItem } from './game/ground';
 import { ItemDb } from './game/itemdb';
 import { directionFromVector } from './game/anim';
-import { arrow, Effect, effectFrame, fireBall, fireWall, ghostBolt, lightning, updateEffect, visual } from './game/effects';
+import { arrow, aura, Effect, effectFrame, fireBall, fireWall, ghostBolt, lightning, rain, shell, updateEffect, visual } from './game/effects';
 import { derive, LEVEL_GAIN, mitigate, Slot, slotOf, xpToNext } from './game/stats';
 import { InventoryUI } from './ui/inventory';
 import { GAME_TRACKS, MoviePlayer, showTitle, WorldMapUI } from './ui/overlays';
@@ -328,7 +328,7 @@ async function boot(): Promise<void> {
   hud.append(mapSelect, npcSelect, spawnSelect, ...leaderBtns, markerBtn, musicBtn);
 
   // ---------------------------------------------------------------- magic and projectiles
-  const SPELL_IMPL = new Set([1, 2, 3, 4, 5, 6, 9, 12]);
+  const SPELL_IMPL = new Set([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]);
   story.magic.set(1, 1); // the strategy guide says Kusa starts with Fire Wall and Fire Ball
   story.magic.set(2, 1);
   let spellSel = 2;
@@ -371,6 +371,28 @@ async function boot(): Promise<void> {
       case 4: { const e = ghostBolt(h.x, h.y, h.dir, 24 + Math.round(m * 2.4)); e.record = 33; e.radius = 40; add(e); break; }
       case 5: add(lightning(h.x, h.y, 6 + Math.round(m * 0.8))); break;
       case 6: { const e = lightning(h.x, h.y, 8 + Math.round(m)); e[0].record = 41; add(e); break; }
+      case 7: {
+        // Stone Curse: everything near the caster turns to stone for a while
+        const secs = 6 + m * 0.3;
+        for (const en of enemies) {
+          if (en.e.dead || Math.hypot(en.e.x - h.x, (en.e.y - h.y) / 0.625) > 220) continue;
+          en.e.freeze(secs);
+          add(shell(en.e, secs));
+        }
+        break;
+      }
+      case 8: {
+        // Buddha Shield: the whole party is untouchable for a while
+        const secs = 10 + m * 0.3;
+        for (const x of heroes) {
+          if (x.dead) continue;
+          x.invuln = secs;
+          add(aura(x, 33, secs));
+        }
+        break;
+      }
+      case 10: add(rain(h.x, h.y, h.dir, 6 + Math.round(m * 0.9), 12)); break;
+      case 11: add(rain(h.x, h.y, h.dir, 12 + Math.round(m * 1.6), 27)); break;
       case 9: {
         const w = heroes.filter((x) => !x.dead).sort((a, b) => a.hp / a.maxHp - b.hp / b.maxHp)[0];
         if (w) {
@@ -815,7 +837,7 @@ async function boot(): Promise<void> {
   }
 
   // handy for poking around in the browser console
-  (window as unknown as Record<string, unknown>).akuma = { story, party, renderer, enterMap, index, db, dropItem, spawnEnemy };
+  (window as unknown as Record<string, unknown>).akuma = { story, party, renderer, enterMap, index, db, dropItem, spawnEnemy, castSpell, selectSpell: (k: number) => { spellSel = k; }, enemies };
 }
 
 boot().catch((e) => {
