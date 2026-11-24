@@ -52,3 +52,11 @@ Open: kind -> sheet mapping, enemy stats/AI, hero HP and damage, trailer tables,
   (LOCATE_ITEM, enemy drops, coins), walk-over pickup, inventory panel (key I) with "Use" for healing items, shop lists show
   real names. Money amounts, drop rates and which ITEM.GOS record is drawn for which item are guesses. Prices are not found yet,
   so shops cannot sell.
+- Title picture (click to begin; also unlocks audio), world-map screen (key M, WORLD1 / WORLD2 pictures with a button per
+  place - the original's clickable hotspots are not decoded), movie player for the four intro videos, music per map family
+  (placeholder: which CD track belongs to which map is unknown).
+
+## Next ideas
+- Prices (shops cannot sell yet), hero stats / level / experience, magic (12 spells with names known), real enemy stats.
+- NPC placement on maps (NEW_OBJECT / object ids), BASIC event triggers (GO_BASIC_EVENT), save / load.
+- Real collision rules and the MAP trailer tables; world-map hotspots; per-map music.

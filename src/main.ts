@@ -6,6 +6,7 @@ import { Hero } from './game/hero';
 import { findPickup, GroundItem } from './game/ground';
 import { ItemDb } from './game/itemdb';
 import { InventoryUI } from './ui/inventory';
+import { MoviePlayer, showTitle, trackForMap, WorldMapUI } from './ui/overlays';
 import { Party } from './game/party';
 import { TILE_H, TILE_W, World } from './game/world';
 import { loadLang, loadMap, loadMapIndex, loadSpriteMeta, loadText, loadTilesets } from './data/loaders';
@@ -105,7 +106,7 @@ async function boot(): Promise<void> {
     clearEnemies();
     clearGround();
     party.placeAt(spawn.x, spawn.y);
-    audio.setMusic(2 + (entry.order % 14));
+    audio.setMusic(trackForMap(entry, index.filter((m) => m.id[0] === entry.id[0]).findIndex((m) => m.id === entry.id)));
     history.replaceState(null, '', `#${entry.id}`);
     mapSelect.value = entry.id;
     refreshNpcList();
@@ -221,6 +222,21 @@ async function boot(): Promise<void> {
     },
     toast,
   );
+  const worldUI = new WorldMapUI(document.getElementById('world')!, index, (id) => void enterMap(id));
+  const movies = new MoviePlayer(document.getElementById('movie')!);
+  const movieSelect = document.createElement('select');
+  movieSelect.add(new Option('Movies…', ''));
+  for (const [file, label] of [['soft', 'JC Research logo'], ['trigger', 'Triger Soft logo'], ['visual1', 'Visual 1'], ['visual2', 'Visual 2']]) movieSelect.add(new Option(label, file));
+  movieSelect.onchange = () => {
+    if (!movieSelect.value) return;
+    audio.unlock();
+    movies.play(movieSelect.value);
+    movieSelect.value = '';
+  };
+  const worldBtn = document.createElement('button');
+  worldBtn.textContent = 'World map (M)';
+  worldBtn.onclick = () => worldUI.toggle(mapEntry.id);
+  hud.append(worldBtn, movieSelect);
   const invBtn = document.createElement('button');
   invBtn.textContent = 'Items (I)';
   invBtn.onclick = () => inv.toggle();
@@ -250,6 +266,7 @@ async function boot(): Promise<void> {
     keys.add(e.key.toLowerCase());
     if (e.key >= '1' && e.key <= '3' && !heroes[Number(e.key) - 1].dead) party.setLeader(Number(e.key) - 1);
     if (e.key.toLowerCase() === 'i') inv.toggle();
+    if (e.key.toLowerCase() === 'm') worldUI.toggle(mapEntry.id);
     if (e.key === ' ') {
       party.leader.attack();
       e.preventDefault();
@@ -279,6 +296,7 @@ async function boot(): Promise<void> {
   }
 
   // ---------------------------------------------------------------- loop
+  const startedWithMap = !!location.hash || params.has('map');
   await enterMap((location.hash.slice(1) || params.get('map') || 't1').toLowerCase());
 
   let last = performance.now();
@@ -381,6 +399,13 @@ async function boot(): Promise<void> {
     requestAnimationFrame(frame);
   }
   requestAnimationFrame(frame);
+
+  if (!params.has('notitle') && !startedWithMap) {
+    showTitle(document.getElementById('title')!, () => {
+      audio.unlock();
+      musicBtn.textContent = `♪ music: ${audio.isMusicOn() ? 'on' : (audio.toggleMusic(), 'on')}`;
+    });
+  }
 
   // handy for poking around in the browser console
   (window as unknown as Record<string, unknown>).akuma = { story, party, renderer, enterMap, index, db, dropItem, spawnEnemy };

@@ -52,6 +52,10 @@ export class AudioPlayer {
     if (this.musicOn) void this.music.play().catch(() => {});
   }
 
+  isMusicOn(): boolean {
+    return this.musicOn;
+  }
+
   toggleMusic(): boolean {
     this.musicOn = !this.musicOn;
     if (this.musicOn) void this.music.play().catch(() => {});
