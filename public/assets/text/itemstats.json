@@ -1,0 +1,921 @@
+{
+"1": {
+"aspeed": 4,
+"atk": 6,
+"life": 30,
+"price": 120,
+"weight": 35
+},
+"2": {
+"aspeed": 3,
+"atk": 8,
+"life": 40,
+"price": 250,
+"weight": 40
+},
+"3": {
+"aspeed": 7,
+"atk": 10,
+"life": 35,
+"price": 450,
+"weight": 30
+},
+"4": {
+"aspeed": 7,
+"atk": 9,
+"life": 46,
+"price": 500,
+"special": "Dexterity + 3",
+"weight": 20
+},
+"5": {
+"aspeed": 3,
+"atk": 14,
+"life": 50,
+"price": 520,
+"weight": 56
+},
+"6": {
+"aspeed": 5,
+"atk": 15,
+"life": 52,
+"price": 1300,
+"special": "Health + 5",
+"weight": 60
+},
+"7": {
+"aspeed": 6,
+"atk": 18,
+"life": 50,
+"price": 1830,
+"special": "Health + 3",
+"weight": 82
+},
+"8": {
+"aspeed": 5,
+"atk": 19,
+"life": 60,
+"price": 1500,
+"weight": 85
+},
+"9": {
+"aspeed": 3,
+"atk": 22,
+"life": 55,
+"price": 2550,
+"special": "Strength + 5",
+"weight": 74
+},
+"10": {
+"aspeed": 8,
+"atk": 26,
+"life": 55,
+"price": 3900,
+"special": "Dexterity + 5",
+"weight": 42
+},
+"11": {
+"aspeed": 6,
+"atk": 33,
+"life": 70,
+"price": 4200,
+"weight": 50
+},
+"12": {
+"aspeed": 4,
+"atk": 30,
+"life": 58,
+"price": 3600,
+"weight": 80
+},
+"13": {
+"aspeed": 8,
+"atk": 35,
+"life": 60,
+"price": 6800,
+"special": "Dexterity + 7",
+"weight": 57
+},
+"14": {
+"aspeed": 6,
+"atk": 40,
+"life": 60,
+"price": 8700,
+"special": "Strength + 7",
+"weight": 84
+},
+"15": {
+"aspeed": 6,
+"atk": 45,
+"life": 66,
+"price": 10500,
+"special": "Strength + 3, Magic + 3",
+"weight": 53
+},
+"16": {
+"aspeed": 6,
+"atk": 47,
+"life": 64,
+"price": 12300,
+"special": "Strength + 3, Magic +10",
+"weight": 135
+},
+"17": {
+"aspeed": 8,
+"atk": 50,
+"life": 50,
+"price": 15800,
+"special": "Dexterity + 10, Health + 5",
+"weight": 76
+},
+"18": {
+"aspeed": 6,
+"atk": 60,
+"life": 70,
+"price": 16200,
+"weight": 144
+},
+"19": {
+"aspeed": 6,
+"atk": 55,
+"life": 75,
+"price": 18000,
+"special": "Strength + 10",
+"weight": 85
+},
+"20": {
+"aspeed": 7,
+"atk": 62,
+"life": 65,
+"price": 21700,
+"special": "Magic + 15",
+"weight": 96
+},
+"21": {
+"aspeed": 4,
+"atk": 25,
+"life": 50,
+"price": 3500,
+"special": "Strength +7",
+"weight": 70
+},
+"22": {
+"aspeed": 7,
+"atk": 28,
+"life": 50,
+"price": 8900,
+"special": "Strength+8, Health+5, Skill+10",
+"weight": 23
+},
+"23": {
+"aspeed": 6,
+"atk": 45,
+"life": 50,
+"price": 11000,
+"special": "Life+30",
+"weight": 52
+},
+"24": {
+"aspeed": 6,
+"atk": 30,
+"life": 80,
+"price": 5300,
+"special": "Life+45",
+"weight": 85
+},
+"25": {
+"aspeed": 9,
+"atk": 36,
+"life": 50,
+"price": 6800,
+"special": "Skill+5",
+"weight": 38
+},
+"26": {
+"aspeed": 6,
+"atk": 57,
+"life": 50,
+"price": 14600,
+"special": "Strength+15, Magic-5",
+"weight": 78
+},
+"27": {
+"aspeed": 6,
+"atk": 50,
+"life": 50,
+"price": 17000,
+"special": "Strength+10, Magic+10",
+"weight": 87
+},
+"28": {
+"aspeed": 7,
+"atk": 55,
+"life": 50,
+"price": 18900,
+"special": "Life+40, Skill+5",
+"weight": 77
+},
+"29": {
+"aspeed": 7,
+"atk": 73,
+"life": 75,
+"price": 38000,
+"special": "Strength+10, Health+10, Dexterity-5",
+"weight": 80
+},
+"30": {
+"aspeed": 8,
+"atk": 65,
+"life": 50,
+"price": 21500,
+"special": "Strength+5, Magic+20, Life-30",
+"weight": 120
+},
+"31": {
+"aspeed": 8,
+"atk": 70,
+"life": 80,
+"price": 27000,
+"special": "Strength+15, Health+20, Skill-5",
+"weight": 90
+},
+"32": {
+"aspeed": 9,
+"atk": 75,
+"life": 80,
+"price": 45000,
+"special": "Magic+12, Skill+10, Life+50",
+"weight": 145
+},
+"33": {
+"aspeed": 8,
+"atk": 95,
+"life": 99,
+"price": 100000,
+"special": "Skill+30, Dexterity+20, Strength+20",
+"weight": 96
+},
+"41": {
+"aspeed": 2,
+"atk": 3,
+"life": 20,
+"price": 60,
+"range": 6,
+"weight": 22
+},
+"42": {
+"aspeed": 4,
+"atk": 5,
+"life": 30,
+"price": 200,
+"range": 6,
+"weight": 20
+},
+"43": {
+"aspeed": 4,
+"atk": 7,
+"life": 35,
+"price": 560,
+"range": 7,
+"weight": 26
+},
+"44": {
+"aspeed": 2,
+"atk": 12,
+"life": 38,
+"price": 1380,
+"range": 8,
+"weight": 25
+},
+"45": {
+"aspeed": 5,
+"atk": 15,
+"life": 25,
+"price": 3460,
+"range": 9,
+"special": "Dexterity + 4, Sight+1",
+"weight": 20
+},
+"46": {
+"aspeed": 4,
+"atk": 22,
+"life": 36,
+"price": 4200,
+"range": 8,
+"special": "Strength + 5",
+"weight": 27
+},
+"47": {
+"aspeed": 4,
+"atk": 28,
+"life": 40,
+"price": 5800,
+"range": 8,
+"weight": 26
+},
+"48": {
+"aspeed": 3,
+"atk": 26,
+"life": 40,
+"price": 8500,
+"range": 9,
+"special": "Magic +5, Sight+2",
+"weight": 30
+},
+"49": {
+"aspeed": 6,
+"atk": 30,
+"life": 45,
+"price": 9100,
+"range": 9,
+"special": "Dexterity + 3, Sight+2",
+"weight": 37
+},
+"50": {
+"aspeed": 5,
+"atk": 36,
+"life": 50,
+"price": 10200,
+"range": 9,
+"special": "Magic+ 7, Sight+3",
+"weight": 34
+},
+"51": {
+"aspeed": 4,
+"atk": 42,
+"life": 48,
+"price": 14500,
+"range": 9,
+"special": "Health+10, Sight+4",
+"weight": 40
+},
+"52": {
+"aspeed": 6,
+"atk": 20,
+"life": 35,
+"price": 7100,
+"range": 7,
+"special": "Dexterity+3,Health+3, Stregth+3",
+"weight": 22
+},
+"53": {
+"aspeed": 4,
+"atk": 36,
+"life": 40,
+"price": 8300,
+"range": 8,
+"special": "Sight+3, magic+5",
+"weight": 34
+},
+"54": {
+"aspeed": 8,
+"atk": 45,
+"life": 40,
+"price": 17600,
+"range": 10,
+"special": "Health-5, Skill+5, Sight+3",
+"weight": 42
+},
+"55": {
+"aspeed": 1,
+"atk": 50,
+"life": 35,
+"price": 20000,
+"range": 9,
+"special": "Magic+12, Sight+2",
+"weight": 35
+},
+"56": {
+"aspeed": 3,
+"atk": 55,
+"life": 40,
+"price": 37000,
+"range": 10,
+"special": "Magic+10, Life+40, Sight+3",
+"weight": 44
+},
+"61": {
+"def": 6,
+"life": 20,
+"price": 90,
+"special": "Dexterity-5",
+"weight": 35
+},
+"62": {
+"def": 10,
+"life": 38,
+"price": 280,
+"special": "Dexterity-8",
+"weight": 50
+},
+"63": {
+"def": 20,
+"life": 50,
+"price": 560,
+"special": "Dexterity-10",
+"weight": 54
+},
+"64": {
+"def": 23,
+"life": 56,
+"price": 1380,
+"special": "Dexterity-11, Skil+5",
+"weight": 58
+},
+"65": {
+"def": 27,
+"life": 64,
+"price": 3460,
+"special": "Dexterity-5, Strength+7",
+"weight": 40
+},
+"66": {
+"def": 30,
+"life": 75,
+"price": 8200,
+"special": "Skill+5, Magic+15",
+"weight": 72
+},
+"67": {
+"def": 24,
+"life": 60,
+"price": 4400,
+"special": "Dexterity-5, Life+30",
+"weight": 42
+},
+"68": {
+"def": 20,
+"life": 65,
+"price": 13800,
+"special": "Skill+10, Magic+5",
+"weight": 76
+},
+"69": {
+"def": 32,
+"life": 80,
+"price": 21000,
+"special": "Life+50",
+"weight": 88
+},
+"71": {
+"def": 2,
+"life": 14,
+"price": 50,
+"weight": 8
+},
+"72": {
+"def": 4,
+"life": 25,
+"price": 120,
+"weight": 14
+},
+"73": {
+"def": 5,
+"life": 34,
+"price": 360,
+"weight": 25
+},
+"74": {
+"def": 5,
+"life": 35,
+"price": 1300,
+"special": "Sight+1",
+"weight": 26
+},
+"75": {
+"def": 4,
+"life": 35,
+"price": 4350,
+"special": "Sight+3, Skill+5",
+"weight": 34
+},
+"76": {
+"def": 5,
+"life": 20,
+"price": 12300,
+"special": "Sight+2, Skill+5, Intelligence+10",
+"weight": 20
+},
+"77": {
+"def": 6,
+"life": 32,
+"price": 18800,
+"special": "Sight+4, Magic+15",
+"weight": 22
+},
+"81": {
+"def": 10,
+"life": 26,
+"price": 140,
+"weight": 23
+},
+"82": {
+"def": 14,
+"life": 32,
+"price": 320,
+"weight": 20
+},
+"83": {
+"def": 18,
+"life": 45,
+"price": 530,
+"special": "Dexterity-5",
+"weight": 45
+},
+"84": {
+"def": 23,
+"life": 60,
+"price": 1180,
+"weight": 40
+},
+"85": {
+"def": 27,
+"life": 66,
+"price": 2440,
+"special": "Dexterity-5,Life+20",
+"weight": 58
+},
+"86": {
+"def": 32,
+"life": 80,
+"price": 4450,
+"weight": 30
+},
+"87": {
+"def": 40,
+"life": 84,
+"price": 7900,
+"weight": 80
+},
+"88": {
+"def": 35,
+"life": 88,
+"price": 8500,
+"special": "Skill+5, Life+30",
+"weight": 86
+},
+"89": {
+"def": 28,
+"life": 65,
+"price": 4200,
+"special": "Life+20, Health+5",
+"weight": 115
+},
+"90": {
+"def": 43,
+"life": 70,
+"price": 13900,
+"special": "Life+20, Strength+5",
+"weight": 63
+},
+"91": {
+"def": 35,
+"life": 80,
+"price": 15400,
+"special": "Skill+10, Magic+10",
+"weight": 75
+},
+"101": {
+"def": 1,
+"life": 27,
+"price": 80,
+"special": "Speed+3",
+"weight": 8
+},
+"102": {
+"def": 5,
+"life": 35,
+"price": 320,
+"special": "Speed+1",
+"weight": 16
+},
+"103": {
+"def": 4,
+"life": 32,
+"price": 570,
+"special": "Speed+4",
+"weight": 12
+},
+"104": {
+"def": 4,
+"life": 45,
+"price": 950,
+"special": "Speed+6",
+"weight": 10
+},
+"105": {
+"def": 2,
+"life": 30,
+"price": 2200,
+"special": "Speed+6, Life+10",
+"weight": 10
+},
+"106": {
+"def": 4,
+"life": 43,
+"price": 2400,
+"special": "Speed+7",
+"weight": 14
+},
+"107": {
+"def": 5,
+"life": 34,
+"price": 4250,
+"special": "Dexterity+5, Speed+8",
+"weight": 18
+},
+"108": {
+"def": 2,
+"life": 31,
+"price": 2700,
+"special": "Speed+8",
+"weight": 18
+},
+"109": {
+"def": 4,
+"life": 37,
+"price": 3300,
+"special": "Speed+6, Magic+5",
+"weight": 15
+},
+"110": {
+"def": 4,
+"life": 40,
+"price": 11450,
+"special": "Dexterity+10, Magic+12,"
+},
+"111": {
+"effect": "Increasing Skill 5"
+},
+"112": {
+"effect": "Increasing Dexterity 5"
+},
+"113": {
+"effect": "Increasing Health 5, Increasing Strength 5"
+},
+"114": {
+"effect": "Increasing Magic 10"
+},
+"115": {
+"effect": "Increasing Intelligence 10"
+},
+"116": {
+"effect": "Increasing M.Speed 7"
+},
+"117": {
+"effect": "Increasing Strength 12, Intelligence -3"
+},
+"118": {
+"effect": "Increasing Magic 15, Strength -5"
+},
+"119": {
+"effect": "Increasing all of skills(health, Strength, Magic, Dexterity, Intelligence) 3"
+},
+"120": {
+"effect": "Increasing all of skills(health, Strength, Magic, Dexterity, Intelligence) 5"
+},
+"121": {
+"effect": "Increasing Mana 30. when wear this ring Increase Mana 1 every 20 frame"
+},
+"122": {
+"effect": "Increasing life 40. when wear this ring Increase Life 1 every 20 frame"
+},
+"123": {
+"effect": "Increasing Intelligence 15"
+},
+"124": {
+"effect": "Increasing Attack 20, A.Speed 10"
+},
+"131": {
+"effect": "Increasing skill 20%",
+"price": 5600
+},
+"132": {
+"effect": "Increasing life 30%",
+"price": 7500
+},
+"133": {
+"effect": "Increasing Mana 30%.",
+"price": 8300
+},
+"134": {
+"effect": "Increasing Life and Mana 15%",
+"price": 9500
+},
+"135": {
+"effect": "Increasing Strength 20%",
+"price": 4250
+},
+"136": {
+"effect": "Increasing Magic 15%",
+"price": 3500
+},
+"137": {
+"effect": "Increasing Intelligence 20%",
+"price": 5300
+},
+"138": {
+"effect": "Increasing Dexterity 15%",
+"price": 3300
+},
+"139": {
+"effect": "Increasing magic 20%",
+"price": 6650
+},
+"140": {
+"effect": "Increasing all of skills (health, Strength, Magic, Dexterity, Intelligence) 10%.",
+"price": 15500
+},
+"141": {
+"effect": "Increasing all of skills (health, Strength, Magic, Dexterity, Intelligence) 15%.",
+"price": 24600
+},
+"142": {
+"effect": "Increasing Attack 30%.",
+"price": 15000
+},
+"151": {
+"effect": "Decreasing damage 50%",
+"price": 400
+},
+"152": {
+"effect": "Decreasing damage 80%",
+"price": 1000
+},
+"153": {
+"effect": "Increasing enemy's damage double",
+"price": 550
+},
+"154": {
+"effect": "Increasing enemy's damage three times",
+"price": 1300
+},
+"155": {
+"effect": "Increasing Dexterity",
+"price": 350
+},
+"156": {
+"effect": "Increasing Strength 30%",
+"price": 740
+},
+"157": {
+"effect": "Remove darkness",
+"price": 320
+},
+"158": {
+"effect": "Can see long distance",
+"price": 280
+},
+"159": {
+"effect": "Increasing skill 10%",
+"price": 500
+},
+"160": {
+"effect": "Increasing life 100",
+"price": 940
+},
+"161": {
+"effect": "Increasing Life 50%",
+"price": 80
+},
+"162": {
+"effect": "Increasing Life 70%",
+"price": 150
+},
+"163": {
+"effect": "Increasing Mana 50%",
+"price": 80
+},
+"164": {
+"effect": "Increasing Mana 70%",
+"price": 150
+},
+"165": {
+"effect": "Increasing Life 35%, Increasing Mana 35%",
+"price": 100
+},
+"166": {
+"effect": "Increasing Life 70%, Increasing Mana 70%",
+"price": 200
+},
+"167": {
+"effect": "Recover Life and Mana",
+"price": 300
+},
+"168": {
+"effect": "Recover Life and Mana. Increasing health 1.",
+"price": 1300
+},
+"169": {
+"effect": "Increasing Intelligence 1",
+"price": 1000
+},
+"170": {
+"effect": "Increasing Strength 1",
+"price": 1000
+},
+"171": {
+"effect": "Increasing Health 1.",
+"price": 1000
+},
+"172": {
+"effect": "Increasing Magic 1 Recover Mana.",
+"price": 1200
+},
+"173": {
+"effect": "Increasing Dexterity 1",
+"price": 1000
+},
+"174": {
+"effect": "Make 4 Ice balls",
+"price": 40
+},
+"175": {
+"effect": "Make 6 Fire balls",
+"price": 80
+},
+"176": {
+"effect": "Operate the power beam door",
+"price": 600
+},
+"177": {
+"effect": "Make holy eyes",
+"price": 300
+},
+"178": {
+"effect": "Hurt enemies around 10 tiles Decrease life of enemy 50%",
+"price": 2000
+},
+"179": {
+"effect": "Become Invincible for 3500",
+"price": 3400
+},
+"180": {
+"effect": "Increasing Intelligence 10",
+"price": 8000
+},
+"181": {
+"effect": "Increasing Intelligence, Strength, Health, Magic, Dexterity 1.",
+"price": 4500
+},
+"182": {
+"effect": "Increasing money number 10 of 2000",
+"price": 20000
+},
+"183": {
+"effect": "Recover Life and Mana and Increasing health 5",
+"price": 500
+},
+"184": {
+"effect": "Seal the Devils' passage",
+"mana": 100
+},
+"185": {
+"effect": "Make round fire wall",
+"mana": 35
+},
+"186": {
+"effect": "Attack enemies with fire ball",
+"mana": 20
+},
+"187": {
+"effect": "Attack with thunder",
+"mana": 40
+},
+"188": {
+"effect": "Attack devils with high voltaic current",
+"mana": 65
+},
+"189": {
+"effect": "Make sparks around our characters",
+"mana": 35
+},
+"190": {
+"effect": "Make fire around our characters",
+"mana": 45
+},
+"191": {
+"effect": "Make enemies stone",
+"mana": 120
+},
+"192": {
+"effect": "Become invincible against enemies",
+"mana": 60
+},
+"193": {
+"effect": "Recover life power",
+"mana": 30
+},
+"194": {
+"effect": "make ice rain comes down",
+"mana": 20
+},
+"195": {
+"effect": "Make fire rain comes down",
+"mana": 48
+},
+"196": {
+"effect": "Resurrect a person to life",
+"mana": 100
+}
+}

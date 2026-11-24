@@ -73,3 +73,18 @@ export interface LangData {
   items: Record<string, { name: string; desc: string }>;
   weapons: Record<string, { name: string; stats: string; category: string }>;
 }
+
+/** Prices and stats from the printed manual (tools/build_assets.py `stats`). */
+export interface ItemStat {
+  atk?: number;
+  aspeed?: number;
+  def?: number;
+  life?: number;
+  range?: number;
+  weight?: number;
+  price?: number;
+  mana?: number;
+  special?: string;
+  effect?: string;
+}
+export type ItemStats = Record<string, ItemStat>;

@@ -4,14 +4,14 @@ import { Enemy } from './game/enemy';
 import { ENEMY_SHEETS, sheetForKind } from './game/enemies';
 import { Hero } from './game/hero';
 import { MapObject, monsterSpawns, objectRole, parseMapObjects } from './data/mapobjects';
-import { npcSpriteRecord, pickBlock } from './game/npcs';
+import { basicBlockFor, npcSpriteRecord, pickBlock } from './game/npcs';
 import { findPickup, GroundItem } from './game/ground';
 import { ItemDb } from './game/itemdb';
 import { InventoryUI } from './ui/inventory';
 import { MoviePlayer, showTitle, trackForMap, WorldMapUI } from './ui/overlays';
 import { Party } from './game/party';
 import { TILE_H, TILE_W, World } from './game/world';
-import { loadLang, loadMap, loadMapIndex, loadSpriteMeta, loadText, loadTilesets } from './data/loaders';
+import { loadItemStats, loadLang, loadMap, loadMapIndex, loadSpriteMeta, loadText, loadTilesets } from './data/loaders';
 import { MapIndexEntry, SpriteSheetMeta, TilesetTable } from './data/types';
 import { GameRenderer, SpriteActor, VIEW_H, VIEW_W } from './render/renderer';
 import { Arg, EvtBlock, EvtFile, parseEvt } from './script/parser';
@@ -35,13 +35,14 @@ async function boot(): Promise<void> {
   const dlgEl = document.getElementById('dialogue')!;
   status.textContent = 'loading…';
 
-  const [index, tilesets, files, lang] = await Promise.all([
+  const [index, tilesets, files, lang, itemStats] = await Promise.all([
     loadMapIndex(),
     loadTilesets() as Promise<TilesetTable>,
     Promise.all(['sam.evt', 'under.evt'].map(async (f) => parseEvt(await loadText(`scripts/${f}`)))),
     loadLang(),
+    loadItemStats(),
   ]);
-  const db = new ItemDb(lang);
+  const db = new ItemDb(lang, itemStats);
   const scriptFiles: { tag: string; file: EvtFile }[] = [
     { tag: '1', file: files[0] },
     { tag: '2', file: files[1] },
@@ -190,8 +191,32 @@ async function boot(): Promise<void> {
     (s) => void audio.play(s),
     (m) => console.warn('[script]', m),
   );
+  dlg.trade = {
+    get money() {
+      return story.money;
+    },
+    price: (id) => db.price(id),
+    sellPrice: (id) => db.sellPrice(id),
+    count: (id) => story.itemCount(id),
+    nameOf: (id) => db.name(id),
+    buy(id) {
+      const p = db.price(id);
+      if (p === undefined || story.money < p) return false;
+      story.money -= p;
+      story.giveItem(id);
+      return true;
+    },
+    sell(id) {
+      const p = db.sellPrice(id);
+      if (p === undefined || story.itemCount(id) < 1) return false;
+      story.removeItem(id);
+      story.money += p;
+      return true;
+    },
+    owned: (equipment) => [...story.items.keys()].filter((id) => (equipment ? db.kind(id) === 'equipment' : db.kind(id) === 'consumable')).sort((a, b) => a - b),
+  };
   dlg.itemLabel = (id) => {
-    const st = db.desc(id);
+    const st = db.summary(id);
     return `${db.name(id)}${st ? ' (' + st + ')' : ''}`;
   };
   let running = false;
@@ -199,8 +224,16 @@ async function boot(): Promise<void> {
     if (running) return;
     running = true;
     party.leader.input.x = party.leader.input.y = 0;
-    const res = await new EvtInterpreter(file, block, story, dlg).run();
-    if (res.reason === 'ERROR') console.error('[script]', res.message);
+    let cur = block;
+    for (let hops = 0; hops < 3; hops++) {
+      const res = await new EvtInterpreter(file, cur, story, dlg).run();
+      if (res.reason === 'ERROR') console.error('[script]', res.message);
+      if (res.reason !== 'BASIC') break;
+      // GO_BASIC_EVENT: fall back to the object's default (BASIC) entry - the shop / plain talk
+      const basic = basicBlockFor(file.blocks, cur.name, mapEntry.id);
+      if (!basic) break;
+      cur = basic;
+    }
     dlg.hide();
     running = false;
   }

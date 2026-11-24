@@ -1,6 +1,19 @@
 import { Arg } from '../script/parser';
 import { FaceSpec, RGB, ScriptHost, ShopKind } from '../script/interpreter';
 
+/** what the shop screens need from the game */
+export interface ShopHost {
+  money: number;
+  price(id: number): number | undefined;
+  sellPrice(id: number): number | undefined;
+  count(id: number): number;
+  nameOf(id: number): string;
+  buy(id: number): boolean;
+  sell(id: number): boolean;
+  /** item ids the party holds that this kind of shop takes (equipment or consumables) */
+  owned(equipment: boolean): number[];
+}
+
 const css = (c: RGB) => `rgb(${c[0]},${c[1]},${c[2]})`;
 
 /** DOM dialogue box implementing the UI half of ScriptHost. World effects are delegated. */
@@ -122,13 +135,62 @@ export class DialogueUI implements ScriptHost {
   /** item names for shop listings; set once the string table is loaded */
   itemLabel: (id: number) => string = (id) => `item ${id}`;
 
+  /** set by main: lets the shop screens read and change the party's money and items */
+  trade: ShopHost | null = null;
+
   async shop(kind: ShopKind, prompt: string, list: number[]): Promise<void> {
-    // buying / selling needs prices, which have not been found yet: list what the shop offers
-    this.lines.push({ text: `[${kind.replace(/_/g, ' ').toLowerCase()}] ${prompt}`, color: [150, 150, 150] });
-    for (const id of list.slice(0, 12)) this.lines.push({ text: `  · ${this.itemLabel(id)}`, color: [200, 200, 160] });
-    if (list.length > 12) this.lines.push({ text: `  … and ${list.length - 12} more`, color: [150, 150, 150] });
-    this.render();
-    await this.waitKey();
+    const t = this.trade;
+    if (!t || kind === 'REPAIR_WEAPON' || kind === 'LEARN_MAGIC') {
+      // no prices for spells / repairs in the data we have: just list what is on offer
+      this.lines.push({ text: `[${kind.replace(/_/g, ' ').toLowerCase()}] ${prompt}`, color: [150, 150, 150] });
+      for (const id of list.slice(0, 12)) this.lines.push({ text: `  · ${this.itemLabel(id)}`, color: [200, 200, 160] });
+      if (list.length > 12) this.lines.push({ text: `  … and ${list.length - 12} more`, color: [150, 150, 150] });
+      this.render();
+      await this.waitKey();
+      return;
+    }
+    const selling = kind === 'SELL_WEAPON' || kind === 'SELL_ITEM';
+    let note = '';
+    return new Promise((done) => {
+      const draw = () => {
+        const box = document.createElement('div');
+        box.className = 'choices';
+        box.style.maxHeight = '38vh';
+        box.style.overflowY = 'auto';
+        const ids = selling ? t.owned(kind === 'SELL_WEAPON') : list;
+        if (!ids.length) {
+          const e = document.createElement('div');
+          e.textContent = selling ? 'Nothing to sell.' : 'Sold out.';
+          box.appendChild(e);
+        }
+        for (const id of ids) {
+          const price = selling ? t.sellPrice(id) : t.price(id);
+          const b = document.createElement('button');
+          const have = t.count(id);
+          b.textContent = `${this.itemLabel(id)}  —  ${price === undefined ? 'n/a' : price}${have ? `  (have ${have})` : ''}`;
+          b.disabled = price === undefined || (!selling && t.money < price);
+          b.onclick = (e) => {
+            e.stopPropagation();
+            note = selling ? (t.sell(id) ? `Sold ${t.nameOf(id)}.` : 'Cannot sell that.') : t.buy(id) ? `Bought ${t.nameOf(id)}.` : 'Not enough money.';
+            draw();
+          };
+          box.appendChild(b);
+        }
+        const leave = document.createElement('button');
+        leave.textContent = 'Leave';
+        leave.onclick = (e) => {
+          e.stopPropagation();
+          done();
+        };
+        box.appendChild(leave);
+        this.lines = [
+          { text: prompt, color: this.color },
+          { text: `Money: ${t.money}${note ? '   ' + note : ''}`, color: [255, 220, 120] },
+        ];
+        this.render(box);
+      };
+      draw();
+    });
   }
   play(sound: string): void {
     this.onPlay(sound);

@@ -64,7 +64,13 @@ Open: kind -> sheet mapping, enemy stats/AI, hero HP and damage, trailer tables,
 - Converted BACK, ARMS, MENUICON, ICON1 banks (not used yet; ARMS looks like weapon / armour overlay frames).
 - NPC sprite choice and trailer class meanings are heuristics.
 
+## Session 1f
+- Prices and stats found in the bundled HTML manual (MANUAL/WEAPONL.HTM): `itemstats.json` (158 items). Shops now sell and
+  buy (sell price = half, a guess): list with attack / defense / special text, greyed when you lack the money.
+- GO_BASIC_EVENT implemented (falls back to the NPC's BASIC shop block; village-specific variants are a guess).
+- Still missing: ring prices, spell learning cost, repairs, equipping items (bought gear just sits in the bag).
+
 ## Next ideas
-- Prices (shops cannot sell yet), hero stats / level / experience, magic (12 spells with names known), real enemy stats.
+- Equip items and use their stats; hero stats / level / experience, magic (12 spells with names known), real enemy stats.
 - NEW_OBJECT, BASIC event triggers (GO_BASIC_EVENT), save / load.
 - Real collision rules, trailer class meanings; world-map hotspots; per-map music.

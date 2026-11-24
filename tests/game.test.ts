@@ -261,3 +261,26 @@ test('map objects: trailer decodes to in-bounds placements that agree with the s
 function ENEMY_OK(name: string): boolean {
   return /^(ENEMY-[A-P]\d?|BIRD|CYCLOP|FIRE|FISH|FLY|GEAR|GEARBIG|LAMB|LION|ZAMBIE|STONE|DRAGON|WATER)$/.test(name);
 }
+
+test('item stats: manual prices line up with the string table names', async () => {
+  const { ItemDb } = await import('../src/game/itemdb');
+  const lang = json('text/lang.json');
+  const db = new ItemDb(lang, json('text/itemstats.json'));
+  assert.equal(db.price(1), 120); // Copper Sword
+  assert.equal(db.name(1), 'Copper Sword');
+  assert.equal(db.stat(33).atk, 95); // Blood Sword (event-only: weight / price columns swapped in the manual)
+  assert.equal(db.price(33), 100000);
+  assert.equal(db.price(161), 80); // Life Water
+  assert.equal(db.price(167), 300); // Ginseng
+  assert.equal(db.sellPrice(1), 60);
+  assert.equal(db.price(227), undefined); // quest key is not for sale
+  // every item a shop script sells has a price, except rings (no price in the manual) and learnable spells (mana cost only)
+  const { parseEvt } = await import('../src/script/parser');
+  const fs = await import('node:fs');
+  const missing = new Set<number>();
+  for (const f of ['sam.evt', 'under.evt']) {
+    const file = parseEvt(fs.readFileSync(new URL(`../public/assets/scripts/${f}`, import.meta.url), 'utf8'));
+    for (const o of file.ops) if (o.t === 'list' && db.kind(o.n) !== 'quest' && db.price(o.n) === undefined && !(o.n >= 111 && o.n <= 124) && !(o.n >= 184 && o.n <= 196)) missing.add(o.n);
+  }
+  assert.deepEqual([...missing], []);
+});

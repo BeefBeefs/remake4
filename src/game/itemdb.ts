@@ -1,10 +1,40 @@
-import { LangData } from '../data/types';
+import { ItemStat, ItemStats, LangData } from '../data/types';
 
 export type ItemKind = 'equipment' | 'consumable' | 'quest' | 'unknown';
 
 /** Item id space shared by GIVE / REMOVE / LOCATE_ITEM / shop lists (see docs/FORMATS.md, LANG.GOS). */
 export class ItemDb {
-  constructor(readonly lang: LangData) {}
+  constructor(
+    readonly lang: LangData,
+    private stats: ItemStats = {},
+  ) {}
+
+  stat(id: number): ItemStat {
+    return this.stats[String(id)] ?? {};
+  }
+
+  /** shop price from the manual; undefined = not sold (quest items, rings) */
+  price(id: number): number | undefined {
+    return this.stats[String(id)]?.price;
+  }
+
+  /** what a shop pays: half the price (GUESS - the manual only lists the buy price) */
+  sellPrice(id: number): number | undefined {
+    const p = this.price(id);
+    return p === undefined ? undefined : Math.max(1, Math.floor(p / 2));
+  }
+
+  /** one-line summary for shop lists: attack / defense / effect from the manual, else the string-table text */
+  summary(id: number): string {
+    const st = this.stat(id);
+    const parts: string[] = [];
+    if (st.atk !== undefined) parts.push(`atk ${st.atk}`);
+    if (st.aspeed !== undefined) parts.push(`spd ${st.aspeed}`);
+    if (st.def !== undefined) parts.push(`def ${st.def}`);
+    if (st.special) parts.push(st.special.replace(/\s+/g, ''));
+    if (parts.length) return parts.join(' ');
+    return this.desc(id);
+  }
 
   kind(id: number): ItemKind {
     if (this.lang.weapons[String(id)]) return 'equipment';

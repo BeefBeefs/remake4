@@ -77,6 +77,18 @@ Roles (inferred by drawing the maps and checking against scripts):
 - class 1-47: monster, `kind` = LANG.GOS monster number; `extra` looks like the drop item; class meaning unknown.
 - NPC sprites: SPRITE.GOS record chosen from the NPC's script name (`src/game/npcs.ts`; Blacksmith 9, Jeweler 12, ...).
 
+## Prices and item stats
+Not in the EXE or GOS files: the printed manual on the disc (`MANUAL/WEAPONL.HTM`, cp949 HTML tables) lists every item
+with attack, attack speed, durability (`life`), defense, bow range, weight, shop price and spell mana cost. Rows are
+in the same order as the LANG.GOS ids (normal items first, then event-only ones; event-only tables list weight before
+price). Extracted by `tools/build_assets.py --only stats` into `public/assets/text/itemstats.json`. Rings have no price
+there; spells only a mana cost.
+
+## GO_BASIC_EVENT
+Every shop NPC has a BASIC block (the default shop / small talk) next to its story-dependent FLOW block;
+`GO_BASIC_EVENT` hands over to the BASIC block of the same name. A few names have several (the script comments name
+the village they serve), see `basicBlockFor` in `src/game/npcs.ts` (village mapping is a guess).
+
 ## Open questions
 Exact meaning of the 10000 object flag; trailer class numbers other than the ones below; real collision rules; unarmed stance and
-actions 3-5, 11-13, 18-20; `GO_BASIC_EVENT`; which music plays where; walking speed and animation timing.
+actions 3-5, 11-13, 18-20; which music plays where; walking speed and animation timing.

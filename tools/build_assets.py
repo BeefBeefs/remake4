@@ -3,7 +3,7 @@
 
 usage:
   python3 tools/build_assets.py --disc <dir containing MAP/ IMG/ WAV/ *.EVT> [--bin AKUMA.bin] [--out public/assets]
-        [--only tiles,maps,sprites,images,audio,scripts,lang,cdaudio,video] [--sprites KUSA,RINING,...|all]
+        [--only tiles,maps,sprites,images,audio,scripts,lang,stats,cdaudio,video] [--sprites KUSA,RINING,...|all]
 
 Original data is never copied verbatim except the small PCM WAV sound effects.
 """
@@ -335,12 +335,72 @@ def build_video(disc, out):
             print("video", dst, os.path.getsize(dst) // 1024, "KB")
 
 
+# groups of WEAPONL.HTM in document order -> item ids (same order as LANG.GOS: normal items first, then event-only ones)
+STAT_GROUPS = [
+    list(range(1, 21)), list(range(21, 34)),          # swords: shop / event
+    list(range(41, 52)), list(range(52, 57)),         # bows
+    list(range(61, 67)), list(range(67, 70)),         # shields
+    list(range(71, 76)), list(range(76, 78)),         # caps
+    list(range(81, 89)), list(range(89, 92)),         # armor
+    list(range(101, 108)), list(range(108, 111)),     # shoes
+    list(range(111, 125)),                            # rings (no price in the manual)
+    list(range(131, 143)),                            # necklaces
+    list(range(151, 161)),                            # effect items
+    list(range(161, 169)),                            # recovery items
+    list(range(169, 174)) + list(range(178, 184)),    # drugs and scrolls
+    list(range(174, 178)),                            # ice ball, fire ball, gate jewel, holy eye
+    list(range(184, 197)),                            # spells (Seal magic first): mana cost
+]
+STAT_COLUMNS = {"attack": "atk", "a. speed": "aspeed", "a.speed": "aspeed", "life": "life", "defense": "def",
+                "expense": "price", "weight": "weight", "effect range": "range", "distance": "range", "mana": "mana"}
+
+
+def build_stats(disc, out):
+    """MANUAL/WEAPONL.HTM (the printed manual's item list) holds prices and stats: attack, attack speed, durability
+    ('life'), defense, bow range, weight, shop price, spell mana cost. Rows are matched to item ids by order."""
+    import re
+    path = find(disc, "MANUAL", "WEAPONL.HTM")
+    t = open(path, "rb").read().decode("cp949", "replace")
+    t = re.sub(r"<(script|style).*?</\\1>", "", t, flags=re.S | re.I)
+    groups, header = [], None
+    for tr in re.findall(r"<tr.*?</tr>", t, flags=re.S | re.I):
+        cells = [re.sub(r"\s+", " ", re.sub(r"<[^>]+>", "", c).replace("&nbsp;", " ")).strip()
+                 for c in re.findall(r"<t[dh][^>]*>(.*?)</t[dh]>", tr, flags=re.S | re.I)]
+        if not any(cells):
+            continue
+        if cells[0].lower() in ("items", "item"):
+            header = [c.lower() for c in cells]
+            groups.append([])
+        elif header and groups and len(cells) == len(header):
+            groups[-1].append(dict(zip(header, cells)))
+    if [len(g) for g in groups] != [len(g) for g in STAT_GROUPS]:
+        raise SystemExit("WEAPONL.HTM layout changed: %s" % [len(g) for g in groups])
+    stats = {}
+    for ids, rows in zip(STAT_GROUPS, groups):
+        for i, row in zip(ids, rows):
+            e = {}
+            for col, val in row.items():
+                num = re.sub(r"[^0-9-]", "", val.replace("+ ", "+"))
+                key = STAT_COLUMNS.get(col)
+                if key and num not in ("", "-"):
+                    e[key] = int(num)
+                elif col.startswith("special") and val:
+                    e["special"] = val
+                elif col in ("effect", "explain") and val:
+                    e["effect"] = val
+            stats[i] = e
+    os.makedirs(os.path.join(out, "text"), exist_ok=True)
+    with open(os.path.join(out, "text", "itemstats.json"), "w") as f:
+        json.dump(stats, f, indent=0, sort_keys=True)
+    print("stats", len(stats), "items,", sum(1 for e in stats.values() if "price" in e), "with prices")
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--disc", required=True)
     ap.add_argument("--bin")
     ap.add_argument("--out", default=os.path.join(os.path.dirname(__file__), "..", "public", "assets"))
-    ap.add_argument("--only", default="tiles,maps,sprites,images,audio,scripts,lang")
+    ap.add_argument("--only", default="tiles,maps,sprites,images,audio,scripts,lang,stats")
     ap.add_argument("--sprites", default=",".join(DEFAULT_SPRITES))
     a = ap.parse_args()
     out = os.path.abspath(a.out)
@@ -352,6 +412,7 @@ def main():
     if "audio" in todo: build_audio(a.disc, out)
     if "scripts" in todo: build_scripts(a.disc, out)
     if "lang" in todo: build_lang(a.disc, out)
+    if "stats" in todo: build_stats(a.disc, out)
     if "cdaudio" in todo: build_cdaudio(a.bin, out)
     if "video" in todo: build_video(a.disc, out)
 

@@ -35,3 +35,22 @@ export function npcSpriteRecord(name: string): number | null {
 export function pickBlock(blocks: { fi: number; block: EvtBlock }[]): { fi: number; block: EvtBlock } {
   return blocks.find((b) => b.block.kind === 'FLOW') ?? blocks[0];
 }
+
+/**
+ * GO_BASIC_EVENT hands over to the shop / plain-talk entry of the same NPC name. A few names have several BASIC entries
+ * (the script comments say which village they serve): block ids below are those village-specific ones. Which map
+ * "Western region / Eastern / Northern castle village" really is was inferred from the names (Western Village, Eastern
+ * Village, Vulcan Village = the explosives smith), so treat it as a guess; every other map takes the generic entry.
+ */
+const BASIC_BY_MAP: Record<string, Record<string, number>> = {
+  t1: { Blacksmith: 11, Witch: 12 },
+  t4: { 'Item Merchant': 10 },
+  t5: { Blacksmith: 9, 'Item Merchant': 13 },
+};
+const BASIC_VILLAGE_ONLY = new Set([9, 10, 11, 12, 13]);
+
+export function basicBlockFor(blocks: EvtBlock[], name: string, mapId: string): EvtBlock | undefined {
+  const same = blocks.filter((b) => b.kind === 'BASIC' && b.name === name);
+  const want = BASIC_BY_MAP[mapId]?.[name];
+  return same.find((b) => b.id === want) ?? same.find((b) => !BASIC_VILLAGE_ONLY.has(b.id)) ?? same[0];
+}
