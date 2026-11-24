@@ -96,6 +96,29 @@ export class GameMenu {
     this.el.appendChild(back);
   }
 
+  /** a one-off list of choices (the Gate Jewel's "Road to ..."); resolves with the index, or -1 when closed */
+  choose(title: string, options: string[]): Promise<number> {
+    return new Promise((resolve) => {
+      this.el.innerHTML = '';
+      this.el.style.display = 'block';
+      const head = document.createElement('div');
+      head.className = 'head';
+      head.textContent = title;
+      const done = (i: number): void => {
+        this.el.style.display = 'none';
+        resolve(i);
+      };
+      head.appendChild(this.button('\u2715', () => done(-1)));
+      this.el.appendChild(head);
+      options.forEach((o, i) => {
+        const row = document.createElement('div');
+        row.className = 'q';
+        row.appendChild(this.button(o, () => done(i)));
+        this.el.appendChild(row);
+      });
+    });
+  }
+
   private go(v: 'main' | 'save' | 'load'): void {
     this.view = v;
     this.render();

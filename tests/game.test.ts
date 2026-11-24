@@ -545,7 +545,8 @@ test('consumable effects are read from the item descriptions; passive and unsupp
   assert.deepEqual(fx(160), { stats: { HEALTH: 20 } });
   assert.deepEqual(fx(175), { cast: 2 });
   assert.deepEqual(fx(178), { smite: true });
-  for (const none of [157, 158, 176, 177, 184]) assert.equal(fx(none), null, `item ${none}`);
+  assert.deepEqual(fx(176), { gate: true });
+  for (const none of [157, 158, 177, 184]) assert.equal(fx(none), null, `item ${none}`);
 });
 
 test('pickBlock follows the game year: later quest entries unlock and replace earlier ones; a finished one waits for the next', () => {

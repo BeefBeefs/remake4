@@ -19,7 +19,7 @@ export class InventoryUI {
     private el: HTMLElement,
     private db: ItemDb,
     private state: StoryState,
-    private onUse: (fx: ItemEffect) => boolean,
+    private onUse: (fx: ItemEffect) => boolean | Promise<boolean>,
     private toast: (msg: string) => void,
     private equipHost: EquipHost,
   ) {
@@ -118,8 +118,8 @@ export class InventoryUI {
       if (fx) {
         const b = document.createElement('button');
         b.textContent = 'Use';
-        b.onclick = () => {
-          if (this.onUse(fx)) {
+        b.onclick = async () => {
+          if (await this.onUse(fx)) {
             this.state.removeItem(id);
             this.toast(`Used ${this.db.name(id)}`);
           } else this.toast('No effect right now');

@@ -648,7 +648,7 @@ async function boot(): Promise<void> {
     document.getElementById('inv')!,
     db,
     story,
-    (fx) => {
+    async (fx) => {
       const alive = heroes.filter((x) => !x.dead);
       let used = false;
       if (fx.life !== undefined) {
@@ -702,6 +702,17 @@ async function boot(): Promise<void> {
           n++;
         }
         used = n > 0;
+      }
+      if (fx.gate) {
+        // "The Teleport Gate linking with <World>": travel to a village of this world that is not sealed
+        const here = index.findIndex((m) => m.id === mapEntry.id);
+        const under = here >= UNDERWORLD_OFFSET;
+        const towns = index.filter((m, i) => /^t\d$/.test(m.id) && i >= UNDERWORLD_OFFSET === under && !story.sealed.has(i + 1));
+        const pick = await menu.choose(`The Teleport Gate linking with ${lang.ui[under ? 18 : 17]}`, towns.map((m) => `${lang.ui[9]} ${m.name}`));
+        if (pick < 0) return false;
+        inv.toggle();
+        await enterMap(towns[pick].id);
+        used = true;
       }
       if (fx.shield) {
         for (const h of alive) h.invuln = Math.max(h.invuln, fx.shield);

@@ -13,6 +13,8 @@ export interface ItemEffect {
   learn?: number;
   /** seconds of invincibility for the whole party */
   shield?: number;
+  /** open the Teleport Gate: choose a village to travel to (Gate Jewel) */
+  gate?: boolean;
   /** cast this spell number for free (Fire Ball / Ice Ball items) */
   cast?: number;
   /** kill the devils near the party (Soul Scroll) */
@@ -65,6 +67,7 @@ export function itemEffect(id: number, desc: string): ItemEffect | null {
   if (id === 174) return { cast: 10 }; // Ice Ball: the Ice Rain effect
   if (id === 175) return { cast: 2 };
   if (id === 178) return { smite: true };
+  if (id === 176) return { gate: true };
   const d = desc.toLowerCase();
   const fx: ItemEffect = {};
   if (/fully recover life/.test(d)) fx.life = 1;
