@@ -103,10 +103,12 @@ async function boot(): Promise<void> {
   let world: World | null = null;
   let mapEntry: MapIndexEntry = index[0];
   let lastEffect = '';
-  interface Npc { name: string; x: number; y: number; record: number | null; actor: SpriteActor | null; blocks: { fi: number; block: EvtBlock }[]; t: number }
+  interface Npc { object: number; name: string; x: number; y: number; record: number | null; actor: SpriteActor | null; blocks: { fi: number; block: EvtBlock }[]; t: number }
   const npcs: Npc[] = [];
+  /** the script object whose entry is running (what THIS means in REMOVE_OBJECT / CHANGE_GOS) */
+  let curNpc: Npc | null = null;
   let pendingMonsters: { o: MapObject; done: boolean }[] = [];
-  interface Prop { x: number; y: number; meta: SpriteSheetMeta; record: number; actor: SpriteActor; t: number }
+  interface Prop { object: number; x: number; y: number; meta: SpriteSheetMeta; record: number; actor: SpriteActor; t: number }
   const props: Prop[] = [];
 
   async function buildMapObjects(mapNo: number, objs: MapObject[]): Promise<void> {
@@ -116,6 +118,7 @@ async function boot(): Promise<void> {
     props.length = 0;
     const scripted = new Set<number>();
     scriptFiles.forEach((sf) => sf.file.blocks.forEach((b) => b.map === mapNo && scripted.add(b.object)));
+    objs = objs.filter((o) => !story.removed.has(`${mapNo}:${o.index}`)); // removed by a script earlier
     const free = objs.filter((o) => !scripted.has(o.index));
     // villages (t1-t6) list class 1-47 entries too (a Satan in the Western Village), so those are not monsters there
     pendingMonsters = mapEntry.id.startsWith('t') ? [] : monsterSpawns(free).map((o) => ({ o, done: false }));
@@ -124,7 +127,7 @@ async function boot(): Promise<void> {
       if (role !== 'prop' && role !== 'scenery') continue;
       const meta = role === 'prop' ? spriteMeta : backMeta;
       if (!meta.records[o.kind]?.frames.length) continue;
-      props.push({ x: o.x * TILE_W + TILE_W / 2, y: o.y * TILE_H + TILE_H - 2, meta, record: o.kind, actor: await renderer.createSprite(meta), t: Math.random() * 2 });
+      props.push({ object: o.index, x: o.x * TILE_W + TILE_W / 2, y: o.y * TILE_H + TILE_H - 2, meta, record: o.kind, actor: await renderer.createSprite(meta), t: Math.random() * 2 });
     }
     const byObject = new Map<number, { fi: number; block: EvtBlock }[]>();
     scriptFiles.forEach((sf, fi) =>
@@ -138,9 +141,9 @@ async function boot(): Promise<void> {
     for (const [objectId, blocks] of byObject) {
       const o = objs.find((x) => x.index === objectId);
       if (!o) continue;
-      const record = npcSpriteRecord(blocks[0].block.name);
+      const record = story.gos.get(`${mapNo}:${objectId}`) ?? npcSpriteRecord(blocks[0].block.name);
       const actor = record === null ? null : await renderer.createSprite(spriteMeta);
-      npcs.push({ name: blocks[0].block.name.trim() || `object ${objectId}`, x: o.x * TILE_W + TILE_W / 2, y: o.y * TILE_H + TILE_H - 2, record, actor, blocks, t: Math.random() });
+      npcs.push({ object: objectId, name: blocks[0].block.name.trim() || `object ${objectId}`, x: o.x * TILE_W + TILE_W / 2, y: o.y * TILE_H + TILE_H - 2, record, actor, blocks, t: Math.random() });
     }
   }
   function nearestNpc(x: number, y: number, reach: number): Npc | null {
@@ -207,6 +210,46 @@ async function boot(): Promise<void> {
       if (name === 'LOCATE_ITEM' && args.length >= 4 && Number(args[0]) === index.findIndex((m) => m.id === mapEntry.id) + 1) {
         await dropItem(Number(args[3]), Number(args[1]) * TILE_W + TILE_W / 2, Number(args[2]) * TILE_H + TILE_H - 2);
       }
+      const mapNoNow = index.findIndex((m) => m.id === mapEntry.id) + 1;
+      if (name === 'FULL_LIFE' || name === 'FULL_MANA') {
+        for (const h of heroes) {
+          if (name === 'FULL_LIFE') {
+            if (h.dead) h.revive();
+            h.hp = h.maxHp;
+          } else h.mana = h.maxMana;
+        }
+        toast(name === 'FULL_LIFE' ? 'Life restored' : 'Mana restored');
+      }
+      if (name === 'REMOVE_OBJECT') {
+        // THIS | CURMAP n | map n
+        const a0 = String(args[0] ?? '').toUpperCase();
+        const target = a0 === 'THIS' ? (curNpc ? { map: mapNoNow, obj: curNpc.object } : null) : { map: a0 === 'CURMAP' ? mapNoNow : Number(args[0]), obj: Number(args[1]) };
+        if (target && Number.isFinite(target.map) && Number.isFinite(target.obj)) {
+          story.removed.add(`${target.map}:${target.obj}`);
+          if (target.map === mapNoNow) {
+            for (let i = npcs.length - 1; i >= 0; i--)
+              if (npcs[i].object === target.obj) {
+                if (npcs[i].actor) renderer.removeSprite(npcs[i].actor!);
+                npcs.splice(i, 1);
+              }
+            for (let i = props.length - 1; i >= 0; i--)
+              if (props[i].object === target.obj) {
+                renderer.removeSprite(props[i].actor);
+                props.splice(i, 1);
+              }
+            refreshNpcList();
+          }
+        }
+      }
+      if (name === 'CHANGE_GOS' && curNpc && Number.isFinite(Number(args[0]))) {
+        // the speaking object turns into SPRITE.GOS record n (a shattered door, a revealed demon...)
+        const rec = Number(args[0]);
+        if (spriteMeta.records[rec]?.frames.length) {
+          curNpc.record = rec;
+          story.gos.set(`${mapNoNow}:${curNpc.object}`, rec);
+          if (!curNpc.actor) curNpc.actor = await renderer.createSprite(spriteMeta);
+        }
+      }
       lastEffect = `${name} ${args.join(' ')}`;
       console.info('[script effect]', lastEffect);
     },
@@ -252,6 +295,7 @@ async function boot(): Promise<void> {
   async function runBlock(file: EvtFile, block: EvtBlock): Promise<void> {
     if (running) return;
     running = true;
+    curNpc = npcs.find((n) => n.blocks.some((b) => b.block === block)) ?? null;
     party.leader.input.x = party.leader.input.y = 0;
     let cur = block;
     for (let hops = 0; hops < 3; hops++) {
@@ -837,7 +881,7 @@ async function boot(): Promise<void> {
   }
 
   // handy for poking around in the browser console
-  (window as unknown as Record<string, unknown>).akuma = { story, party, renderer, enterMap, index, db, dropItem, spawnEnemy, castSpell, selectSpell: (k: number) => { spellSel = k; }, enemies };
+  (window as unknown as Record<string, unknown>).akuma = { story, party, renderer, enterMap, index, db, dropItem, spawnEnemy, castSpell, npcs, scriptFiles, runBlock, dlg, selectSpell: (k: number) => { spellSel = k; }, enemies };
 }
 
 boot().catch((e) => {

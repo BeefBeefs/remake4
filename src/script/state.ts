@@ -9,6 +9,9 @@ export class StoryState {
   items = new Map<number, number>();
   /** active quest numbers (`ORDER n`) with their log text */
   orders = new Map<number, { title: string; ment: string[] }>();
+  /** objects scripts have removed ("map:object") and sprite records they have swapped in (CHANGE_GOS) */
+  removed = new Set<string>();
+  gos = new Map<string, number>();
   money = 0;
   level = 1;
   /** experience towards the next level (party-wide) */

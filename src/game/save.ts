@@ -17,6 +17,8 @@ export interface SaveData {
     xp: number;
     stats: Record<StatName, number>;
     magic: [number, number][];
+    removed?: string[];
+    gos?: [string, number][];
   };
   heroes: { hp: number; mana: number; gear: Loadout }[];
 }
@@ -52,6 +54,8 @@ export function makeSave(
       xp: story.xp,
       stats: { ...story.stats },
       magic: [...story.magic],
+      removed: [...story.removed],
+      gos: [...story.gos],
     },
     heroes: heroes.map((h) => ({ hp: Math.ceil(h.hp), mana: Math.floor(h.mana), gear: { ...h.gear } })),
   };
@@ -86,4 +90,6 @@ export function applyStory(story: StoryState, d: SaveData): void {
   story.xp = d.story.xp;
   story.stats = { ...story.stats, ...d.story.stats };
   story.magic = new Map(d.story.magic);
+  story.removed = new Set(d.story.removed ?? []);
+  story.gos = new Map(d.story.gos ?? []);
 }

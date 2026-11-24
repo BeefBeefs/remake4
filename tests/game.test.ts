@@ -371,6 +371,8 @@ test('save games round-trip story state and party condition', () => {
   s.xp = 9;
   s.stats.MAGIC = 21;
   s.magic.set(1, 1);
+  s.removed.add('9:11');
+  s.gos.set('8:3', 62);
   const text = JSON.stringify(makeSave(s, heroes, 2, 'a3', 100.4, 200.6));
   const d = parseSave(text, 3)!;
   assert.ok(d);
@@ -389,6 +391,8 @@ test('save games round-trip story state and party condition', () => {
   assert.equal(t.level, 4);
   assert.equal(t.stats.MAGIC, 21);
   assert.ok(t.magic.has(1));
+  assert.ok(t.removed.has('9:11'));
+  assert.equal(t.gos.get('8:3'), 62);
 });
 test('save games reject damaged or foreign saves', () => {
   assert.equal(parseSave(null, 3), null);

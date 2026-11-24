@@ -104,6 +104,15 @@ Open: kind -> sheet mapping, enemy stats/AI, hero HP and damage, trailer tables,
   invulnerable ~10s, glow 33 follows each hero), Ice Rain (MGC-EFF 12) and Fire Rain (MGC-EFF 27) as 7 damaging patches
   ahead of the caster. Durations / damage are placeholders. Seal magic (184) is a story item, not castable.
 
+## Session 1l
+- Script effects now live: FULL_LIFE / FULL_MANA (inns, the Teleport Fountain's holy water: revives and restores the party),
+  REMOVE_OBJECT (`THIS`, `CURMAP n`, `map n`; remembered in `story.removed`, saved), CHANGE_GOS n (the speaking object
+  becomes SPRITE.GOS record n; remembered in `story.gos`, saved).
+- Still not done: NEW_OBJECT (args map x y a b c; `a` looks like a face / npc id, `b` a SPRITE or monster number), CHANGE n
+  (switches the object's talk variant; `CHANGE 0` is the common reset), UNSEAL n (opens map n; the initial open set is unknown
+  so the world map still lists everything), STONE map amount.
+- EVT files carry Korean design notes (cp949 comments after the scripts) that explain the quests; worth mining.
+
 ## Next ideas
 - Per-hero growth / real stat formulas; monster bytes b2 b4-b7; hero base stats / level / experience, magic (12 spells with names known), real enemy stats.
 - NEW_OBJECT, BASIC event triggers (GO_BASIC_EVENT), save / load.
