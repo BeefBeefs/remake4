@@ -205,4 +205,5 @@ Reproduced from the video (T1 around cell 30,42) and fixed three things:
 - Open question: villages' ground looks like a mosaic of grass / rock / dirt pairs (the map data really mixes tiles 67/87/107 pairs); the screenshots only show caves and a volcano, which look uniform, so no reference for villages.
 - HUD pieces from the original screenshots: quick slots (keys 4-9, 0; known spells first, then usable potions/scrolls/buffs; the original uses 1-0 but 1-3 pick the leader here), a Year panel whose orb shows how far through the year the clock is (my reading of the slider), minimap. `applyItemEffect` in main.ts is shared by the inventory and the quick slots.
 - Dialogue portraits: ICON1.GOS record 24 frame n is the picture for `FACE n` (0 Elim, 1 Raening, 2 Kusa, 3 chief/intermediary ... 14 Satan, 20 Hellminor); `FACE HERO` shows the party leader and names them. ICON1 also holds the original HUD art (location labels, hotkey bar digits, "OVER GAME", orbs) and MENUICON the title/menu button art - not used yet.
+- HUD: each party row now has the hero's ICON1 portrait (36 px, greyed when down); the party panel sits above the status line.
 

@@ -919,9 +919,16 @@ async function boot(): Promise<void> {
     mbar.className = 'bar mana';
     const mfill = document.createElement('i');
     mbar.appendChild(mfill);
-    row.append(name, bar, mbar);
+    const fr = faceRec?.frames[({ Elim: 0, Raening: 1, Kusa: 2 } as Record<string, number>)[h.name] ?? 0];
+    const face = document.createElement('div');
+    face.className = 'pface';
+    if (fr) {
+      const k = 36 / fr.w; // the 80x78 portrait, scaled down
+      face.style.cssText = `width:36px;height:${Math.round(fr.h * k)}px;background:url(${assetUrl(`sprites/${iconMeta.pages[0].file}`)}) -${fr.x * k}px -${fr.y * k}px / ${iconMeta.pages[0].w * k}px auto`;
+    }
+    row.append(name, bar, mbar, face);
     partyEl.appendChild(row);
-    return { row, fill, mfill };
+    return { row, fill, mfill, face };
   });
   const lvEl = document.createElement('div');
   lvEl.style.textAlign = 'right';
@@ -1249,7 +1256,7 @@ async function boot(): Promise<void> {
         lvEl.textContent = `Lv ${story.level} · xp ${story.xp}/${xpToNext(story.level)}`;
         bars[i].mfill.style.width = `${(100 * h.mana) / Math.max(1, h.maxMana)}%`;
         bars[i].fill.style.width = `${(100 * h.hp) / h.maxHp}%`;
-        bars[i].row.className = 'row' + (h === party.leader ? ' lead' : '');
+        bars[i].row.className = 'row' + (h === party.leader ? ' lead' : '') + (h.dead ? ' down' : '');
         bars[i].row.style.opacity = h.dead ? '0.4' : '1';
       });
       if (party.allDead) {

@@ -13,8 +13,10 @@
     #hud > * { pointer-events: auto; }
     #hud .dev { flex-basis: 100%; flex-wrap: wrap; gap: 6px; }
     #hud select, #hud button { background: #1c1410cc; color: #eed; border: 1px solid #6a5a40; border-radius: 4px; padding: 4px 8px; font: inherit; }
-    #party { position: fixed; right: 8px; bottom: 6px; display: flex; flex-direction: column; gap: 3px; pointer-events: none; }
+    #party { position: fixed; right: 8px; bottom: 24px; display: flex; flex-direction: column; gap: 3px; pointer-events: none; }
     #party .row { display: flex; align-items: center; gap: 6px; justify-content: flex-end; text-shadow: 0 0 3px #000; }
+    #party .pface { border: 1px solid #000; box-shadow: 0 0 0 1px #ffffff44; image-rendering: pixelated; }
+    #party .row.down .pface { filter: grayscale(1) brightness(.5); }
     #party .bar { width: 90px; height: 7px; background: #200; border: 1px solid #000; }
     #party .bar > i { display: block; height: 100%; background: #c33; }
     #party .bar.mana { width: 50px; height: 4px; }
