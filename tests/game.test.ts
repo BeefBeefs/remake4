@@ -205,3 +205,29 @@ test('combat: hurt, death, revive, leader hand-over', async () => {
   assert.ok(!party.allDead);
   assert.equal(lead.hp, lead.maxHp);
 });
+
+test('item database: ids from scripts and shops all resolve to real names', async () => {
+  const { ItemDb } = await import('../src/game/itemdb');
+  const { parseEvt } = await import('../src/script/parser');
+  const db = new ItemDb(json('text/lang.json'));
+  assert.equal(db.name(167), 'Ginseng');
+  assert.equal(db.name(168), 'Wild ginseng');
+  assert.equal(db.name(201), 'Deer Horn');
+  assert.equal(db.name(234), 'Holy Well Water');
+  assert.equal(db.name(1), 'Copper Sword');
+  assert.equal(db.healFraction(161), 0.5);
+  assert.equal(db.healFraction(162), 1);
+  assert.equal(db.healFraction(169), null);
+  const unknown = new Set<number>();
+  for (const f of ['sam.evt', 'under.evt']) {
+    const file = parseEvt(readFileSync(A(`scripts/${f}`), 'utf8'));
+    for (const op of file.ops) {
+      if (op.t === 'cmd' && ['GIVE', 'REMOVE'].includes(op.name) && op.args[0] === 'ITEM') {
+        if (db.kind(Number(op.args[1])) === 'unknown') unknown.add(Number(op.args[1]));
+      }
+      if (op.t === 'cmd' && op.name === 'LOCATE_ITEM' && db.kind(Number(op.args[3])) === 'unknown') unknown.add(Number(op.args[3]));
+      if (op.t === 'list' && db.kind(op.n) === 'unknown' && op.n > 142) unknown.add(op.n);
+    }
+  }
+  assert.deepEqual([...unknown].sort((a, b) => a - b), [], 'every referenced item id is in the table');
+});

@@ -17,6 +17,13 @@
     #party .bar > i { display: block; height: 100%; background: #c33; }
     #party .lead { color: #ffd; font-weight: 700; }
     #over { position: fixed; inset: 0; display: none; align-items: center; justify-content: center; font-size: 28px; color: #d44; background: #000a; pointer-events: none; }
+    #inv { position: fixed; right: 8px; top: 44px; width: min(92vw, 340px); max-height: 60vh; overflow: auto; display: none;
+      background: #101830ee; border: 2px solid #8aa0d8; border-radius: 6px; padding: 8px 10px; }
+    #inv .head { display: flex; justify-content: space-between; align-items: center; font-weight: 700; margin-bottom: 6px; }
+    #inv .item { display: flex; justify-content: space-between; align-items: center; gap: 8px; padding: 4px 0; border-top: 1px solid #ffffff22; }
+    #inv small { opacity: .7; }
+    #inv button { background: #00000055; color: inherit; border: 1px solid #ffffff44; border-radius: 4px; padding: 3px 8px; font: inherit; }
+    #toast { position: fixed; left: 50%; top: 52px; transform: translateX(-50%); background: #000a; padding: 4px 10px; border-radius: 4px; display: none; pointer-events: none; }
     #status { position: fixed; left: 8px; bottom: 6px; color: #cbb; text-shadow: 0 0 3px #000; pointer-events: none; }
     #dialogue { position: fixed; left: 50%; bottom: 4%; transform: translateX(-50%); width: min(92vw, 620px); display: none;
       background: #101830ee; border: 2px solid #8aa0d8; border-radius: 6px; padding: 10px 12px; }
@@ -31,6 +38,8 @@
 <body>
   <div id="stage"><canvas id="game" width="640" height="480"></canvas></div>
   <div id="hud"></div>
+  <div id="inv"></div>
+  <div id="toast"></div>
   <div id="party"></div>
   <div id="over">Your party has fallen…</div>
   <div id="status"></div>

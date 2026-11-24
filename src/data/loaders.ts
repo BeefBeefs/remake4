@@ -1,4 +1,4 @@
-import { MapData, MapIndexEntry, SpriteSheetMeta, TilesetTable } from './types';
+import { MapData, MapIndexEntry, SpriteSheetMeta, TilesetTable, LangData } from './types';
 
 const ASSETS = 'assets/';
 
@@ -61,3 +61,4 @@ export async function loadText(path: string): Promise<string> {
   if (!r.ok) throw new Error(`failed to load ${path}: ${r.status}`);
   return r.text();
 }
+export const loadLang = () => getJson<LangData>('text/lang.json');

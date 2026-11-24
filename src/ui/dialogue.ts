@@ -119,9 +119,14 @@ export class DialogueUI implements ScriptHost {
       this.render(box);
     });
   }
+  /** item names for shop listings; set once the string table is loaded */
+  itemLabel: (id: number) => string = (id) => `item ${id}`;
+
   async shop(kind: ShopKind, prompt: string, list: number[]): Promise<void> {
-    // shops need the inventory UI, which comes later; show what the original would list
-    this.lines.push({ text: `[${kind.replace('_', ' ').toLowerCase()}] ${prompt}  (${list.length} entries: ${list.slice(0, 8).join(', ')}${list.length > 8 ? '…' : ''})`, color: [150, 150, 150] });
+    // buying / selling needs prices, which have not been found yet: list what the shop offers
+    this.lines.push({ text: `[${kind.replace(/_/g, ' ').toLowerCase()}] ${prompt}`, color: [150, 150, 150] });
+    for (const id of list.slice(0, 12)) this.lines.push({ text: `  · ${this.itemLabel(id)}`, color: [200, 200, 160] });
+    if (list.length > 12) this.lines.push({ text: `  … and ${list.length - 12} more`, color: [150, 150, 150] });
     this.render();
     await this.waitKey();
   }

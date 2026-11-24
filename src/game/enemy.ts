@@ -30,6 +30,7 @@ export class Enemy {
     public y: number,
     readonly kind = 0,
     readonly power = 20,
+    readonly drop = 0,
   ) {
     this.hp = 2 + Math.floor(power / 12);
     this.damageOut = 3 + Math.floor(power / 8);

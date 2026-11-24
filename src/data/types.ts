@@ -63,3 +63,13 @@ export interface SpriteSheetMeta {
 
 /** tiles in the game's sheets are 20 per row, 216 rows */
 export const TILE_LIMIT = 4320;
+
+/** public/assets/text/lang.json, written by tools/build_assets.py --only lang */
+export interface LangData {
+  ui: string[];
+  monsters: string[];
+  maps: string[];
+  magic: Record<string, { name: string; desc: string }>;
+  items: Record<string, { name: string; desc: string }>;
+  weapons: Record<string, { name: string; stats: string; category: string }>;
+}

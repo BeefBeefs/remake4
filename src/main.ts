@@ -3,9 +3,12 @@ import { collectArrivals } from './game/arrivals';
 import { Enemy } from './game/enemy';
 import { ENEMY_SHEETS, sheetForKind } from './game/enemies';
 import { Hero } from './game/hero';
+import { findPickup, GroundItem } from './game/ground';
+import { ItemDb } from './game/itemdb';
+import { InventoryUI } from './ui/inventory';
 import { Party } from './game/party';
 import { TILE_H, TILE_W, World } from './game/world';
-import { loadMap, loadMapIndex, loadSpriteMeta, loadText, loadTilesets } from './data/loaders';
+import { loadLang, loadMap, loadMapIndex, loadSpriteMeta, loadText, loadTilesets } from './data/loaders';
 import { MapIndexEntry, SpriteSheetMeta, TilesetTable } from './data/types';
 import { GameRenderer, SpriteActor, VIEW_H, VIEW_W } from './render/renderer';
 import { Arg, EvtBlock, EvtFile, parseEvt } from './script/parser';
@@ -29,11 +32,13 @@ async function boot(): Promise<void> {
   const dlgEl = document.getElementById('dialogue')!;
   status.textContent = 'loading…';
 
-  const [index, tilesets, files] = await Promise.all([
+  const [index, tilesets, files, lang] = await Promise.all([
     loadMapIndex(),
     loadTilesets() as Promise<TilesetTable>,
     Promise.all(['sam.evt', 'under.evt'].map(async (f) => parseEvt(await loadText(`scripts/${f}`)))),
+    loadLang(),
   ]);
+  const db = new ItemDb(lang);
   const scriptFiles: { tag: string; file: EvtFile }[] = [
     { tag: '1', file: files[0] },
     { tag: '2', file: files[1] },
@@ -53,12 +58,29 @@ async function boot(): Promise<void> {
     heroes.push(new Hero(d.name, d.sheet, 0, 0));
   }
   const party = new Party(heroes);
+  const itemMeta = await loadSpriteMeta('ITEM');
+  const ground: GroundItem[] = [];
+  const toastEl = document.getElementById('toast')!;
+  let toastT = 0;
+  function toast(msg: string): void {
+    toastEl.textContent = msg;
+    toastEl.style.display = 'block';
+    toastT = 2.2;
+  }
+  async function dropItem(id: number, x: number, y: number): Promise<void> {
+    const actor = await renderer.createSprite(itemMeta);
+    ground.push({ id, x, y, actor, record: db.groundRecord(id), t: Math.random() });
+  }
+  function clearGround(): void {
+    for (const g of ground) renderer.removeSprite(g.actor);
+    ground.length = 0;
+  }
   const enemies: { e: Enemy; actor: SpriteActor }[] = [];
 
-  async function spawnEnemy(sheet: string, x: number, y: number, kind = 0, power = 20): Promise<void> {
+  async function spawnEnemy(sheet: string, x: number, y: number, kind = 0, power = 20, drop = 0): Promise<void> {
     if (!metas.has(sheet)) metas.set(sheet, await loadSpriteMeta(sheet));
     const actor = await renderer.createSprite(metas.get(sheet)!);
-    enemies.push({ e: new Enemy(sheet, x, y, kind, power), actor });
+    enemies.push({ e: new Enemy(sheet, x, y, kind, power, drop), actor });
   }
   function clearEnemies(): void {
     for (const en of enemies) renderer.removeSprite(en.actor);
@@ -81,6 +103,7 @@ async function boot(): Promise<void> {
     const dest = cellX !== undefined && cellY !== undefined ? { cx: cellX, cy: cellY } : arrivals.get(mapNo);
     const spawn = dest ? world.nearestFree(dest.cx, dest.cy) : world.findSpawn();
     clearEnemies();
+    clearGround();
     party.placeAt(spawn.x, spawn.y);
     audio.setMusic(2 + (entry.order % 14));
     history.replaceState(null, '', `#${entry.id}`);
@@ -99,7 +122,10 @@ async function boot(): Promise<void> {
       if (name === 'LOCATE_ENEMY' && args.length >= 5 && Number(args[0]) === index.findIndex((m) => m.id === mapEntry.id) + 1) {
         // map x y kind power drop; kind -> sheet is a guess (see game/enemies.ts)
         const p = world!.nearestFree(Number(args[1]), Number(args[2]));
-        await spawnEnemy(sheetForKind(Number(args[3])), p.x, p.y, Number(args[3]), Number(args[4]));
+        await spawnEnemy(sheetForKind(Number(args[3])), p.x, p.y, Number(args[3]), Number(args[4]), Number(args[5] ?? 0));
+      }
+      if (name === 'LOCATE_ITEM' && args.length >= 4 && Number(args[0]) === index.findIndex((m) => m.id === mapEntry.id) + 1) {
+        await dropItem(Number(args[3]), Number(args[1]) * TILE_W + TILE_W / 2, Number(args[2]) * TILE_H + TILE_H - 2);
       }
       lastEffect = `${name} ${args.join(' ')}`;
       console.info('[script effect]', lastEffect);
@@ -107,6 +133,10 @@ async function boot(): Promise<void> {
     (s) => void audio.play(s),
     (m) => console.warn('[script]', m),
   );
+  dlg.itemLabel = (id) => {
+    const st = db.desc(id);
+    return `${db.name(id)}${st ? ' (' + st + ')' : ''}`;
+  };
   let running = false;
   async function runBlock(file: EvtFile, block: EvtBlock): Promise<void> {
     if (running) return;
@@ -178,6 +208,23 @@ async function boot(): Promise<void> {
   });
   hud.append(mapSelect, npcSelect, spawnSelect, ...leaderBtns, markerBtn, musicBtn);
 
+  const inv = new InventoryUI(
+    document.getElementById('inv')!,
+    db,
+    story,
+    (fraction) => {
+      // heal the most wounded living hero
+      const h = heroes.filter((x) => !x.dead).sort((a, b) => a.hp / a.maxHp - b.hp / b.maxHp)[0];
+      if (!h || h.hp >= h.maxHp) return false;
+      h.hp = Math.min(h.maxHp, h.hp + Math.round(h.maxHp * fraction));
+      return true;
+    },
+    toast,
+  );
+  const invBtn = document.createElement('button');
+  invBtn.textContent = 'Items (I)';
+  invBtn.onclick = () => inv.toggle();
+  hud.append(invBtn);
   const partyEl = document.getElementById('party')!;
   const overEl = document.getElementById('over')!;
   const bars = heroes.map((h) => {
@@ -202,6 +249,7 @@ async function boot(): Promise<void> {
     audio.unlock();
     keys.add(e.key.toLowerCase());
     if (e.key >= '1' && e.key <= '3' && !heroes[Number(e.key) - 1].dead) party.setLeader(Number(e.key) - 1);
+    if (e.key.toLowerCase() === 'i') inv.toggle();
     if (e.key === ' ') {
       party.leader.attack();
       e.preventDefault();
@@ -267,6 +315,9 @@ async function boot(): Promise<void> {
       }
       for (let i = enemies.length - 1; i >= 0; i--)
         if (enemies[i].e.dead) {
+          const dead = enemies[i].e;
+          const id = dead.drop > 0 ? dead.drop : Math.random() < 0.35 ? 200 : 0; // 200 = money; drop rates are placeholders
+          if (id) void dropItem(id, dead.x, dead.y);
           renderer.removeSprite(enemies[i].actor);
           enemies.splice(i, 1);
         }
@@ -281,6 +332,27 @@ async function boot(): Promise<void> {
         en.actor.set(f.record, f.frame, en.e.x, en.e.y, f.flip);
         en.actor.mesh.visible = en.actor.mesh.visible && !(en.e.hurt > 0 && Math.floor(en.e.hurt * 20) % 2 === 0);
       }
+      for (const g of ground) {
+        g.t += dt;
+        const n = itemMeta.records[g.record]?.frames.length || 1;
+        g.actor.set(g.record, Math.floor(g.t * 10) % n, g.x, g.y, false);
+      }
+      const pk = lead.dead ? -1 : findPickup(ground, lead.x, lead.y);
+      if (pk >= 0) {
+        const g = ground[pk];
+        if (db.isMoney(g.id)) {
+          story.money += 25; // placeholder amount
+          toast('+25 money');
+        } else {
+          story.giveItem(g.id);
+          toast(`Picked up ${db.name(g.id)}`);
+          if (inv.open) inv.render();
+        }
+        void audio.play('item.wav', 0.6);
+        renderer.removeSprite(g.actor);
+        ground.splice(pk, 1);
+      }
+      if (toastT > 0 && (toastT -= dt) <= 0) toastEl.style.display = 'none';
       heroes.forEach((h, i) => {
         bars[i].fill.style.width = `${(100 * h.hp) / h.maxHp}%`;
         bars[i].row.className = 'row' + (h === party.leader ? ' lead' : '');
@@ -311,7 +383,7 @@ async function boot(): Promise<void> {
   requestAnimationFrame(frame);
 
   // handy for poking around in the browser console
-  (window as unknown as Record<string, unknown>).akuma = { story, party, renderer, enterMap, index };
+  (window as unknown as Record<string, unknown>).akuma = { story, party, renderer, enterMap, index, db, dropItem, spawnEnemy };
 }
 
 boot().catch((e) => {

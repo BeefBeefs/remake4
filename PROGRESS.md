@@ -48,3 +48,7 @@ Open: kind -> sheet mapping, enemy stats/AI, hero HP and damage, trailer tables,
 - Combat v0: hero HP, hurt / death animations (action 11 / 21), enemy swings hurt the nearest hero, party HUD, leader
   hand-over when one falls, "party has fallen" then respawn. Damage / HP numbers are placeholders (scaled from the
   script's power value) - the real stat tables have not been found.
+- Items: one id space (equipment 1-142, consumables 151-196, quest items 200-254) resolved through LANG.GOS; ground items
+  (LOCATE_ITEM, enemy drops, coins), walk-over pickup, inventory panel (key I) with "Use" for healing items, shop lists show
+  real names. Money amounts, drop rates and which ITEM.GOS record is drawn for which item are guesses. Prices are not found yet,
+  so shops cannot sell.
