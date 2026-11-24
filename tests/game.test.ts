@@ -475,3 +475,9 @@ test('instant events: statue and table pools exclude map-bound puzzle blocks', a
   assert.equal(instantKindOfSprite(43), 'table');
   assert.equal(instantKindOfSprite(5), null);
 });
+
+test('level growth makes the Mantis trainer requirement (level 16, strength 60) reachable', async () => {
+  const { LEVEL_GAIN } = await import('../src/game/stats');
+  assert.ok(10 + 15 * LEVEL_GAIN.STRENGTH >= 60, 'strength at level 16');
+  assert.ok(10 + 17 * LEVEL_GAIN.DEXTERITY > 60, 'dexterity at level 18');
+});

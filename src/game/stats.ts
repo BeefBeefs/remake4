@@ -124,8 +124,12 @@ export function xpToNext(level: number): number {
   return 20 + 15 * (level - 1) * level;
 }
 
-/** stat points gained per level-up (placeholder; the trainer script wants Dexterity > 60 at level 16) */
-export const LEVEL_GAIN: Record<StatName, number> = { HEALTH: 2, STRENGTH: 2, MAGIC: 1, DEXTERITY: 3, BRAIN: 1, SKILL: 1 };
+/**
+ * stat points gained per level-up (placeholder). The Mantis Village trainer asks for level 16 and Strength 60 (the printed
+ * strategy guide says Dexterity 60): starting from 10, level 16 gives Strength 70 and Dexterity 55, so both are in reach by
+ * about level 18 even without gear.
+ */
+export const LEVEL_GAIN: Record<StatName, number> = { HEALTH: 2, STRENGTH: 4, MAGIC: 1, DEXTERITY: 3, BRAIN: 1, SKILL: 1 };
 
 export function enemyXp(power: number): number {
   return 4 + Math.floor(power / 2);

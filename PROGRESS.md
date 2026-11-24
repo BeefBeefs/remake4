@@ -173,3 +173,8 @@ Open: kind -> sheet mapping, enemy stats/AI, hero HP and damage, trailer tables,
 - They are now a shared pool (`src/game/instant.ts`): touching a dungeon statue sprite (SPRITE kind 26/28) or table sprite (kind 43) runs one random event of its kind, then the sprite is used up (saved in `removed`). Works by Enter near it or by tapping it. Blocks tied to one map (REMOVE_OBJECT / WARP / CHANGE_GOS / UNSEAL puzzle statues, blocks 151, 170-172, 180, 181) stay out of the pool.
 - Guess: the original probably assigned a fixed event per sprite; the data we found does not say which. Browser check on d6: 16 statues, touching 4 froze demons twice, +1 dexterity, +1 strength.
 - Kinds 45/46/47/49/53/57 on the dungeon maps are editor-marker rectangles (grey/purple), 23 = stairs, 61 = gate; not handled yet. Monster `extra` 151-181/201 values may be warp/event drops (180/181 = WARP blocks "warp space"); today drops >= 150 are treated as items.
+
+## Session 1s – manual cross-check
+- Read the disc manual (`docs/QUESTS.md`): confirms village names, the three requirements for the underworld, the quest list, and that heroes can revive each other (not implemented yet).
+- Mantis Trainer needs level >= 16 and Strength >= 60; placeholder growth gave Strength 40 at level 16, so STRENGTH per level is now 4 (70 at 16). Test added.
+- Looked at the d6 white patches: six bone-floor tiles in the source art, left alone.
