@@ -31,3 +31,13 @@ Dev
   (they look like cliff / void edges).
 - Marker detection widened (two-tone marker tiles): ~470 per tileset.
 - Next: y-sorting characters behind objects, where NPCs/enemies stand (trailer?), spawn points from WARP targets.
+
+## Session 1c
+- All 42 enemy/monster sheets converted (`public/assets/sprites`, ~36 MB of sprites in total).
+- Enemies: placeholder AI (notice, chase, swing), hero attack damages enemies in range, 3 hits kill. Spawn from the
+  "Spawn enemy..." menu (gallery of all sheets) or from LOCATE_ENEMY when a script runs.
+- Entry points: maps open at the most common script WARP destination, snapped to open ground. 2 of 22 warp targets
+  sit on a marker tile, so marker collision is not exact; characters standing in a blocked cell can walk out.
+- Side-facing default is now "stored dir 2 faces left" (true for every sheet).
+- Overhead flag makes y-sorting against buildings unnecessary (roofs above, walls below).
+Open: kind -> sheet mapping, enemy stats/AI, hero HP and damage, trailer tables, NEW_OBJECT / LOCATE_ITEM, items.

@@ -31,6 +31,20 @@ tiles need something underneath: **?** how the original fills the base). Solid g
 `83507b` tiles (also two-tone ones) are editor markers: collision / void. **?** exact semantics of each.
 Assets are repacked to 32 tiles per row so the sheet stays under 4096 px.
 
+## Scripts: placement commands
+`WARP map cellX cellY` (map = 1-based index in the map order above; all 22 targets verified in bounds).
+`LOCATE_ENEMY map cellX cellY kind power drop` (468 uses; kind 2-47, power 8-210, drop 0 = none, otherwise an
+item id **?**). The cluster of 5-7 lines with nearby cells is one group spawn. `NEW_OBJECT` / `LOCATE_ITEM` are not
+decoded. Kind -> sprite sheet: the EXE lists the enemy sheets in order (A-P, 13 recoloured variants, 13 named
+monsters = 42), but kinds go up to 47, so the mapping used (`src/game/enemies.ts`) is a **guess**.
+
+## Enemy sheets
+`ENEMY-A..P`, variants `A1 B1 B2 E1 F1 G1 G2 J1 J2 M1 N1 N2 N3` (recolours, same frame layout), monsters
+`BIRD CYCLOP FIRE FISH FLY GEAR GEARBIG LAMB LION ZAMBIE STONE DRAGON WATER`. 5 stored directions per action;
+actions 0 idle (1 frame), 1 walk (10), 2 attack (8), 3-5 unlabelled (9, 8, 10 frames; **?** hurt/special/death).
+`*-D.GOS` files hold the same layout (**?** death or dark variant), the `*0` files are the RGB555 twins.
+In all converted sheets (heroes too) stored direction 2 faces screen-left.
+
 ## SF5 / SF6 â€“ pictures
 u16 w, u16 h (800x600), RGB555 (SF5) or RGB565 (SF6).
 
@@ -42,5 +56,6 @@ world effects (WARP, LOCATE_ENEMY, NEW_OBJECT...) go to the host. One label (`ë§
 original data; jumping to a missing label warns and ends the script.
 
 ## Open questions
-MAP trailer; exact meaning of the 10000 object flag; NPC/enemy placement; real collision rules; unarmed stance and
+MAP trailer (10 blocks of 200 bytes, ~125 used entries each, small per-type values: looks like per-monster-type
+attribute tables, not positions); exact meaning of the 10000 object flag; NPC/enemy placement; real collision rules; unarmed stance and
 actions 3-5, 11-13, 18-20; `GO_BASIC_EVENT`; which music plays where; walking speed and animation timing.

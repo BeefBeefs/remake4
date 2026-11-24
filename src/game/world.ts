@@ -64,10 +64,8 @@ export class World {
     return this.blockedCell(Math.floor(px / TILE_W), Math.floor(py / TILE_H));
   }
 
-  /** nearest open cell to the map centre, as a pixel position at the cell's bottom middle */
-  findSpawn(): { x: number; y: number } {
-    const cx0 = this.map.w >> 1;
-    const cy0 = this.map.h >> 1;
+  /** nearest open cell to (cx0, cy0) as a pixel position at the cell's bottom middle */
+  nearestFree(cx0: number, cy0: number): { x: number; y: number } {
     const maxR = Math.max(this.map.w, this.map.h);
     for (let r = 0; r < maxR; r++) {
       for (let dy = -r; dy <= r; dy++) {
@@ -80,5 +78,10 @@ export class World {
       }
     }
     return { x: this.pixelW / 2, y: this.pixelH / 2 };
+  }
+
+  /** nearest open cell to the map centre */
+  findSpawn(): { x: number; y: number } {
+    return this.nearestFree(this.map.w >> 1, this.map.h >> 1);
   }
 }

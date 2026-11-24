@@ -21,8 +21,11 @@ export const HERO_ANIM = {
   death: 21,
 } as const;
 
-/** true if the stored side views face screen-right (east). Unverified guess; flip with ?flip=1 */
-export const STORED_FACES_EAST = true;
+/**
+ * true if the stored side views face screen-right (east). In every converted sheet (heroes and enemies) the
+ * side view in stored direction 2 faces screen-left, so the default is west; `?flip=1` swaps it.
+ */
+export const STORED_FACES_EAST = false;
 
 /** 8 directions, clockwise from screen-up: N NE E SE S SW W NW */
 export function directionFromVector(dx: number, dy: number): number {

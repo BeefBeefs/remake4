@@ -1,4 +1,7 @@
 import { AudioPlayer } from './game/audio';
+import { collectArrivals } from './game/arrivals';
+import { Enemy } from './game/enemy';
+import { ENEMY_SHEETS, sheetForKind } from './game/enemies';
 import { Hero } from './game/hero';
 import { Party } from './game/party';
 import { TILE_H, TILE_W, World } from './game/world';
@@ -36,6 +39,7 @@ async function boot(): Promise<void> {
     { tag: '2', file: files[1] },
   ];
 
+  const arrivals = collectArrivals(files);
   const renderer = new GameRenderer(canvas);
   const audio = new AudioPlayer();
   const story = new StoryState();
@@ -49,6 +53,17 @@ async function boot(): Promise<void> {
     heroes.push(new Hero(d.name, d.sheet, 0, 0));
   }
   const party = new Party(heroes);
+  const enemies: { e: Enemy; actor: SpriteActor }[] = [];
+
+  async function spawnEnemy(sheet: string, x: number, y: number, kind = 0): Promise<void> {
+    if (!metas.has(sheet)) metas.set(sheet, await loadSpriteMeta(sheet));
+    const actor = await renderer.createSprite(metas.get(sheet)!);
+    enemies.push({ e: new Enemy(sheet, x, y, kind), actor });
+  }
+  function clearEnemies(): void {
+    for (const en of enemies) renderer.removeSprite(en.actor);
+    enemies.length = 0;
+  }
 
   let world: World | null = null;
   let mapEntry: MapIndexEntry = index[0];
@@ -61,10 +76,11 @@ async function boot(): Promise<void> {
     world = new World(map, meta);
     await renderer.setWorld(world, meta, map.tileset);
     mapEntry = entry;
-    const spawn =
-      cellX !== undefined && cellY !== undefined
-        ? { x: cellX * TILE_W + TILE_W / 2, y: cellY * TILE_H + TILE_H - 2 }
-        : world.findSpawn();
+    // explicit cell (script WARP) > the cell the scripts usually send you to > map centre
+    const mapNo = index.findIndex((m) => m.id === entry.id) + 1;
+    const dest = cellX !== undefined && cellY !== undefined ? { cx: cellX, cy: cellY } : arrivals.get(mapNo);
+    const spawn = dest ? world.nearestFree(dest.cx, dest.cy) : world.findSpawn();
+    clearEnemies();
     party.placeAt(spawn.x, spawn.y);
     audio.setMusic(2 + (entry.order % 14));
     history.replaceState(null, '', `#${entry.id}`);
@@ -79,6 +95,11 @@ async function boot(): Promise<void> {
       if (name === 'WARP') {
         const target = index[Number(args[0]) - 1];
         if (target) await enterMap(target.id, Number(args[1]), Number(args[2]));
+      }
+      if (name === 'LOCATE_ENEMY' && args.length >= 5 && Number(args[0]) === index.findIndex((m) => m.id === mapEntry.id) + 1) {
+        // map x y kind power drop; kind -> sheet is a guess (see game/enemies.ts)
+        const p = world!.nearestFree(Number(args[1]), Number(args[2]));
+        await spawnEnemy(sheetForKind(Number(args[3])), p.x, p.y, Number(args[3]));
       }
       lastEffect = `${name} ${args.join(' ')}`;
       console.info('[script effect]', lastEffect);
@@ -121,6 +142,16 @@ async function boot(): Promise<void> {
     void runBlock(scriptFiles[fi].file, scriptFiles[fi].file.blocks[bi]);
   };
 
+  const spawnSelect = document.createElement('select');
+  spawnSelect.add(new Option('Spawn enemy…', ''));
+  for (const n of ENEMY_SHEETS) spawnSelect.add(new Option(n, n));
+  spawnSelect.onchange = () => {
+    if (!spawnSelect.value) return;
+    const l = party.leader;
+    void spawnEnemy(spawnSelect.value, l.x + 90, l.y);
+    spawnSelect.value = '';
+  };
+
   const markerBtn = document.createElement('button');
   markerBtn.textContent = 'collision markers: off';
   let showMarkers = false;
@@ -143,7 +174,7 @@ async function boot(): Promise<void> {
     b.onclick = () => party.setLeader(i);
     return b;
   });
-  hud.append(mapSelect, npcSelect, ...leaderBtns, markerBtn, musicBtn);
+  hud.append(mapSelect, npcSelect, spawnSelect, ...leaderBtns, markerBtn, musicBtn);
 
   // ---------------------------------------------------------------- input
   const keys = new Set<string>();
@@ -192,11 +223,30 @@ async function boot(): Promise<void> {
       if (!dlg.open) readKeys();
       else party.leader.input.x = party.leader.input.y = 0;
       party.update(dt, world, metas);
+      const lead = party.leader;
+      for (const en of enemies) {
+        const e = en.e;
+        e.update(dt, world, metas.get(e.sheet)!, lead);
+        if (lead.swung && !e.dead && Math.hypot(e.x - lead.x, (e.y - lead.y) / 0.625) < 64) e.damage(1);
+        if (e.swung) {
+          e.swung = false; // hero damage is not modelled yet
+        }
+      }
+      for (let i = enemies.length - 1; i >= 0; i--)
+        if (enemies[i].e.dead) {
+          renderer.removeSprite(enemies[i].actor);
+          enemies.splice(i, 1);
+        }
       // draw
       for (let i = 0; i < heroes.length; i++) {
         const h = heroes[i];
         const f = h.drawFrame(FLIP_SIDES);
         actors[i].set(f.record, f.frame, h.x, h.y, f.flip);
+      }
+      for (const en of enemies) {
+        const f = en.e.drawFrame(FLIP_SIDES);
+        en.actor.set(f.record, f.frame, en.e.x, en.e.y, f.flip);
+        en.actor.mesh.visible = en.actor.mesh.visible && !(en.e.hurt > 0 && Math.floor(en.e.hurt * 20) % 2 === 0);
       }
       renderer.render(party.leader.x, party.leader.y - 20);
       statusT += dt;

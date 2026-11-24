@@ -21,6 +21,8 @@ export class Hero {
   state: HeroState = 'idle';
   private t = 0;
   private frame = 0;
+  /** true for one update when an attack reaches its hit frame */
+  swung = false;
   target: { x: number; y: number } | null = null;
   /** direct input vector (keyboard), unit-ish; overrides target */
   input = { x: 0, y: 0 };
@@ -43,6 +45,12 @@ export class Hero {
   }
 
   private tryMove(world: World, dx: number, dy: number): boolean {
+    // a character that starts inside a blocked cell (collision data is inferred) may always walk out of it
+    if (world.blockedAt(this.x, this.y)) {
+      this.x += dx;
+      this.y += dy;
+      return dx !== 0 || dy !== 0;
+    }
     let moved = false;
     const nx = this.x + dx;
     if (!world.blockedAt(nx - HALF_WIDTH, this.y) && !world.blockedAt(nx + HALF_WIDTH, this.y)) {
@@ -58,6 +66,7 @@ export class Hero {
   }
 
   update(dt: number, world: World, meta: SpriteSheetMeta): void {
+    this.swung = false;
     let vx = 0;
     let vy = 0;
     if (this.input.x || this.input.y) {
@@ -94,6 +103,7 @@ export class Hero {
       this.frame++;
     }
     const n = this.frameCountNow(meta);
+    if (this.state === 'attack' && this.frame === Math.floor(n / 2) && this.t < dt + 1e-6) this.swung = true;
     if (this.state === 'attack' && this.frame >= n) {
       this.state = 'idle';
       this.frame = 0;

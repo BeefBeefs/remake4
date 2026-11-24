@@ -64,10 +64,9 @@ export class SpriteActor {
     this.uv.needsUpdate = true;
   }
 
+  /** textures and materials are shared per sheet (owned by GameRenderer); only the quad is released */
   dispose(): void {
     this.mesh.geometry.dispose();
-    this.materials.forEach((m) => m.dispose());
-    this.pages.forEach((t) => t.dispose());
   }
 }
 
@@ -136,12 +135,26 @@ export class GameRenderer {
     this.stats.drawnTiles = tiles;
   }
 
+  private sheets = new Map<string, Promise<{ pages: THREE.Texture[]; mats: THREE.MeshBasicMaterial[] }>>();
+
   async createSprite(meta: SpriteSheetMeta): Promise<SpriteActor> {
-    const pages = await Promise.all(meta.pages.map((p) => pixelTexture(assetUrl(`sprites/${p.file}`))));
-    const mats = pages.map((t) => new THREE.MeshBasicMaterial({ map: t, transparent: true, alphaTest: 0.5 }));
+    let p = this.sheets.get(meta.name);
+    if (!p) {
+      p = Promise.all(meta.pages.map((pg) => pixelTexture(assetUrl(`sprites/${pg.file}`)))).then((pages) => ({
+        pages,
+        mats: pages.map((t) => new THREE.MeshBasicMaterial({ map: t, transparent: true, alphaTest: 0.5 })),
+      }));
+      this.sheets.set(meta.name, p);
+    }
+    const { pages, mats } = await p;
     const a = new SpriteActor(meta, pages, mats);
     this.scene.add(a.mesh);
     return a;
+  }
+
+  removeSprite(a: SpriteActor): void {
+    this.scene.remove(a.mesh);
+    a.dispose();
   }
 
   /** camera centre in world pixels (y down), clamped to the map */

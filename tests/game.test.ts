@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { directionFromVector, recordIndex, storedDirection } from '../src/game/anim';
 import { parseMap } from '../src/data/loaders';
-import { World } from '../src/game/world';
+import { TILE_H, TILE_W, World } from '../src/game/world';
 import { buildChunk, CHUNK } from '../src/render/tilemesh';
 import { Hero } from '../src/game/hero';
 import { SpriteSheetMeta, TilesetTable } from '../src/data/types';
@@ -23,7 +23,8 @@ test('directions: 8-way from vectors, mirrored storage', () => {
   assert.deepEqual(storedDirection(6, false), { rec: 2, flip: false });
   assert.deepEqual(storedDirection(0), { rec: 0, flip: false });
   assert.deepEqual(storedDirection(4), { rec: 4, flip: false });
-  assert.deepEqual(recordIndex(7, 5), { index: 7 * 5 + 3, flip: true });
+  assert.deepEqual(recordIndex(7, 5), { index: 7 * 5 + 3, flip: false });
+  assert.deepEqual(recordIndex(7, 3), { index: 7 * 5 + 3, flip: true });
 });
 
 test('converted maps load and spawn is walkable', () => {
@@ -100,4 +101,69 @@ test('object layer: flagged cells are tiles drawn overhead, nothing is left unac
     flagged += 1;
   }
   assert.equal(flagged, 42);
+});
+
+test('every script WARP destination is inside its map and has open ground within 3 cells', () => {
+  const ts = json<TilesetTable>('tiles/tilesets.json');
+  const index = json<{ id: string }[]>('maps/index.json');
+  const bad: string[] = [];
+  let n = 0;
+  for (const f of ['sam.evt', 'under.evt']) {
+    const text = readFileSync(A(`scripts/${f}`), 'utf8');
+    for (const m of text.matchAll(/^@ WARP (\d+) (\d+) (\d+)/gm)) {
+      const [num, x, y] = [Number(m[1]), Number(m[2]), Number(m[3])];
+      const id = index[num - 1].id;
+      const map = parseMap(json(`maps/${id}.json`));
+      const w = new World(map, ts[map.tileset]);
+      n++;
+      if (!w.inBounds(x, y)) bad.push(`${id} ${x},${y} out of bounds`);
+      else {
+        // 2 of 22 destinations sit on a marker tile, so marker collision is not exact; arrivals snap to open ground
+        const p = w.nearestFree(x, y);
+        if (Math.hypot(p.x / TILE_W - x - 0.5, p.y / TILE_H - y - 1) > 3) bad.push(`${id} ${x},${y} no open ground nearby`);
+      }
+    }
+  }
+  assert.ok(n > 20);
+  assert.deepEqual(bad, []);
+});
+
+test('arrivals: most frequent WARP destination per map', async () => {
+  const { collectArrivals } = await import('../src/game/arrivals');
+  const { parseEvt } = await import('../src/script/parser');
+  const f = parseEvt(readFileSync(A('scripts/sam.evt'), 'utf8'));
+  const a = collectArrivals([f]);
+  assert.ok(a.size >= 8);
+  const t1 = a.get(15); // map 15 = T1
+  assert.deepEqual(t1, { cx: 42, cy: 39 });
+});
+
+test('enemies: every sheet loads, walks toward the hero, swings and dies', async () => {
+  const { Enemy } = await import('../src/game/enemy');
+  const { ENEMY_SHEETS, sheetForKind } = await import('../src/game/enemies');
+  const ts = json<TilesetTable>('tiles/tilesets.json');
+  const m = parseMap(json('maps/t1.json'));
+  const w = new World(m, ts[m.tileset]);
+  const open = w.findSpawn();
+  for (const name of ENEMY_SHEETS) {
+    const meta = json<SpriteSheetMeta>(`sprites/${name.toLowerCase()}.json`);
+    assert.ok(meta.records.length >= 25, name);
+    // attack action must have frames in all five stored directions
+    for (let d = 0; d < 5; d++) assert.ok((meta.records[2 * 5 + d]?.frames.length ?? 0) > 0, `${name} attack dir ${d}`);
+  }
+  assert.equal(sheetForKind(0), 'ENEMY-A');
+  assert.equal(sheetForKind(42), 'ENEMY-A'); // wraps: kinds 42+ have no sheet yet
+  const meta = json<SpriteSheetMeta>('sprites/enemy-a.json');
+  const e = new Enemy('ENEMY-A', open.x + 100, open.y);
+  const target = { x: open.x, y: open.y };
+  let swung = false;
+  for (let i = 0; i < 600; i++) {
+    e.update(1 / 60, w, meta, target);
+    swung ||= e.swung;
+    e.swung = false;
+  }
+  assert.ok(Math.hypot(e.x - target.x, e.y - target.y) < 60, 'closed in on the hero');
+  assert.ok(swung, 'attacked');
+  e.damage(3);
+  assert.ok(e.dead);
 });
