@@ -379,7 +379,16 @@ async function boot(): Promise<void> {
     };
     return b;
   });
-  hud.append(mapSelect, npcSelect, spawnSelect, ...leaderBtns, markerBtn, musicBtn);
+  // the debugging tools live behind a gear button so the phone HUD stays small
+  const devBox = document.createElement('div');
+  devBox.className = 'dev';
+  devBox.style.display = devMode ? 'flex' : 'none';
+  devBox.append(mapSelect, npcSelect, spawnSelect, markerBtn);
+  const gearBtn = document.createElement('button');
+  gearBtn.textContent = '\u2699';
+  gearBtn.title = 'debug tools';
+  gearBtn.onclick = () => (devBox.style.display = devBox.style.display === 'none' ? 'flex' : 'none');
+  hud.append(...leaderBtns, musicBtn);
 
   // ---------------------------------------------------------------- magic and projectiles
   const SPELL_IMPL = new Set([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]);
@@ -556,7 +565,8 @@ async function boot(): Promise<void> {
   const worldBtn = document.createElement('button');
   worldBtn.textContent = 'World map (M)';
   worldBtn.onclick = () => worldUI.toggle(mapEntry.id);
-  hud.append(worldBtn, movieSelect);
+  hud.append(worldBtn);
+  devBox.append(movieSelect);
   const invBtn = document.createElement('button');
   invBtn.textContent = 'Items (I)';
   invBtn.onclick = () => inv.toggle();
@@ -565,7 +575,7 @@ async function boot(): Promise<void> {
   const questBtn = document.createElement('button');
   questBtn.textContent = 'Quests (J)';
   questBtn.onclick = () => quests.toggle();
-  hud.append(questBtn);
+  hud.append(questBtn, gearBtn, devBox);
   // announce quests as the scripts add / finish them
   let knownOrders = new Map(story.orders);
   function watchQuests(): void {

@@ -125,6 +125,8 @@ Open: kind -> sheet mapping, enemy stats/AI, hero HP and damage, trailer tables,
 ## Session 1n
 - Quest log (`src/ui/quests.ts`, J or the Quests button): active ORDERs with their hint lines; toasts announce new / finished quests.
 
+- HUD: map / NPC / spawn / marker / movie pickers moved behind the gear button (shown by default for #map debug links).
+
 ## Next ideas
 - Per-hero growth / real stat formulas; monster bytes b2 b4-b7; hero base stats / level / experience, magic (12 spells with names known), real enemy stats.
 - NEW_OBJECT, BASIC event triggers (GO_BASIC_EVENT), save / load.
