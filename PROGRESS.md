@@ -108,8 +108,9 @@ Open: kind -> sheet mapping, enemy stats/AI, hero HP and damage, trailer tables,
 - Script effects now live: FULL_LIFE / FULL_MANA (inns, the Teleport Fountain's holy water: revives and restores the party),
   REMOVE_OBJECT (`THIS`, `CURMAP n`, `map n`; remembered in `story.removed`, saved), CHANGE_GOS n (the speaking object
   becomes SPRITE.GOS record n; remembered in `story.gos`, saved).
-- Still not done: NEW_OBJECT (args map x y a b c; `a` looks like a face / npc id, `b` a SPRITE or monster number), CHANGE n
-  (switches the object's talk variant; `CHANGE 0` is the common reset), UNSEAL n (opens map n; the initial open set is unknown
+- CHANGE n: the EVT block header is `id map object name kind extra`; an object with several blocks (quest stages) answers
+  with the entry whose id is n after `CHANGE n`, `CHANGE 0` returns to the first (`story.entry`, saved, `pickBlock`).
+- Still not done: NEW_OBJECT (args map x y a b c; `a` looks like a face / npc id, `b` a SPRITE or monster number), UNSEAL n (opens map n; the initial open set is unknown
   so the world map still lists everything), STONE map amount.
 - EVT files carry Korean design notes (cp949 comments after the scripts) that explain the quests; worth mining.
 
@@ -117,6 +118,9 @@ Open: kind -> sheet mapping, enemy stats/AI, hero HP and damage, trailer tables,
 - Rendering fix: grey / purple editor marker colours were still visible in the caves (c1 showed a checkerboard). Marker
   detection is now tolerant of the other shades, blue / red / green editor tiles are hidden, and marker-coloured bands
   inside art tiles are transparent (tiles re-exported).
+
+- Open question: class-0 trailer objects with facing 5 and kind 5-12 (hundreds, even in caves) are drawn as SPRITE records
+  5-12 (crates, barrels, and the 11-frame figures 9-12); they may really be an editor "random filler" with other art.
 
 ## Next ideas
 - Per-hero growth / real stat formulas; monster bytes b2 b4-b7; hero base stats / level / experience, magic (12 spells with names known), real enemy stats.

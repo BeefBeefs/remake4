@@ -31,8 +31,16 @@ export function npcSpriteRecord(name: string): number | null {
   return 11;
 }
 
-/** all blocks sharing one object id on a map: conversation (FLOW) entries first, then BASIC ones */
-export function pickBlock(blocks: { fi: number; block: EvtBlock }[]): { fi: number; block: EvtBlock } {
+/**
+ * All blocks sharing one object id on a map: conversation (FLOW) entries first, then BASIC ones. A quest NPC has several
+ * entries (one per stage); the script command `CHANGE n` makes entry id n the one it answers with, `CHANGE 0` goes back
+ * to the first.
+ */
+export function pickBlock(blocks: { fi: number; block: EvtBlock }[], entryId = 0): { fi: number; block: EvtBlock } {
+  if (entryId > 0) {
+    const chosen = blocks.find((b) => b.block.id === entryId);
+    if (chosen) return chosen;
+  }
   return blocks.find((b) => b.block.kind === 'FLOW') ?? blocks[0];
 }
 

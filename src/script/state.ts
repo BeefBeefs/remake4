@@ -12,6 +12,8 @@ export class StoryState {
   /** objects scripts have removed ("map:object") and sprite records they have swapped in (CHANGE_GOS) */
   removed = new Set<string>();
   gos = new Map<string, number>();
+  /** talk entry an object currently answers with ("map:object" -> block id), set by CHANGE n; absent = its first entry */
+  entry = new Map<string, number>();
   money = 0;
   level = 1;
   /** experience towards the next level (party-wide) */

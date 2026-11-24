@@ -427,3 +427,12 @@ test('spells: rain hurts what stands in it, the shield follows, stone stops an e
   assert.equal(e.x, 100);
   assert.ok(e.frozen > 1.5 && e.frozen < 2.5);
 });
+
+test('pickBlock honours CHANGE: an object answers with the entry the script chose', async () => {
+  const { pickBlock } = await import('../src/game/npcs');
+  const mk = (id: number, kind: 'BASIC' | 'FLOW' = 'BASIC') => ({ fi: 0, block: { id, map: 19, object: 15, name: 'g', kind, extra: 100, line: 0, start: 0 } });
+  const blocks = [mk(68), mk(69), mk(70)];
+  assert.equal(pickBlock(blocks).block.id, 68);
+  assert.equal(pickBlock(blocks, 70).block.id, 70);
+  assert.equal(pickBlock(blocks, 99).block.id, 68); // unknown id: the default entry
+});

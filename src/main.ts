@@ -159,6 +159,8 @@ async function boot(): Promise<void> {
     return best;
   }
 
+  const mapEntryNo = () => index.findIndex((m) => m.id === mapEntry.id) + 1;
+
   async function enterMap(id: string, cellX?: number, cellY?: number): Promise<void> {
     const entry = index.find((m) => m.id === id) ?? index[0];
     const map = await loadMap(entry.id);
@@ -240,6 +242,13 @@ async function boot(): Promise<void> {
             refreshNpcList();
           }
         }
+      }
+      if (name === 'CHANGE' && curNpc) {
+        // this object answers with entry n from now on (0 = its first entry again)
+        const n = Number(args[0]);
+        const key = `${mapNoNow}:${curNpc.object}`;
+        if (n > 0) story.entry.set(key, n);
+        else story.entry.delete(key);
       }
       if (name === 'CHANGE_GOS' && curNpc && Number.isFinite(Number(args[0]))) {
         // the speaking object turns into SPRITE.GOS record n (a shattered door, a revealed demon...)
@@ -631,7 +640,7 @@ async function boot(): Promise<void> {
     const tapped = nearestNpc(wx, wy - 16, 30);
     if (tapped) {
       if (Math.hypot(tapped.x - party.leader.x, (tapped.y - party.leader.y) / 0.625) < 80) {
-        const pick = pickBlock(tapped.blocks);
+        const pick = pickBlock(tapped.blocks, story.entry.get(`${mapEntryNo()}:${tapped.object}`));
         if (!running) void runBlock(scriptFiles[pick.fi].file, pick.block);
         return;
       }
@@ -652,7 +661,7 @@ async function boot(): Promise<void> {
   function talkToNearest(): void {
     const n = nearestNpc(party.leader.x, party.leader.y, 70);
     if (!n || running) return;
-    const pick = pickBlock(n.blocks);
+    const pick = pickBlock(n.blocks, story.entry.get(`${mapEntryNo()}:${n.object}`));
     audio.unlock();
     void runBlock(scriptFiles[pick.fi].file, pick.block);
   }
