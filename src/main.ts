@@ -231,6 +231,7 @@ async function boot(): Promise<void> {
     world = new World(map, meta);
     await renderer.setWorld(world, meta, map.tileset);
     mapEntry = entry;
+    if (/^t\d$/.test(entry.id)) lastTown = entry.id;
     // explicit cell (script WARP) > the cell the scripts usually send you to > map centre
     const mapNo = index.findIndex((m) => m.id === entry.id) + 1;
     const dest = cellX !== undefined && cellY !== undefined ? { cx: cellX, cy: cellY } : arrivals.get(mapNo);
@@ -245,6 +246,14 @@ async function boot(): Promise<void> {
     mapSelect.value = entry.id;
     refreshNpcList();
     if (!restoring) saveGame();
+  }
+
+  /** the village the party wakes up in after a defeat: the last one it stood in, else the first of this world */
+  let lastTown = '';
+  function restTown(): string {
+    const underworld = index.findIndex((m) => m.id === mapEntry.id) >= UNDERWORLD_OFFSET;
+    const town = lastTown && (index.findIndex((m) => m.id === lastTown) >= UNDERWORLD_OFFSET) === underworld ? lastTown : '';
+    return town || (underworld ? 't5' : 't1');
   }
 
   // ---------------------------------------------------------------- save / load
@@ -1189,7 +1198,7 @@ async function boot(): Promise<void> {
             h.mana = h.maxMana;
           });
           party.setLeader(0);
-          void enterMap(mapEntry.id);
+          void enterMap(restTown()); // "Now I'm going to have a rest at my place."
         }
       }
       renderer.render(party.leader.x, party.leader.y - 20);
