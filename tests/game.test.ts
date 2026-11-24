@@ -451,3 +451,11 @@ test('pickBlock: entry -1 (CHANGE 0) falls back to the BASIC entry, else the def
   assert.equal(pickBlock(both, 0).block.id, 103);
   assert.equal(pickBlock([mk(5, 'FLOW')], -1).block.id, 5);
 });
+
+test('STONE is a known script command with a frame count (statue puzzle)', async () => {
+  const { parseEvt } = await import('../src/script/parser');
+  const evt = parseEvt(readFileSync(A('scripts/under.evt'), 'utf8'));
+  const stones = evt.ops.filter((o) => o.t === 'cmd' && o.name === 'STONE');
+  assert.equal(stones.length, 3);
+  assert.deepEqual(stones.map((o) => (o.t === 'cmd' ? o.args[1] : 0)).sort(), [300, 500, 700]);
+});

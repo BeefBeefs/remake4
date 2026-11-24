@@ -256,6 +256,16 @@ async function boot(): Promise<void> {
         await dropItem(Number(args[3]), Number(args[1]) * TILE_W + TILE_W / 2, Number(args[2]) * TILE_H + TILE_H - 2);
       }
       const mapNoNow = index.findIndex((m) => m.id === mapEntry.id) + 1;
+      if (name === 'STONE') {
+        // a statue turns every enemy on the map to stone for n frames (the script notes say 300 / 500 / 700; ~20 frames a second)
+        const secs = (Number(args[1]) || 300) / 20;
+        for (const en of enemies) {
+          if (en.e.dead) continue;
+          en.e.freeze(secs);
+          void addEffect(shell(en.e, secs));
+        }
+        toast('Every demon here turns to stone');
+      }
       if (name === 'FULL_LIFE' || name === 'FULL_MANA') {
         for (const h of heroes) {
           if (name === 'FULL_LIFE') {
