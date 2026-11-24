@@ -12,7 +12,7 @@ import { arrow, aura, Effect, effectFrame, fireBall, fireWall, ghostBolt, lightn
 import { derive, LEVEL_GAIN, mitigate, Slot, slotOf, traitOf, xpToNext } from './game/stats';
 import { InventoryUI } from './ui/inventory';
 import { advanceYear } from './game/clock';
-import { Buff, BUFF_SECONDS } from './game/consumables';
+import { Buff, BUFF_SECONDS, ItemEffect, itemEffect } from './game/consumables';
 import { QuestLog } from './ui/quests';
 import { GameMenu } from './ui/menu';
 import { Minimap } from './ui/minimap';
@@ -647,11 +647,8 @@ async function boot(): Promise<void> {
     }
   }
 
-  const inv = new InventoryUI(
-    document.getElementById('inv')!,
-    db,
-    story,
-    async (fx) => {
+  /** apply a consumable's effect; false when it would change nothing (the item is then kept) */
+  async function applyItemEffect(fx: ItemEffect): Promise<boolean> {
       const alive = heroes.filter((x) => !x.dead);
       let used = false;
       if (fx.life !== undefined) {
@@ -722,7 +719,13 @@ async function boot(): Promise<void> {
         used = true;
       }
       return used;
-    },
+  }
+
+  const inv = new InventoryUI(
+    document.getElementById('inv')!,
+    db,
+    story,
+    applyItemEffect,
     toast,
     {
       names: HERO_DEFS.map((d) => d.name),
@@ -853,6 +856,48 @@ async function boot(): Promise<void> {
     castBtn.textContent = k ? `✦ ${lang.magic[String(k)]?.name ?? k} ${manaCost(k)}` : '✦ no magic';
   }
   refreshActButtons();
+  // quick slots (keys 4-9 and 0; 1-3 pick the leader): known spells first, then usable consumables
+  const quickEl = document.getElementById('quick')!;
+  const yearNum = document.querySelector('#year span')!;
+  const yearOrb = document.querySelector<HTMLElement>('#year b')!;
+  interface Quick { label: string; run: () => void | Promise<void> }
+  let quickList: Quick[] = [];
+  let quickSig = '';
+  function quickEntries(): Quick[] {
+    const out: Quick[] = [];
+    for (const k of knownSpells())
+      out.push({ label: lang.magic[String(k)]?.name ?? `Spell ${k}`, run: () => { spellSel = k; castSpell(); refreshActButtons(); } });
+    for (const [id, n] of [...story.items].sort((a, b) => a[0] - b[0])) {
+      const fx = db.kind(id) === 'consumable' ? itemEffect(id, db.desc(id)) : null;
+      if (!fx || fx.learn !== undefined) continue;
+      out.push({
+        label: `${db.name(id)} ×${n}`,
+        run: async () => {
+          if (await applyItemEffect(fx)) {
+            story.removeItem(id);
+            toast(`Used ${db.name(id)}`);
+          } else toast('No effect right now');
+        },
+      });
+    }
+    return out.slice(0, 7);
+  }
+  function refreshQuick(): void {
+    quickList = quickEntries();
+    const sig = quickList.map((q) => q.label).join('|');
+    if (sig === quickSig) return;
+    quickSig = sig;
+    quickEl.innerHTML = '';
+    quickList.forEach((q, i) => {
+      const b = document.createElement('button');
+      b.textContent = `${'4567890'[i]} ${q.label}`;
+      b.onclick = (e) => {
+        e.stopPropagation();
+        void q.run();
+      };
+      quickEl.appendChild(b);
+    });
+  }
   const partyEl = document.getElementById('party')!;
   const overEl = document.getElementById('over')!;
   const bars = heroes.map((h) => {
@@ -888,6 +933,8 @@ async function boot(): Promise<void> {
     const zxc = 'zxc'.indexOf(e.key.toLowerCase());
     if (zxc >= 0 && !heroes[zxc].dead) party.setLeader(zxc); // the manual's Z / X / C hot keys
     if (e.key === 'Escape') menu.toggle();
+    const qi = '4567890'.indexOf(e.key);
+    if (qi >= 0 && !e.repeat && !dlg.open) void quickList[qi]?.run();
     if (e.key.toLowerCase() === 'i') inv.toggle();
     if (e.key.toLowerCase() === 'j') quests.toggle();
     if (e.key.toLowerCase() === 'f') castSpell();
@@ -1225,6 +1272,7 @@ async function boot(): Promise<void> {
       questT += dt;
       if (questT > 0.5) {
         questT = 0;
+        refreshQuick();
         watchQuests();
       }
       if (saveT > 5) {
@@ -1234,6 +1282,8 @@ async function boot(): Promise<void> {
       statusT += dt;
       if (statusT > 0.25) {
         statusT = 0;
+        yearNum.textContent = String(Math.floor(story.year));
+        yearOrb.style.left = `${(story.year % 1) * 100}%`;
         const l = party.leader;
         const near = dlg.open ? null : nearestNpc(lead.x, lead.y, 70);
         status.textContent = (near ? `[E / tap] talk to ${near.name} · ` : '') + `Year ${Math.floor(story.year)} · ${mapEntry.id.toUpperCase()} ${mapEntry.name} · ${l.name} cell ${Math.floor(l.x / TILE_W)},${Math.floor(l.y / TILE_H)} · tiles ${renderer.stats.drawnTiles}${lastEffect ? ' · fx: ' + lastEffect : ''}`;
