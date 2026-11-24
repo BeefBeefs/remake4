@@ -30,7 +30,7 @@ function mockHost(choices: number[]) {
       log.push('select:' + cs.map((c) => c.text).join('|'));
       return Math.min(choices[ci++] ?? cs.length - 1, cs.length - 1); // then keep choosing the last entry (usually "Exit")
     },
-    shop: async (k, p, l) => void log.push(`shop:${k}:${l.length}`),
+    shop: async (k, _p, l) => void log.push(`shop:${k}:${l.length}`),
     play: (s) => void log.push('play:' + s),
     effect: (n, a) => void log.push(`fx:${n}:${a.join(',')}`),
     warn: (m) => void log.push('WARN ' + m),
