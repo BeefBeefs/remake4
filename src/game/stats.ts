@@ -80,6 +80,7 @@ export function parseBonuses(text: string, into: Bonuses = emptyBonuses()): Bonu
 
 export interface Derived {
   maxHp: number;
+  maxMana: number;
   attack: number;
   defense: number;
   speedMul: number;
@@ -109,7 +110,8 @@ export function derive(db: ItemDb, base: Record<StatName, number>, level: number
   const total = (k: StatName) => Math.round((base[k] + b.stats[k]) * (1 + (b.pct[k] ?? 0) / 100));
   const maxHp = Math.round((50 + 5 * total('HEALTH') + b.life + (level - 1) * 4) * (1 + (b.pct.LIFE ?? 0) / 100));
   const attack = Math.round((atk + b.atk + total('STRENGTH') / 2) * (1 + (b.pct.ATK ?? 0) / 100));
-  return { maxHp, attack, defense: def, speedMul: 1 + b.speed / 100, strength: total('STRENGTH'), dexterity: total('DEXTERITY'), magic: total('MAGIC') };
+  const maxMana = 20 + 3 * total('MAGIC');
+  return { maxHp, maxMana, attack, defense: def, speedMul: 1 + b.speed / 100, strength: total('STRENGTH'), dexterity: total('DEXTERITY'), magic: total('MAGIC') };
 }
 
 /** damage after armour: each defense point soaks a bit, never below 1 */

@@ -12,6 +12,10 @@ export interface ShopHost {
   sell(id: number): boolean;
   /** item ids the party holds that this kind of shop takes (equipment or consumables) */
   owned(equipment: boolean): number[];
+  /** magic training: label for spell `k`, and learning it (price unknown, so it is free for now) */
+  spellLabel(k: number): string;
+  learned(k: number): boolean;
+  learn(k: number): void;
 }
 
 const css = (c: RGB) => `rgb(${c[0]},${c[1]},${c[2]})`;
@@ -140,7 +144,40 @@ export class DialogueUI implements ScriptHost {
 
   async shop(kind: ShopKind, prompt: string, list: number[]): Promise<void> {
     const t = this.trade;
-    if (!t || kind === 'REPAIR_WEAPON' || kind === 'LEARN_MAGIC') {
+    if (t && kind === 'LEARN_MAGIC') {
+      return new Promise((done) => {
+        let note = '';
+        const draw = () => {
+          const box = document.createElement('div');
+          box.className = 'choices';
+          box.style.maxHeight = '38vh';
+          box.style.overflowY = 'auto';
+          for (const k of list) {
+            const b = document.createElement('button');
+            b.textContent = t.spellLabel(k) + (t.learned(k) ? '  (known)' : '');
+            b.disabled = t.learned(k);
+            b.onclick = (e) => {
+              e.stopPropagation();
+              t.learn(k);
+              note = 'Learned!';
+              draw();
+            };
+            box.appendChild(b);
+          }
+          const leave = document.createElement('button');
+          leave.textContent = 'Leave';
+          leave.onclick = (e) => {
+            e.stopPropagation();
+            done();
+          };
+          box.appendChild(leave);
+          this.lines = [{ text: `${prompt}${note ? '   ' + note : ''}`, color: this.color }];
+          this.render(box);
+        };
+        draw();
+      });
+    }
+    if (!t || kind === 'REPAIR_WEAPON') {
       // no prices for spells / repairs in the data we have: just list what is on offer
       this.lines.push({ text: `[${kind.replace(/_/g, ' ').toLowerCase()}] ${prompt}`, color: [150, 150, 150] });
       for (const id of list.slice(0, 12)) this.lines.push({ text: `  · ${this.itemLabel(id)}`, color: [200, 200, 160] });

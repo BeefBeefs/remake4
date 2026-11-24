@@ -15,6 +15,11 @@
     #party .row { display: flex; align-items: center; gap: 6px; justify-content: flex-end; text-shadow: 0 0 3px #000; }
     #party .bar { width: 90px; height: 7px; background: #200; border: 1px solid #000; }
     #party .bar > i { display: block; height: 100%; background: #c33; }
+    #party .bar.mana { width: 50px; height: 4px; }
+    #party .bar.mana > i { background: #36c; }
+    #act { position: fixed; left: 8px; bottom: 8px; display: flex; gap: 8px; align-items: flex-end; }
+    #act button { min-width: 54px; height: 54px; border-radius: 27px; border: 1px solid #fff6; background: #000a; color: #fff; font: inherit; font-size: 18px; padding: 0 10px; touch-action: none; }
+    #act button:nth-child(2) { font-size: 12px; height: 44px; border-radius: 22px; }
     #party .lead { color: #ffd; font-weight: 700; }
     #over { position: fixed; inset: 0; display: none; align-items: center; justify-content: center; font-size: 28px; color: #d44; background: #000a; pointer-events: none; }
     #inv { position: fixed; right: 8px; top: 44px; width: min(92vw, 340px); max-height: 60vh; overflow: auto; display: none;
@@ -60,6 +65,7 @@
   <div id="party"></div>
   <div id="over">Your party has fallen…</div>
   <div id="status"></div>
+  <div id="act"></div>
   <div id="dialogue"></div>
   <script type="module" src="/src/main.ts"></script>
 </body>

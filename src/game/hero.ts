@@ -28,6 +28,8 @@ export class Hero {
   maxHp = 100;
   hp = 100;
   /** worn items by slot, and the numbers derived from them (set by the game, see game/stats.ts) */
+  mana = 50;
+  maxMana = 50;
   gear: Loadout = {};
   attackPower = UNARMED_ATTACK;
   defense = 0;

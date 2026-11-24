@@ -309,3 +309,28 @@ test('stats: gear bonuses parse, derived numbers, mitigation, xp curve', async (
   // level 16 should reach the trainer's Dexterity requirement (>60) from the starting 10
   assert.ok(base.DEXTERITY + 15 * LEVEL_GAIN.DEXTERITY > 50);
 });
+
+test('effects: arrows pick the 32-way frame, fire balls travel and burst, walls tick', async () => {
+  const fx = await import('../src/game/effects');
+  assert.equal(fx.arrowFrame(0, -1), 0);
+  assert.equal(fx.arrowFrame(1, 0), 8);
+  assert.equal(fx.arrowFrame(0, 1), 16);
+  assert.equal(fx.arrowFrame(-1, 0), 24);
+  const world = { blockedAt: () => false } as unknown as import('../src/game/world').World;
+  const dummy = { x: 100, y: 14, dead: false, hits: 0, damage(n: number) { this.hits += n; } };
+  const spawn: import('../src/game/effects').Effect[] = [];
+  const ball = fx.fireBall(0, 14, 2, 10); // east
+  let alive = true;
+  for (let i = 0; i < 60 && alive; i++) alive = fx.updateEffect(ball, 1 / 30, world, [dummy], spawn);
+  assert.equal(alive, false);
+  assert.equal(dummy.hits, 10);
+  assert.equal(spawn.length, 1); // the explosion visual
+  const wall = fx.fireWall(0, 14, 2, 3)[2];
+  const d2 = { x: wall.x, y: wall.y + 14, dead: false, hits: 0, damage(n: number) { this.hits += n; } };
+  for (let i = 0; i < 31; i++) fx.updateEffect(wall, 1 / 30, world, [d2], []);
+  assert.ok(d2.hits >= 6, String(d2.hits)); // ticks every 0.5 s: 3 damage each, ~2 s
+  const a = fx.arrow(0, 14, 2, 7, 200);
+  const d3 = { x: 60, y: 14, dead: false, hits: 0, damage(n: number) { this.hits += n; } };
+  for (let i = 0; i < 40; i++) fx.updateEffect(a, 1 / 30, world, [d3], []);
+  assert.equal(d3.hits, 7);
+});

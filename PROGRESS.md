@@ -76,6 +76,15 @@ Open: kind -> sheet mapping, enemy stats/AI, hero HP and damage, trailer tables,
 - Experience: kills give xp, party-wide level-ups raise stats (placeholder curve and gains), heal the party, HUD shows Lv / xp.
 - Trailer monsters no longer spawn in villages (T1 lists a Satan there: class 1-47 entries mean something else in towns).
 
+## Session 1h
+- Touch controls: on-screen attack / cast / next-spell buttons (bottom left); tap an enemy to walk up and attack it (bows
+  shoot from range). Keys: F cast, Q next spell.
+- Magic v0 with mana bars: Fire Wall, Fire Ball, Ghost Bolt, Death Spark, Lightning, Blood Fire, Healing, Resurrection
+  (MGC-EFF.GOS art; costs from the manual; damage formulas are placeholders). Kusa's two starting spells are in from the
+  start; magic trainers (LEARN_MAGIC) teach spells for free because no price is known. Ice Rain / Fire Rain / Stone Curse /
+  Buddha Shield are not playable yet.
+- Bows fire ARROW.GOS arrows (32 angle frames) with the bow's range from the manual; effects live in `src/game/effects.ts`.
+
 ## Next ideas
 - Per-hero growth / real stat formulas / level / experience, magic (12 spells with names known), real enemy stats.
 - NEW_OBJECT, BASIC event triggers (GO_BASIC_EVENT), save / load.

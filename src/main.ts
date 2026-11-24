@@ -7,6 +7,8 @@ import { MapObject, monsterSpawns, objectRole, parseMapObjects } from './data/ma
 import { basicBlockFor, npcSpriteRecord, pickBlock } from './game/npcs';
 import { findPickup, GroundItem } from './game/ground';
 import { ItemDb } from './game/itemdb';
+import { directionFromVector } from './game/anim';
+import { arrow, Effect, effectFrame, fireBall, fireWall, ghostBolt, lightning, updateEffect, visual } from './game/effects';
 import { derive, enemyXp, LEVEL_GAIN, mitigate, Slot, slotOf, xpToNext } from './game/stats';
 import { InventoryUI } from './ui/inventory';
 import { MoviePlayer, showTitle, trackForMap, WorldMapUI } from './ui/overlays';
@@ -163,6 +165,7 @@ async function boot(): Promise<void> {
     const spawn = dest ? world.nearestFree(dest.cx, dest.cy) : world.findSpawn();
     clearEnemies();
     clearGround();
+    clearEffects();
     await buildMapObjects(index.findIndex((m) => m.id === entry.id) + 1, parseMapObjects(map.trailer, map.w, map.h));
     party.placeAt(spawn.x, spawn.y);
     audio.setMusic(trackForMap(entry, index.filter((m) => m.id[0] === entry.id[0]).findIndex((m) => m.id === entry.id)));
@@ -214,6 +217,13 @@ async function boot(): Promise<void> {
       story.removeItem(id);
       story.money += p;
       return true;
+    },
+    spellLabel: (k) => `${lang.magic[String(k)]?.name ?? 'Spell ' + k} (mana ${itemStats[String(184 + k)]?.mana ?? '?'})${SPELL_IMPL.has(k) ? '' : ' - not playable yet'}`,
+    learned: (k) => story.magic.has(k),
+    learn: (k) => {
+      story.magic.set(k, 1);
+      if (!SPELL_IMPL.has(k)) return;
+      if (!knownSpells().includes(spellSel)) spellSel = k;
     },
     owned: (equipment) => [...story.items.keys()].filter((id) => (equipment ? db.kind(id) === 'equipment' : db.kind(id) === 'consumable')).sort((a, b) => a - b),
   };
@@ -300,6 +310,76 @@ async function boot(): Promise<void> {
   });
   hud.append(mapSelect, npcSelect, spawnSelect, ...leaderBtns, markerBtn, musicBtn);
 
+  // ---------------------------------------------------------------- magic and projectiles
+  const SPELL_IMPL = new Set([1, 2, 3, 4, 5, 6, 9, 12]);
+  story.magic.set(1, 1); // the strategy guide says Kusa starts with Fire Wall and Fire Ball
+  story.magic.set(2, 1);
+  let spellSel = 2;
+  const knownSpells = () => [...story.magic.keys()].filter((k) => SPELL_IMPL.has(k)).sort((a, b) => a - b);
+  const manaCost = (k: number) => itemStats[String(184 + k)]?.mana ?? 30;
+  const effectMetas = new Map<string, SpriteSheetMeta>([
+    ['MGC-EFF', await loadSpriteMeta('MGC-EFF')],
+    ['ARROW', await loadSpriteMeta('ARROW')],
+  ]);
+  const fx: { e: Effect; actor: SpriteActor }[] = [];
+  const effectSheets = new Map<string, SpriteSheetMeta>(effectMetas);
+  async function addEffect(e: Effect): Promise<void> {
+    const actor = await renderer.createSprite(effectSheets.get(e.sheet)!);
+    fx.push({ e, actor });
+  }
+  function clearEffects(): void {
+    for (const f of fx) renderer.removeSprite(f.actor);
+    fx.length = 0;
+  }
+  const HERO_SFX: Record<string, string> = { LEELIM: 'lee', KUSA: 'kusa', RINING: 'ren' };
+  function castSpell(): void {
+    const h = party.leader;
+    const k = knownSpells().includes(spellSel) ? spellSel : knownSpells()[0];
+    if (!k || h.dead || running || dlg.open) return;
+    const cost = manaCost(k);
+    if (h.mana < cost) {
+      toast('Not enough mana');
+      return;
+    }
+    const d = derive(db, story.stats, story.level, h.gear);
+    const m = d.magic;
+    h.mana -= cost;
+    h.attack(); // cast with the attack animation
+    void audio.play(`${HERO_SFX[h.sheet] ?? 'kusa'}-m${Math.min(k, 13)}.wav`, 0.6);
+    const add = (e: Effect | Effect[]) => (Array.isArray(e) ? e : [e]).forEach((x) => void addEffect(x));
+    switch (k) {
+      case 1: add(fireWall(h.x, h.y, h.dir, 4 + Math.round(m * 0.5))); break;
+      case 2: add(fireBall(h.x, h.y, h.dir, 10 + Math.round(m * 1.5))); break;
+      case 3: add(ghostBolt(h.x, h.y, h.dir, 14 + Math.round(m * 1.8))); break;
+      case 4: { const e = ghostBolt(h.x, h.y, h.dir, 24 + Math.round(m * 2.4)); e.record = 33; e.radius = 40; add(e); break; }
+      case 5: add(lightning(h.x, h.y, 6 + Math.round(m * 0.8))); break;
+      case 6: { const e = lightning(h.x, h.y, 8 + Math.round(m)); e[0].record = 41; add(e); break; }
+      case 9: {
+        const w = heroes.filter((x) => !x.dead).sort((a, b) => a.hp / a.maxHp - b.hp / b.maxHp)[0];
+        if (w) {
+          w.hp = Math.min(w.maxHp, w.hp + Math.round(w.maxHp * 0.4));
+          add(visual('MGC-EFF', 33, 7, w.x, w.y));
+        }
+        break;
+      }
+      case 12: {
+        const dead = heroes.find((x) => x.dead);
+        if (dead) {
+          dead.revive();
+          dead.hp = Math.round(dead.maxHp / 2);
+          add(visual('MGC-EFF', 1, 10, dead.x, dead.y));
+        } else h.mana += cost;
+        break;
+      }
+    }
+  }
+  function cycleSpell(): void {
+    const ks = knownSpells();
+    if (!ks.length) return;
+    spellSel = ks[(ks.indexOf(spellSel) + 1) % ks.length];
+    refreshActButtons();
+  }
+
   /** recompute every hero's numbers from stats, level and gear; keeps each hero's life fraction */
   function refreshHeroStats(): void {
     for (const h of heroes) {
@@ -307,6 +387,9 @@ async function boot(): Promise<void> {
       const frac = h.maxHp ? h.hp / h.maxHp : 1;
       h.maxHp = d.maxHp;
       h.hp = h.dead ? 0 : Math.max(1, Math.round(d.maxHp * frac));
+      const mf = h.maxMana ? h.mana / h.maxMana : 1;
+      h.maxMana = d.maxMana;
+      h.mana = Math.round(d.maxMana * mf);
       h.attackPower = d.attack;
       h.defense = d.defense;
       h.speedMul = d.speedMul;
@@ -385,6 +468,31 @@ async function boot(): Promise<void> {
   invBtn.textContent = 'Items (I)';
   invBtn.onclick = () => inv.toggle();
   hud.append(invBtn);
+  const act = document.getElementById('act')!;
+  const atkBtn = document.createElement('button');
+  atkBtn.textContent = '⚔';
+  atkBtn.title = 'Attack (space)';
+  const castBtn = document.createElement('button');
+  const cycBtn = document.createElement('button');
+  cycBtn.textContent = '↻';
+  cycBtn.title = 'Next spell (Q)';
+  for (const b of [atkBtn, castBtn, cycBtn]) {
+    b.addEventListener('pointerdown', (e) => {
+      e.stopPropagation();
+      e.preventDefault();
+      audio.unlock();
+      if (dlg.open) return;
+      if (b === atkBtn) party.leader.attack();
+      else if (b === castBtn) castSpell();
+      else cycleSpell();
+    });
+  }
+  act.append(cycBtn, castBtn, atkBtn);
+  function refreshActButtons(): void {
+    const k = knownSpells().includes(spellSel) ? spellSel : knownSpells()[0];
+    castBtn.textContent = k ? `✦ ${lang.magic[String(k)]?.name ?? k} ${manaCost(k)}` : '✦ no magic';
+  }
+  refreshActButtons();
   const partyEl = document.getElementById('party')!;
   const overEl = document.getElementById('over')!;
   const bars = heroes.map((h) => {
@@ -396,9 +504,13 @@ async function boot(): Promise<void> {
     bar.className = 'bar';
     const fill = document.createElement('i');
     bar.appendChild(fill);
-    row.append(name, bar);
+    const mbar = document.createElement('div');
+    mbar.className = 'bar mana';
+    const mfill = document.createElement('i');
+    mbar.appendChild(mfill);
+    row.append(name, bar, mbar);
     partyEl.appendChild(row);
-    return { row, fill };
+    return { row, fill, mfill };
   });
   const lvEl = document.createElement('div');
   lvEl.style.textAlign = 'right';
@@ -413,6 +525,8 @@ async function boot(): Promise<void> {
     keys.add(e.key.toLowerCase());
     if (e.key >= '1' && e.key <= '3' && !heroes[Number(e.key) - 1].dead) party.setLeader(Number(e.key) - 1);
     if (e.key.toLowerCase() === 'i') inv.toggle();
+    if (e.key.toLowerCase() === 'f') castSpell();
+    if (e.key.toLowerCase() === 'q') cycleSpell();
     if (e.key.toLowerCase() === 'm') worldUI.toggle(mapEntry.id);
     if (e.key.toLowerCase() === 'e' || e.key === 'Enter') talkToNearest();
     if (e.key === ' ') {
@@ -437,13 +551,18 @@ async function boot(): Promise<void> {
         return;
       }
     }
-    party.leader.target = { x: wx, y: wy };
+    const foe = enemies.find((en) => !en.e.dead && Math.hypot(en.e.x - wx, en.e.y - 14 - wy) < 34);
+    attackTarget = foe ? foe.e : null;
+    party.leader.target = foe ? { x: foe.e.x, y: foe.e.y } : { x: wx, y: wy };
     party.leader.input.x = party.leader.input.y = 0;
   });
   canvas.addEventListener('contextmenu', (e) => {
     e.preventDefault();
     party.leader.attack();
   });
+
+  let attackTarget: Enemy | null = null;
+  const isBow = (h: Hero) => !!h.gear.weapon && db.lang.weapons[String(h.gear.weapon)]?.category === 'bow';
 
   function talkToNearest(): void {
     const n = nearestNpc(party.leader.x, party.leader.y, 70);
@@ -474,10 +593,42 @@ async function boot(): Promise<void> {
       party.update(dt, world, metas);
       party.ensureLeaderAlive();
       const lead = party.leader;
+      if (lead.swung && isBow(lead)) {
+        const w = lead.gear.weapon!;
+        void addEffect(arrow(lead.x, lead.y, lead.dir, lead.attackPower, (db.stat(w).range ?? 6) * 32));
+        void audio.play('arrow1.wav', 0.5);
+      }
+      if (attackTarget && !attackTarget.dead && !running) {
+        const dx = attackTarget.x - lead.x;
+        const dy = (attackTarget.y - lead.y) / 0.625;
+        const dist = Math.hypot(dx, dy);
+        const reach = isBow(lead) ? 170 : 44;
+        if (dist < reach) {
+          lead.target = null;
+          lead.dir = directionFromVector(dx, dy);
+          lead.attack();
+        } else if (lead.target) lead.target = { x: attackTarget.x, y: attackTarget.y };
+      } else attackTarget = null;
+      for (const h of heroes) if (!h.dead) h.mana = Math.min(h.maxMana, h.mana + 1.5 * dt);
+      {
+        const born: Effect[] = [];
+        for (let i = fx.length - 1; i >= 0; i--) {
+          const f = fx[i];
+          if (!updateEffect(f.e, dt, world, enemies.map((en) => en.e), born)) {
+            renderer.removeSprite(f.actor);
+            fx.splice(i, 1);
+          } else {
+            const meta = effectSheets.get(f.e.sheet)!;
+            const n = meta.records[f.e.record]?.frames.length ?? 1;
+            f.actor.set(f.e.record, effectFrame(f.e, n), f.e.x, f.e.y, false);
+          }
+        }
+        for (const b of born) void addEffect(b);
+      }
       for (const en of enemies) {
         const e = en.e;
         e.update(dt, world, metas.get(e.sheet)!, lead);
-        if (lead.swung && !e.dead && Math.hypot(e.x - lead.x, (e.y - lead.y) / 0.625) < 64) e.damage(lead.attackPower);
+        if (lead.swung && !isBow(lead) && !e.dead && Math.hypot(e.x - lead.x, (e.y - lead.y) / 0.625) < 64) e.damage(lead.attackPower);
         if (e.swung) {
           e.swung = false;
           // the swing hits the nearest living hero in reach
@@ -558,6 +709,7 @@ async function boot(): Promise<void> {
       if (toastT > 0 && (toastT -= dt) <= 0) toastEl.style.display = 'none';
       heroes.forEach((h, i) => {
         lvEl.textContent = `Lv ${story.level} · xp ${story.xp}/${xpToNext(story.level)}`;
+        bars[i].mfill.style.width = `${(100 * h.mana) / Math.max(1, h.maxMana)}%`;
         bars[i].fill.style.width = `${(100 * h.hp) / h.maxHp}%`;
         bars[i].row.className = 'row' + (h === party.leader ? ' lead' : '');
         bars[i].row.style.opacity = h.dead ? '0.4' : '1';
@@ -569,7 +721,11 @@ async function boot(): Promise<void> {
           respawnT = 0;
           overEl.style.display = 'none';
           clearEnemies();
-          heroes.forEach((h) => h.revive());
+          clearEffects();
+          heroes.forEach((h) => {
+            h.revive();
+            h.mana = h.maxMana;
+          });
           party.setLeader(0);
           void enterMap(mapEntry.id);
         }
