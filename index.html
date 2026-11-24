@@ -54,7 +54,8 @@
     #world .spot.sealed { border-color: #888 !important; background: #00000099 !important; opacity: .7; }
     #world .lbl { position: absolute; transform: translate(-50%, 8px); font-size: 10px; line-height: 1; color: #fff; text-shadow: 0 0 3px #000, 0 0 3px #000; pointer-events: none; white-space: nowrap; }
     #movie { position: fixed; inset: 0; background: #000; display: none; align-items: center; justify-content: center; z-index: 5; }
-    #movie video { max-width: 100%; max-height: 100%; }
+    #movie video, #movie img { max-width: 100%; max-height: 100%; }
+    #movie .cap { position: absolute; left: 0; right: 0; bottom: 8%; text-align: center; color: #fff; font: 18px/1.4 serif; text-shadow: 0 0 6px #000, 0 0 3px #000; padding: 0 1em; white-space: pre-line; }
     #title { position: fixed; inset: 0; background: #000; display: none; flex-direction: column; align-items: center; justify-content: center; z-index: 6; gap: 12px; cursor: pointer; }
     #title img { max-width: 100%; max-height: 80%; image-rendering: pixelated; }
     #title .menu { display: flex; gap: 12px; animation: none; opacity: 1; }

@@ -105,6 +105,32 @@ export class MoviePlayer {
   }
 }
 
+export interface Slide {
+  image: string;
+  text?: string;
+}
+
+/** Full-screen pictures with a caption, one per click / tap; resolves after the last one. Reuses the movie layer. */
+export function showSlides(el: HTMLElement, slides: Slide[]): Promise<void> {
+  return new Promise((resolve) => {
+    let i = 0;
+    const next = (): void => {
+      if (i >= slides.length) {
+        el.onclick = null;
+        el.innerHTML = '';
+        el.style.display = 'none';
+        resolve();
+        return;
+      }
+      const sl = slides[i++];
+      el.innerHTML = `<img src="${assetUrl('images/' + sl.image)}" alt="">${sl.text ? `<div class="cap">${sl.text}</div>` : ''}`;
+      el.style.display = 'flex';
+    };
+    el.onclick = next;
+    next();
+  });
+}
+
 /** Title picture; the first click also unlocks audio. With a save, the player picks Continue or New game. */
 export function showTitle(el: HTMLElement, hasSave: boolean, onStart: () => void, onNewGame: () => void): void {
   el.style.display = 'flex';

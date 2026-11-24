@@ -13,7 +13,7 @@ import { derive, LEVEL_GAIN, mitigate, Slot, slotOf, traitOf, xpToNext } from '.
 import { InventoryUI } from './ui/inventory';
 import { Buff, BUFF_SECONDS } from './game/consumables';
 import { QuestLog } from './ui/quests';
-import { GAME_TRACKS, MoviePlayer, showTitle, WorldMapUI } from './ui/overlays';
+import { GAME_TRACKS, MoviePlayer, showSlides, showTitle, WorldMapUI } from './ui/overlays';
 import { Party } from './game/party';
 import { applyStory, makeSave, parseSave, SAVE_KEY } from './game/save';
 import { TILE_H, TILE_W, World } from './game/world';
@@ -308,13 +308,17 @@ async function boot(): Promise<void> {
       }
       if (name === 'GO_END1') {
         // the hellgate opens: on to the underworld (its first place on the map table is Death Rock; the real entry is a guess)
-        toast('The hellgate has opened...');
         story.flags.add(9001);
+        await showSlides(document.getElementById('movie')!, [{ image: 'end1.webp', text: 'The hellgate has opened...\nThe heroes descend into the underworld.' }]);
         await enterMap('b1');
       }
       if (name === 'GO_END2') {
-        toast('The End - thank you for playing');
         story.flags.add(9002);
+        await showSlides(document.getElementById('movie')!, [
+          { image: 'end2.webp', text: 'Satan is defeated, and the world is at peace again.' },
+          { image: 'staff.webp', text: 'THE END\nAkuma - Demon Spawn (JC Research / Triger Soft, 1999)\nWeb port: thank you for playing' },
+        ]);
+        location.reload(); // back to the title; the save keeps the finished game
       }
       if (name === 'UNSEAL') {
         const n = Number(args[0]);
