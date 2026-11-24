@@ -139,6 +139,10 @@ Open: kind -> sheet mapping, enemy stats/AI, hero HP and damage, trailer tables,
 - Monster sprites: the first byte of every monster-table record is its sprite sheet index, so the story monsters (30-47) no longer
   use guessed sheets (`sheetForKind(kind, table)`); the byte agrees with every kind that had been verified by eye.
 
+- LOCATE_ENEMY's last argument is an item id *or an event id*: Hellminor (drop 34) runs the unnamed entry 34 of its map when it dies
+  ("Arghh, you defeated me... follow my spirit to the underworld"). Rule used: a drop below 150 that matches an unnamed entry of the
+  current map runs that entry instead of dropping an item (only Hellminor matches in the shipped scripts).
+
 ## Next ideas
 - Per-hero growth / real stat formulas; monster bytes b2 b4-b7; hero base stats / level / experience, magic (12 spells with names known), real enemy stats.
 - NEW_OBJECT, BASIC event triggers (GO_BASIC_EVENT), save / load.

@@ -177,6 +177,15 @@ async function boot(): Promise<void> {
       await addNpc(mapNo, objectId, o.x * TILE_W + TILE_W / 2, o.y * TILE_H + TILE_H - 2);
     }
   }
+  /** the script entry with this id on the current map, if there is one (death events of bosses) */
+  function eventBlock(id: number): { fi: number; block: EvtBlock } | null {
+    const mapNo = mapEntryNo();
+    for (let fi = 0; fi < scriptFiles.length; fi++) {
+      const block = scriptFiles[fi].file.blocks.find((b) => b.id === id && b.map === mapNo && b.name.trim() === '');
+      if (block) return { fi, block };
+    }
+    return null;
+  }
   function nearestNpc(x: number, y: number, reach: number): Npc | null {
     let best: Npc | null = null;
     let bd = reach;
@@ -868,8 +877,11 @@ async function boot(): Promise<void> {
         if (enemies[i].e.dead) {
           const dead = enemies[i].e;
           addXp(dead.xp);
+          // a boss's "drop" can name an event instead: Hellminor (drop 34) triggers the entry 34 of this map on death
+          const evt = dead.drop > 0 && dead.drop < 150 ? eventBlock(dead.drop) : null;
           const id = dead.drop > 0 ? dead.drop : Math.random() < 0.35 ? 200 : 0; // 200 = money; drop rates are placeholders
-          if (id) void dropItem(id, dead.x, dead.y);
+          if (evt) void runBlock(scriptFiles[evt.fi].file, evt.block);
+          else if (id) void dropItem(id, dead.x, dead.y);
           renderer.removeSprite(enemies[i].actor);
           enemies.splice(i, 1);
         }
