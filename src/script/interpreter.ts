@@ -104,6 +104,8 @@ export class EvtInterpreter {
 
   /** a jump to a label that does not exist (a few such bugs ship in the original data) ends the script */
   private jump(label: string, dir: 'down' | 'up'): Signal {
+    // Shopkeeper#103 ships a "Yes! I can do it for you" answer with no label at all; the quest accept block is OK1
+    if (label === 'undefined' && this.file.labels.has('OK1')) label = 'OK1';
     const to = this.findLabel(label, dir);
     if (to < 0) {
       this.warn(`label not found: ${label}`);

@@ -21,6 +21,7 @@ import { MapIndexEntry, SpriteSheetMeta, TilesetTable } from './data/types';
 import { GameRenderer, SpriteActor, VIEW_H, VIEW_W } from './render/renderer';
 import { Arg, EvtBlock, EvtFile, parseEvt } from './script/parser';
 import { EvtInterpreter } from './script/interpreter';
+import { shiftMapNumbers, UNDERWORLD_OFFSET } from './script/mapnumbers';
 import { StatName, StoryState } from './script/state';
 import { DialogueUI } from './ui/dialogue';
 
@@ -43,7 +44,10 @@ async function boot(): Promise<void> {
   const [index, tilesets, files, lang, itemStats, monsterTable] = await Promise.all([
     loadMapIndex(),
     loadTilesets() as Promise<TilesetTable>,
-    Promise.all(['sam.evt', 'under.evt'].map(async (f) => parseEvt(await loadText(`scripts/${f}`)))),
+    Promise.all(['sam.evt', 'under.evt'].map(async (f, i) => {
+      const file = parseEvt(await loadText(`scripts/${f}`));
+      return i === 1 ? shiftMapNumbers(file, UNDERWORLD_OFFSET) : file; // under.evt counts maps from the first underworld place
+    })),
     loadLang(),
     loadItemStats(),
     loadMonsters(),
@@ -115,13 +119,12 @@ async function boot(): Promise<void> {
   // Places a script can UNSEAL start out sealed (shop keepers and quest givers tell you about new places one by one;
   // the block that unseals all 22 at once is the late-game guardian). Which places the original really starts with is a guess.
   const initialSeals = new Set<number>();
-  for (const sf of scriptFiles.slice(0, 1)) {
-    // only the main script (sam.evt): the underworld script's unseals would lock the villages behind each other
+  for (const sf of scriptFiles) {
     const starts = sf.file.blocks.map((b) => b.start).sort((a, b) => a - b);
     for (const b of sf.file.blocks) {
       const end = starts.find((x) => x > b.start) ?? sf.file.ops.length;
       const n = sf.file.ops.slice(b.start, end).filter((o) => o.t === 'cmd' && o.name === 'UNSEAL');
-      if (n.length > 0 && n.length < 10) for (const o of n) if (o.t === 'cmd' && Number.isFinite(Number(o.args[0])) && Number(o.args[0]) !== 0 && !(Number(o.args[0]) >= 15 && Number(o.args[0]) <= 18)) initialSeals.add(Number(o.args[0]));
+      if (n.length > 0 && n.length < 10) for (const o of n) if (o.t === 'cmd' && Number.isFinite(Number(o.args[0])) && Number(o.args[0]) !== 0 && !index[Number(o.args[0]) - 1]?.id.startsWith('t')) initialSeals.add(Number(o.args[0])); // villages never start sealed
     }
   }
   const devModeOn = () => devBox.style.display !== 'none';

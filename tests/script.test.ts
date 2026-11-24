@@ -84,3 +84,30 @@ test('conditions, flags, items and quests', async () => {
   assert.ok(st.flags.has(9) && st.itemCount(5) === 0 && st.money === 50);
   assert.deepEqual(st.orders.get(7), { title: 'Fetch', ment: ['a', 'b'] });
 });
+
+test('under.evt map numbers shift onto the unified map list', async () => {
+  const { shiftMapNumbers, UNDERWORLD_OFFSET } = await import('../src/script/mapnumbers');
+  const idx = JSON.parse(readFileSync(new URL('../public/assets/maps/index.json', import.meta.url), 'utf8')) as { id: string }[];
+  const under = parseEvt(readFileSync(new URL('../public/assets/scripts/under.evt', import.meta.url), 'utf8'));
+  const shifted = shiftMapNumbers(under, UNDERWORLD_OFFSET);
+  const village = shifted.blocks.find((b) => b.name === 'Blacksmith')!;
+  assert.equal(idx[village.map - 1].id, 't5'); // the underworld village with the smith, shop, witch and jeweler
+  assert.equal(idx[shifted.blocks.find((b) => b.name === 'Satan' && b.map === 32)!.map - 1].id, 'c4'); // Soul Castle
+  const warps = shifted.ops.filter((o) => o.t === 'cmd' && o.name === 'WARP').map((o) => (o.t === 'cmd' ? Number(o.args[0]) : 0));
+  assert.ok(warps.length > 0 && warps.every((m) => m >= 23 && m <= 42), warps.join());
+  // the shift leaves the original untouched
+  assert.equal(under.blocks.find((b) => b.name === 'Blacksmith')!.map, 8);
+});
+
+test('Shopkeeper accept answer (label-less GO_DOWN) starts the scales quest', async () => {
+  const evt = parseEvt(read('sam.evt'));
+  const blk = evt.blocks.find((b) => b.id === 103 && b.map === 15)!;
+  const st = new StoryState();
+  // menu: "Talk about demons" -> "Tell me more" -> "Yes! I can do it for you"
+  const { host, log } = mockHost([0, 0, 0]);
+  const res = await new EvtInterpreter(evt, blk, st, host).run();
+  assert.equal(res.reason, 'END');
+  assert.ok(st.flags.has(103), 'quest flag given');
+  assert.ok(log.some((l) => l.startsWith('fx:UNSEAL:13')), 'Dream Shadow Mountain opened');
+  assert.ok(!log.some((l) => l.startsWith('WARN')), log.filter((l) => l.startsWith('WARN')).join('\n'));
+});

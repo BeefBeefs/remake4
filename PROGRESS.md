@@ -150,3 +150,10 @@ Open: kind -> sheet mapping, enemy stats/AI, hero HP and damage, trailer tables,
 - Per-hero growth / real stat formulas; monster bytes b2 b4-b7; hero base stats / level / experience, magic (12 spells with names known), real enemy stats.
 - NEW_OBJECT, BASIC event triggers (GO_BASIC_EVENT), save / load.
 - Real collision rules, trailer class meanings. Remaining spells; per-hero stat growth.
+
+## Session 1o – first-quest playtest
+- Playtested Western Village (T1) NPCs headless: Village Chief, Item Merchant and Shopkeeper chains run; quest unseals fire.
+- Found: `Shopkeeper#103` "Yes! I can do it for you" answer has a label-less `GO_DOWN` in the original data -> now falls back to `OK1` (quest accept). Test added.
+- Found: under.evt numbers maps from the first underworld place (1 = b1), sam.evt from the overworld. Added `shiftMapNumbers` (+22) so under.evt blocks, WARP, LOCATE_*, NEW_OBJECT, REMOVE_OBJECT, UNSEAL and inline IF/CASE actions all use the unified map list. Underworld villages (t5/t6) and Satan's castle (c4) now get their NPCs. Confirms b1 as the GO_END1 target (under.evt map 1 = Knight Devil).
+- Underworld UNSEALs are now part of the initial seal set (villages stay open).
+- Still open: STONE, sprite-70 bosses, class-0 crowd objects, real combat formulas.
