@@ -9,7 +9,7 @@ import { findPickup, GroundItem } from './game/ground';
 import { ItemDb } from './game/itemdb';
 import { directionFromVector } from './game/anim';
 import { arrow, aura, Effect, effectFrame, fireBall, fireWall, ghostBolt, lightning, rain, shell, updateEffect, visual } from './game/effects';
-import { derive, LEVEL_GAIN, mitigate, Slot, slotOf, xpToNext } from './game/stats';
+import { derive, LEVEL_GAIN, mitigate, Slot, slotOf, traitOf, xpToNext } from './game/stats';
 import { InventoryUI } from './ui/inventory';
 import { QuestLog } from './ui/quests';
 import { GAME_TRACKS, MoviePlayer, showTitle, WorldMapUI } from './ui/overlays';
@@ -26,6 +26,9 @@ import { breakableFrame, containerDrop, isBreakable } from './game/breakables';
 import { INSTANT_UNDER_MAP, InstantKind, instantBlocks, instantKindOfSprite } from './game/instant';
 import { StatName, StoryState } from './script/state';
 import { DialogueUI } from './ui/dialogue';
+
+/** copper sword, dagger, wooden bow (LANG.GOS weapon ids 1, 4, 41) */
+const START_WEAPONS = [1, 4, 41];
 
 const HERO_DEFS = [
   { name: 'Elim', sheet: 'LEELIM' },
@@ -507,7 +510,7 @@ async function boot(): Promise<void> {
       toast('Not enough mana');
       return;
     }
-    const d = derive(db, story.stats, story.level, h.gear);
+    const d = derive(db, story.stats, story.level, h.gear, traitOf(h.name));
     const m = d.magic;
     h.mana -= cost;
     h.attack(); // cast with the attack animation
@@ -571,7 +574,7 @@ async function boot(): Promise<void> {
   /** recompute every hero's numbers from stats, level and gear; keeps each hero's life fraction */
   function refreshHeroStats(): void {
     for (const h of heroes) {
-      const d = derive(db, story.stats, story.level, h.gear);
+      const d = derive(db, story.stats, story.level, h.gear, traitOf(h.name));
       const frac = h.maxHp ? h.hp / h.maxHp : 1;
       h.maxHp = d.maxHp;
       h.hp = h.dead ? 0 : Math.max(1, Math.round(d.maxHp * frac));
@@ -615,7 +618,7 @@ async function boot(): Promise<void> {
     {
       names: HERO_DEFS.map((d) => d.name),
       gear: (i) => heroes[i].gear,
-      derived: (i) => derive(db, story.stats, story.level, heroes[i].gear),
+      derived: (i) => derive(db, story.stats, story.level, heroes[i].gear, traitOf(heroes[i].name)),
       hp: (i) => [Math.ceil(heroes[i].hp), heroes[i].maxHp],
       equip(i, id) {
         const slot = slotOf(db, id);
@@ -850,6 +853,11 @@ async function boot(): Promise<void> {
     }
   }
   if (!saved) for (const n of initialSeals) story.sealed.add(n);
+  // "the heroes start out with only a single weapon each" (manual): a plain sword for Elim, a dagger for Kusa, a bow for Raening
+  if (!saved) {
+    START_WEAPONS.forEach((id, i) => (heroes[i].gear.weapon = id));
+    refreshHeroStats();
+  }
   // the scripts test NUM 1/2/3 for "hero 1/2/3 is in the party" ("Kusa or me"); nothing grants them, so the engine does
   heroes.forEach((_, i) => story.flags.add(i + 1));
   if (saved) {
@@ -902,7 +910,7 @@ async function boot(): Promise<void> {
       }
       if (lead.swung && isBow(lead)) {
         const w = lead.gear.weapon!;
-        void addEffect(arrow(lead.x, lead.y, lead.dir, lead.attackPower, (db.stat(w).range ?? 6) * 32));
+        void addEffect(arrow(lead.x, lead.y, lead.dir, Math.round(lead.attackPower * traitOf(lead.name).bow), (db.stat(w).range ?? 6) * 32));
         void audio.play('arrow1.wav', 0.5);
       }
       if (attackTarget && !attackTarget.dead && !running) {

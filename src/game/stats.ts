@@ -95,7 +95,30 @@ export const UNARMED_ATTACK = 4;
  * Party stats + one hero's gear -> numbers the game uses. The formulas are placeholders (the real ones live in the EXE):
  * max life 50 + 5 x Health + gear life, attack = weapon attack + Strength/2, defense = sum of gear defense.
  */
-export function derive(db: ItemDb, base: Record<StatName, number>, level: number, gear: Loadout): Derived {
+/**
+ * How the three heroes differ (the manual: Elim a swordsman with high Dexterity and Health, Kusa the spell caster, Raening the
+ * long-range fighter). One shared stat pool feeds all three; these are mild multipliers on what comes out of it. Numbers are
+ * placeholders: only the direction comes from the manual.
+ */
+export interface HeroTrait {
+  hp: number;
+  mana: number;
+  attack: number;
+  speed: number;
+  /** spell power */
+  spell: number;
+  /** extra damage with a bow (Raening's archery) */
+  bow: number;
+}
+const NEUTRAL: HeroTrait = { hp: 1, mana: 1, attack: 1, speed: 1, spell: 1, bow: 1 };
+export const HERO_TRAITS: Record<string, HeroTrait> = {
+  Elim: { hp: 1.2, mana: 0.7, attack: 1.05, speed: 1.06, spell: 0.8, bow: 1 },
+  Kusa: { hp: 0.85, mana: 1.7, attack: 0.9, speed: 0.97, spell: 1.3, bow: 1 },
+  Raening: { hp: 0.95, mana: 0.9, attack: 1, speed: 1.03, spell: 0.9, bow: 1.25 },
+};
+export const traitOf = (name: string): HeroTrait => HERO_TRAITS[name] ?? NEUTRAL;
+
+export function derive(db: ItemDb, base: Record<StatName, number>, level: number, gear: Loadout, trait: HeroTrait = NEUTRAL): Derived {
   const b = emptyBonuses();
   let atk = UNARMED_ATTACK;
   let def = 0;
@@ -111,7 +134,16 @@ export function derive(db: ItemDb, base: Record<StatName, number>, level: number
   const maxHp = Math.round((50 + 5 * total('HEALTH') + b.life + (level - 1) * 4) * (1 + (b.pct.LIFE ?? 0) / 100));
   const attack = Math.round((atk + b.atk + total('STRENGTH') / 2) * (1 + (b.pct.ATK ?? 0) / 100));
   const maxMana = 20 + 3 * total('MAGIC');
-  return { maxHp, maxMana, attack, defense: def, speedMul: 1 + b.speed / 100, strength: total('STRENGTH'), dexterity: total('DEXTERITY'), magic: total('MAGIC') };
+  return {
+    maxHp: Math.round(maxHp * trait.hp),
+    maxMana: Math.round(maxMana * trait.mana),
+    attack: Math.round(attack * trait.attack),
+    defense: def,
+    speedMul: (1 + b.speed / 100) * trait.speed,
+    strength: total('STRENGTH'),
+    dexterity: total('DEXTERITY'),
+    magic: Math.round(total('MAGIC') * trait.spell),
+  };
 }
 
 /** damage after armour: each defense point soaks a bit, never below 1 */

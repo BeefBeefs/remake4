@@ -514,3 +514,11 @@ test('unscripted NPC-model objects (kinds 9-12) are editor filler, containers an
   assert.deepEqual([o(0, 9), o(0, 12), o(0, 8), o(0, 13), o(98, 10), o(5, 9)].map(isEditorFiller), [true, true, false, false, false, false]);
   assert.deepEqual([44, 45, 47, 51, 53, 57, 58].map((k) => isEditorFiller(o(0, k))), [false, true, true, false, true, true, false]); // 51 is the flame
 });
+
+test('hero traits: Elim tougher, Kusa more mana and spell power, Raening hits harder with a bow', async () => {
+  const { HERO_TRAITS, traitOf } = await import('../src/game/stats');
+  assert.ok(HERO_TRAITS.Elim.hp > HERO_TRAITS.Kusa.hp);
+  assert.ok(HERO_TRAITS.Kusa.mana > HERO_TRAITS.Elim.mana && HERO_TRAITS.Kusa.spell > HERO_TRAITS.Raening.spell);
+  assert.ok(HERO_TRAITS.Raening.bow > 1);
+  assert.equal(traitOf('nobody').hp, 1);
+});
