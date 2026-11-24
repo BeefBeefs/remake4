@@ -112,6 +112,24 @@ async function boot(): Promise<void> {
   interface Prop { object: number; x: number; y: number; meta: SpriteSheetMeta; record: number; actor: SpriteActor; t: number }
   const props: Prop[] = [];
 
+  // objects that only appear once a script's NEW_OBJECT puts them on the map (Ompherjo, Patewoos, the sealed sword...)
+  const newTargets = new Set<string>();
+  for (const sf of scriptFiles)
+    for (const op of sf.file.ops) if (op.t === 'cmd' && op.name === 'NEW_OBJECT') newTargets.add(`${Number(op.args[0])}:${Number(op.args[3])}`);
+  function blocksOf(mapNo: number, objectId: number): { fi: number; block: EvtBlock }[] {
+    const list: { fi: number; block: EvtBlock }[] = [];
+    scriptFiles.forEach((sf, fi) => sf.file.blocks.forEach((block) => block.map === mapNo && block.object === objectId && list.push({ fi, block })));
+    return list;
+  }
+  async function addNpc(mapNo: number, objectId: number, x: number, y: number, placedRec?: number): Promise<void> {
+    const blocks = blocksOf(mapNo, objectId);
+    if (!blocks.length) return;
+    let record: number | null = story.gos.get(`${mapNo}:${objectId}`) ?? placedRec ?? npcSpriteRecord(blocks[0].block.name);
+    if (record !== null && !spriteMeta.records[record]?.frames.length) record = npcSpriteRecord(blocks[0].block.name);
+    const actor = record === null ? null : await renderer.createSprite(spriteMeta);
+    npcs.push({ object: objectId, name: blocks[0].block.name.trim() || `object ${objectId}`, x, y, record, actor, blocks, t: Math.random() });
+  }
+
   async function buildMapObjects(mapNo: number, objs: MapObject[]): Promise<void> {
     for (const n of npcs) if (n.actor) renderer.removeSprite(n.actor);
     npcs.length = 0;
@@ -130,21 +148,20 @@ async function boot(): Promise<void> {
       if (!meta.records[o.kind]?.frames.length) continue;
       props.push({ object: o.index, x: o.x * TILE_W + TILE_W / 2, y: o.y * TILE_H + TILE_H - 2, meta, record: o.kind, actor: await renderer.createSprite(meta), t: Math.random() * 2 });
     }
-    const byObject = new Map<number, { fi: number; block: EvtBlock }[]>();
-    scriptFiles.forEach((sf, fi) =>
-      sf.file.blocks.forEach((block) => {
-        if (block.map !== mapNo) return;
-        const list = byObject.get(block.object) ?? [];
-        list.push({ fi, block });
-        byObject.set(block.object, list);
-      }),
-    );
-    for (const [objectId, blocks] of byObject) {
+    const objectIds = new Set<number>();
+    scriptFiles.forEach((sf) => sf.file.blocks.forEach((b) => b.map === mapNo && objectIds.add(b.object)));
+    for (const objectId of objectIds) {
+      const key = `${mapNo}:${objectId}`;
+      if (story.removed.has(key)) continue;
+      const placed = story.placed.get(key);
+      if (placed) {
+        await addNpc(mapNo, objectId, placed.x * TILE_W + TILE_W / 2, placed.y * TILE_H + TILE_H - 2, placed.rec);
+        continue;
+      }
+      if (newTargets.has(key)) continue; // not on the map yet
       const o = objs.find((x) => x.index === objectId);
       if (!o) continue;
-      const record = story.gos.get(`${mapNo}:${objectId}`) ?? npcSpriteRecord(blocks[0].block.name);
-      const actor = record === null ? null : await renderer.createSprite(spriteMeta);
-      npcs.push({ object: objectId, name: blocks[0].block.name.trim() || `object ${objectId}`, x: o.x * TILE_W + TILE_W / 2, y: o.y * TILE_H + TILE_H - 2, record, actor, blocks, t: Math.random() });
+      await addNpc(mapNo, objectId, o.x * TILE_W + TILE_W / 2, o.y * TILE_H + TILE_H - 2);
     }
   }
   function nearestNpc(x: number, y: number, reach: number): Npc | null {
@@ -242,6 +259,20 @@ async function boot(): Promise<void> {
               }
             refreshNpcList();
           }
+        }
+      }
+      if (name === 'NEW_OBJECT' && args.length >= 5) {
+        // map x y object sprite extra: the script object appears at that cell, drawn as SPRITE.GOS record `sprite`
+        const [m, x, y, obj, rec] = args.map(Number);
+        story.placed.set(`${m}:${obj}`, { x, y, rec });
+        if (m === mapNoNow) {
+          for (let i = npcs.length - 1; i >= 0; i--)
+            if (npcs[i].object === obj) {
+              if (npcs[i].actor) renderer.removeSprite(npcs[i].actor!);
+              npcs.splice(i, 1);
+            }
+          await addNpc(m, obj, x * TILE_W + TILE_W / 2, y * TILE_H + TILE_H - 2, rec);
+          refreshNpcList();
         }
       }
       if (name === 'CHANGE' && curNpc) {

@@ -110,7 +110,10 @@ Open: kind -> sheet mapping, enemy stats/AI, hero HP and damage, trailer tables,
   becomes SPRITE.GOS record n; remembered in `story.gos`, saved).
 - CHANGE n: the EVT block header is `id map object name kind extra`; an object with several blocks (quest stages) answers
   with the entry whose id is n after `CHANGE n`, `CHANGE 0` returns to the first (`story.entry`, saved, `pickBlock`).
-- Still not done: NEW_OBJECT (args map x y a b c; `a` looks like a face / npc id, `b` a SPRITE or monster number), UNSEAL n (opens map n; the initial open set is unknown
+- NEW_OBJECT map x y object sprite extra: the script object (Ompherjo, Patewoos, the God Stone, Shining...) appears at that cell as
+  SPRITE.GOS record `sprite`; until then it is not on the map (`story.placed`, saved). Checked: every target has an EVT block,
+  and the sprite numbers fit the names (Shining 59, Ompherjo 15/16). Object 20 of c1 (Hellminor) uses sprite 70 = none (a boss; not spawned).
+- Still not done: UNSEAL n (opens map n; the initial open set is unknown
   so the world map still lists everything), STONE map amount.
 - EVT files carry Korean design notes (cp949 comments after the scripts) that explain the quests; worth mining.
 

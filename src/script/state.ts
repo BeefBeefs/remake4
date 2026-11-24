@@ -14,6 +14,8 @@ export class StoryState {
   gos = new Map<string, number>();
   /** talk entry an object currently answers with ("map:object" -> block id), set by CHANGE n; absent = its first entry */
   entry = new Map<string, number>();
+  /** script objects a NEW_OBJECT has put on the map ("map:object" -> cell and SPRITE record) */
+  placed = new Map<string, { x: number; y: number; rec: number }>();
   money = 0;
   level = 1;
   /** experience towards the next level (party-wide) */
