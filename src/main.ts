@@ -736,6 +736,7 @@ async function boot(): Promise<void> {
   lvEl.style.textAlign = 'right';
   partyEl.prepend(lvEl);
   let respawnT = 0;
+  const helpT = new Map<Hero, number>(); // seconds a living hero has stood next to a fallen one
 
   // ---------------------------------------------------------------- input
   const keys = new Set<string>();
@@ -1003,6 +1004,22 @@ async function boot(): Promise<void> {
         ground.splice(pk, 1);
       }
       if (toastT > 0 && (toastT -= dt) <= 0) toastEl.style.display = 'none';
+      // "if you are killed your companions can revive you": stand next to a fallen hero for two seconds
+      for (const down of heroes) {
+        if (!down.dead) {
+          helpT.delete(down);
+          continue;
+        }
+        const near = !running && heroes.some((h) => !h.dead && Math.hypot(h.x - down.x, (h.y - down.y) / 0.625) < 44);
+        const t = near ? (helpT.get(down) ?? 0) + dt : 0;
+        if (t > 2 && !party.allDead) {
+          down.revive();
+          down.hp = Math.max(1, Math.round(down.maxHp * 0.3));
+          helpT.delete(down);
+          void addEffect(visual('MGC-EFF', 1, 10, down.x, down.y));
+          toast(`${down.name} is back on their feet`);
+        } else helpT.set(down, t);
+      }
       heroes.forEach((h, i) => {
         lvEl.textContent = `Lv ${story.level} · xp ${story.xp}/${xpToNext(story.level)}`;
         bars[i].mfill.style.width = `${(100 * h.mana) / Math.max(1, h.maxMana)}%`;

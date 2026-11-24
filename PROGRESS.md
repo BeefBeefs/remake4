@@ -178,3 +178,4 @@ Open: kind -> sheet mapping, enemy stats/AI, hero HP and damage, trailer tables,
 - Read the disc manual (`docs/QUESTS.md`): confirms village names, the three requirements for the underworld, the quest list, and that heroes can revive each other (not implemented yet).
 - Mantis Trainer needs level >= 16 and Strength >= 60; placeholder growth gave Strength 40 at level 16, so STRENGTH per level is now 4 (70 at 16). Test added.
 - Looked at the d6 white patches: six bone-floor tiles in the source art, left alone.
+- Companion revive from the manual: a living hero standing within ~44px of a fallen one for 2 s revives them at 30% life (unless the whole party is down). Browser-tested.
