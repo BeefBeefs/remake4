@@ -44,6 +44,8 @@
     #movie video { max-width: 100%; max-height: 100%; }
     #title { position: fixed; inset: 0; background: #000; display: none; flex-direction: column; align-items: center; justify-content: center; z-index: 6; gap: 12px; cursor: pointer; }
     #title img { max-width: 100%; max-height: 80%; image-rendering: pixelated; }
+    #title .menu { display: flex; gap: 12px; animation: none; opacity: 1; }
+    #title .menu button { background: #000a; color: #eed; border: 2px solid #8aa0d8; border-radius: 6px; padding: 10px 22px; font: inherit; font-size: 18px; }
     #title div { font-size: 16px; letter-spacing: .1em; opacity: .8; animation: blink 1.6s infinite; }
     @keyframes blink { 50% { opacity: .25; } }
     #status { position: fixed; left: 8px; bottom: 6px; color: #cbb; text-shadow: 0 0 3px #000; pointer-events: none; }

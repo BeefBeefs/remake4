@@ -101,13 +101,26 @@ export class MoviePlayer {
   }
 }
 
-/** Title picture; the first click also unlocks audio. */
-export function showTitle(el: HTMLElement, onStart: () => void): void {
+/** Title picture; the first click also unlocks audio. With a save, the player picks Continue or New game. */
+export function showTitle(el: HTMLElement, hasSave: boolean, onStart: () => void, onNewGame: () => void): void {
   el.style.display = 'flex';
-  el.innerHTML = `<img src="${assetUrl('images/title-01.webp')}" alt="Akuma"><div>click / tap to begin</div>`;
-  el.onclick = () => {
+  const start = (): void => {
     el.style.display = 'none';
     onStart();
+  };
+  el.innerHTML = `<img src="${assetUrl('images/title-01.webp')}" alt="Akuma">` +
+    (hasSave
+      ? '<div class="menu"><button data-c>Continue</button><button data-n>New game</button></div>'
+      : '<div>click / tap to begin</div>');
+  if (!hasSave) {
+    el.onclick = start;
+    return;
+  }
+  el.onclick = null;
+  el.querySelector<HTMLElement>('[data-c]')!.onclick = start;
+  el.querySelector<HTMLElement>('[data-n]')!.onclick = (e) => {
+    e.stopPropagation();
+    if (confirm('Erase the saved game and start over?')) onNewGame();
   };
 }
 

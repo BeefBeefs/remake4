@@ -92,7 +92,14 @@ Open: kind -> sheet mapping, enemy stats/AI, hero HP and damage, trailer tables,
 - World map: markers sit at the EXE's positions (map index carries wx / wy / world); real world vs underworld tab by order.
 - Z / X / C select Elim / Kusa / Raening (manual hot keys).
 
+## Session 1j
+- Save / load (`src/game/save.ts`): story flags, items, quest log, money, level/xp, stats, spells, each hero's life/mana/gear,
+  leader, map and position go to localStorage (`akuma.save.v1`) every 5 s, when the tab is hidden and on every map change.
+  The title offers Continue / New game when a save exists. A `#map` or `?map=` link is a debug jump: it neither loads nor
+  writes the save (and only those links get the `#map` hash written back). Enemies and ground items are not saved
+  (the map reloads fresh). Original save format is not decoded (not needed).
+
 ## Next ideas
 - Per-hero growth / real stat formulas; monster bytes b2 b4-b7; hero base stats / level / experience, magic (12 spells with names known), real enemy stats.
 - NEW_OBJECT, BASIC event triggers (GO_BASIC_EVENT), save / load.
-- Real collision rules, trailer class meanings.
+- Real collision rules, trailer class meanings. Remaining spells; per-hero stat growth.

@@ -13,6 +13,7 @@ import { derive, LEVEL_GAIN, mitigate, Slot, slotOf, xpToNext } from './game/sta
 import { InventoryUI } from './ui/inventory';
 import { GAME_TRACKS, MoviePlayer, showTitle, WorldMapUI } from './ui/overlays';
 import { Party } from './game/party';
+import { applyStory, makeSave, parseSave, SAVE_KEY } from './game/save';
 import { TILE_H, TILE_W, World } from './game/world';
 import { loadItemStats, loadLang, loadMonsters, loadMap, loadMapIndex, loadSpriteMeta, loadText, loadTilesets } from './data/loaders';
 import { MapIndexEntry, SpriteSheetMeta, TilesetTable } from './data/types';
@@ -56,6 +57,8 @@ async function boot(): Promise<void> {
   const renderer = new GameRenderer(canvas);
   const audio = new AudioPlayer();
   const story = new StoryState();
+  // a #map or ?map= link is a debugging jump: it neither loads nor writes the save
+  const devMode = !!location.hash || params.has('map');
   const metas = new Map<string, SpriteSheetMeta>();
   const actors: SpriteActor[] = [];
   const heroes: Hero[] = [];
@@ -170,9 +173,22 @@ async function boot(): Promise<void> {
     await buildMapObjects(index.findIndex((m) => m.id === entry.id) + 1, parseMapObjects(map.trailer, map.w, map.h));
     party.placeAt(spawn.x, spawn.y);
     audio.setPlaylist(GAME_TRACKS);
-    history.replaceState(null, '', `#${entry.id}`);
+    if (devMode) history.replaceState(null, '', `#${entry.id}`);
     mapSelect.value = entry.id;
     refreshNpcList();
+    if (!restoring) saveGame();
+  }
+
+  // ---------------------------------------------------------------- save / load
+  let restoring = false;
+  function saveGame(): void {
+    if (devMode || restoring || party.allDead) return;
+    try {
+      const l = party.leader;
+      localStorage.setItem(SAVE_KEY, JSON.stringify(makeSave(story, heroes, party.leaderIndex, mapEntry.id, l.x, l.y)));
+    } catch {
+      /* storage full or blocked: playing on without saving is better than a crash */
+    }
   }
 
   // ---------------------------------------------------------------- scripts
@@ -582,8 +598,36 @@ async function boot(): Promise<void> {
   }
 
   // ---------------------------------------------------------------- loop
-  const startedWithMap = !!location.hash || params.has('map');
-  await enterMap((location.hash.slice(1) || params.get('map') || 't1').toLowerCase());
+  let saved: ReturnType<typeof parseSave> = null;
+  if (!devMode) {
+    try {
+      saved = parseSave(localStorage.getItem(SAVE_KEY), heroes.length);
+    } catch {
+      saved = null;
+    }
+  }
+  if (saved) {
+    restoring = true;
+    applyStory(story, saved);
+    heroes.forEach((h, i) => {
+      h.gear = { ...saved!.heroes[i].gear };
+    });
+    refreshHeroStats();
+    await enterMap(saved.map);
+    party.placeAt(saved.x - (saved.leader - 1) * 22, saved.y); // placeAt spreads the heroes around the given point
+    heroes.forEach((h, i) => {
+      h.hp = Math.min(h.maxHp, Math.max(1, saved!.heroes[i].hp));
+      h.mana = Math.min(h.maxMana, saved!.heroes[i].mana);
+    });
+    party.setLeader(saved.leader);
+    refreshActButtons();
+    restoring = false;
+  } else {
+    await enterMap((location.hash.slice(1) || params.get('map') || 't1').toLowerCase());
+  }
+  window.addEventListener('pagehide', saveGame);
+  document.addEventListener('visibilitychange', () => document.hidden && saveGame());
+  let saveT = 0;
 
   let last = performance.now();
   let statusT = 0;
@@ -734,6 +778,11 @@ async function boot(): Promise<void> {
         }
       }
       renderer.render(party.leader.x, party.leader.y - 20);
+      saveT += dt;
+      if (saveT > 5) {
+        saveT = 0;
+        saveGame();
+      }
       statusT += dt;
       if (statusT > 0.25) {
         statusT = 0;
@@ -746,11 +795,23 @@ async function boot(): Promise<void> {
   }
   requestAnimationFrame(frame);
 
-  if (!params.has('notitle') && !startedWithMap) {
-    showTitle(document.getElementById('title')!, () => {
-      audio.unlock();
-      musicBtn.textContent = `♪ music: ${audio.isMusicOn() ? 'on' : (audio.toggleMusic(), 'on')}`;
-    });
+  if (!params.has('notitle') && !devMode) {
+    showTitle(
+      document.getElementById('title')!,
+      !!saved,
+      () => {
+        audio.unlock();
+        musicBtn.textContent = `♪ music: ${audio.isMusicOn() ? 'on' : (audio.toggleMusic(), 'on')}`;
+      },
+      () => {
+        try {
+          localStorage.removeItem(SAVE_KEY);
+        } catch {
+          /* ignore */
+        }
+        location.reload();
+      },
+    );
   }
 
   // handy for poking around in the browser console

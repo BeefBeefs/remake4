@@ -6,6 +6,8 @@ import { parseMap } from '../src/data/loaders';
 import { TILE_H, TILE_W, World } from '../src/game/world';
 import { buildChunk, CHUNK } from '../src/render/tilemesh';
 import { Hero } from '../src/game/hero';
+import { applyStory, makeSave, parseSave } from '../src/game/save';
+import { StoryState } from '../src/script/state';
 import { ItemStats, LangData, SpriteSheetMeta, TilesetTable } from '../src/data/types';
 
 const A = (p: string) => new URL(`../public/assets/${p}`, import.meta.url);
@@ -352,4 +354,47 @@ test('monster table: records line up with the string table and drive Enemy stats
   tiger.damage(10);
   assert.ok(before - tiger.hp < 10 && before - tiger.hp >= 1, 'defense softens the hit');
   assert.ok(tiger.xp > 5);
+});
+
+const heroes = [
+  { hp: 40.2, mana: 12.7, gear: { weapon: 5 } },
+  { hp: 10, mana: 0, gear: {} },
+  { hp: 99, mana: 50, gear: { armor: 60 } },
+];
+test('save games round-trip story state and party condition', () => {
+  const s = new StoryState();
+  s.flags.add(7);
+  s.giveItem(151, 3);
+  s.orders.set(2, { title: 'Quest', ment: ['a', 'b'] });
+  s.money = 123;
+  s.level = 4;
+  s.xp = 9;
+  s.stats.MAGIC = 21;
+  s.magic.set(1, 1);
+  const text = JSON.stringify(makeSave(s, heroes, 2, 'a3', 100.4, 200.6));
+  const d = parseSave(text, 3)!;
+  assert.ok(d);
+  assert.equal(d.map, 'a3');
+  assert.equal(d.x, 100);
+  assert.equal(d.y, 201);
+  assert.equal(d.leader, 2);
+  assert.equal(d.heroes[0].hp, 41);
+  assert.equal(d.heroes[0].mana, 12);
+  const t = new StoryState();
+  applyStory(t, d);
+  assert.ok(t.flags.has(7));
+  assert.equal(t.itemCount(151), 3);
+  assert.deepEqual(t.orders.get(2), { title: 'Quest', ment: ['a', 'b'] });
+  assert.equal(t.money, 123);
+  assert.equal(t.level, 4);
+  assert.equal(t.stats.MAGIC, 21);
+  assert.ok(t.magic.has(1));
+});
+test('save games reject damaged or foreign saves', () => {
+  assert.equal(parseSave(null, 3), null);
+  assert.equal(parseSave('not json', 3), null);
+  assert.equal(parseSave('{"v":2}', 3), null);
+  const ok = JSON.stringify(makeSave(new StoryState(), heroes, 0, 't1', 1, 1));
+  assert.ok(parseSave(ok, 3));
+  assert.equal(parseSave(ok, 2), null); // wrong party size
 });
