@@ -6,7 +6,7 @@ import { parseMap } from '../src/data/loaders';
 import { TILE_H, TILE_W, World } from '../src/game/world';
 import { buildChunk, CHUNK } from '../src/render/tilemesh';
 import { Hero } from '../src/game/hero';
-import { SpriteSheetMeta, TilesetTable } from '../src/data/types';
+import { ItemStats, LangData, SpriteSheetMeta, TilesetTable } from '../src/data/types';
 
 const A = (p: string) => new URL(`../public/assets/${p}`, import.meta.url);
 const json = <T>(p: string) => JSON.parse(readFileSync(A(p), 'utf8')) as T;
@@ -264,8 +264,7 @@ function ENEMY_OK(name: string): boolean {
 
 test('item stats: manual prices line up with the string table names', async () => {
   const { ItemDb } = await import('../src/game/itemdb');
-  const lang = json('text/lang.json');
-  const db = new ItemDb(lang, json('text/itemstats.json'));
+  const db = new ItemDb(json<LangData>('text/lang.json'), json<ItemStats>('text/itemstats.json'));
   assert.equal(db.price(1), 120); // Copper Sword
   assert.equal(db.name(1), 'Copper Sword');
   assert.equal(db.stat(33).atk, 95); // Blood Sword (event-only: weight / price columns swapped in the manual)
