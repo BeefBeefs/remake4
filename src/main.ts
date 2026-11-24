@@ -797,9 +797,12 @@ async function boot(): Promise<void> {
     }
   }
   if (!saved) for (const n of initialSeals) story.sealed.add(n);
+  // the scripts test NUM 1/2/3 for "hero 1/2/3 is in the party" ("Kusa or me"); nothing grants them, so the engine does
+  heroes.forEach((_, i) => story.flags.add(i + 1));
   if (saved) {
     restoring = true;
     applyStory(story, saved);
+    heroes.forEach((_, i) => story.flags.add(i + 1)); // saves from before the party flags existed lack them
     heroes.forEach((h, i) => {
       h.gear = { ...saved!.heroes[i].gear };
     });

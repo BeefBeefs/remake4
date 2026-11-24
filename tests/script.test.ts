@@ -111,3 +111,10 @@ test('Shopkeeper accept answer (label-less GO_DOWN) starts the scales quest', as
   assert.ok(log.some((l) => l.startsWith('fx:UNSEAL:13')), 'Dream Shadow Mountain opened');
   assert.ok(!log.some((l) => l.startsWith('WARN')), log.filter((l) => l.startsWith('WARN')).join('\n'));
 });
+
+test('"GO_ DOWN" typo in a CASE still parses as GO_DOWN', () => {
+  const evt = parseEvt(['# 1', '# 1', '# 1', '# "T"', '# FLOW', '# 0', '@ SELECT 1 1 1', 'CASE "a" GO_ DOWN X', 'SELECT_END', '* X', '@ END'].join('\n'));
+  const c = evt.ops.find((o) => o.t === 'case');
+  assert.ok(c && c.t === 'case');
+  assert.deepEqual(c.action, ['GO_DOWN', 'X']);
+});

@@ -143,7 +143,7 @@ export function parseEvt(text: string): EvtFile {
     const word = s.split(/\s+/)[0].toUpperCase();
     if (word === 'CASE') {
       const m = /^CASE\s+"(.*)"\s*(.*)$/.exec(s);
-      if (m) ops.push({ t: 'case', text: m[1], action: tokens(m[2]), line });
+      if (m) ops.push({ t: 'case', text: m[1], action: tokens(m[2].replace(/^GO_ (DOWN|UP)\b/i, 'GO_$1')), line }); // 'GO_ DOWN' typo ships in the data
       else {
         const t = tokens(s.slice(4));
         ops.push({ t: 'case', text: String(t[0] ?? ''), action: t.slice(1), line });

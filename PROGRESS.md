@@ -161,3 +161,8 @@ Open: kind -> sheet mapping, enemy stats/AI, hero HP and damage, trailer tables,
 ## Session 1p – quest turn-in
 - Re-ran the T1 NPC walk with a loop-avoiding harness: all 7 NPCs run to the end with no script warnings. Shopkeeper scales quest verified end to end (accept -> UNSEAL 13 -> hand in item 209 -> Flygon dagger, order cleared).
 - `CHANGE 0` is used 54x, mostly right after a quest finishes. It now stores entry -1 = the object's plain BASIC entry (shop / chat) instead of the first FLOW entry, so finished quests are not offered again. Falls back to the default entry when the object has no BASIC block. Old saves are unaffected (entry 0 was never stored).
+
+## Session 1q – whole-game NPC walk
+- Added `walkmap.mjs` (outside the repo): runs every NPC block on a map with loop-avoiding choices, advancing by clicking the dialogue (a trailing Enter after the dialogue closes re-triggered talk-to-nearest and looked like a stall). All 42 maps walked: no stalls, no errors.
+- Fixed `GO_ DOWN` typo (Jeweler#76 in the underworld village) in the parser.
+- Story audit (items/flags required by scripts vs. provided): every required item has a source. NUM 1/2/3 are "hero 1/2/3 in party" (Witch: "Kusa or me") and nothing grants them; the engine now sets them. Still unprovided: NUM 34 (Blacksmith#11 needs 33 && 34; probably set by the boss death event 34), NUM 64 and 49 (cleanup only).
