@@ -512,4 +512,5 @@ test('unscripted NPC-model objects (kinds 9-12) are editor filler, containers an
   const { isEditorFiller } = await import('../src/data/mapobjects');
   const o = (cls: number, kind: number) => ({ index: 0, facing: 5, x: 0, y: 0, cls, kind, extra: 0 });
   assert.deepEqual([o(0, 9), o(0, 12), o(0, 8), o(0, 13), o(98, 10), o(5, 9)].map(isEditorFiller), [true, true, false, false, false, false]);
+  assert.deepEqual([44, 45, 47, 51, 53, 57, 58].map((k) => isEditorFiller(o(0, k))), [false, true, true, false, true, true, false]); // 51 is the flame
 });

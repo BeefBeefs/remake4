@@ -58,5 +58,10 @@ export function monsterSpawns(objs: MapObject[]): MapObject[] {
  * map through their script entry and are unaffected.
  */
 export function isEditorFiller(o: MapObject): boolean {
-  return o.cls === 0 && o.kind >= 9 && o.kind <= 12;
+  return o.cls === 0 && ((o.kind >= 9 && o.kind <= 12) || isMarkerSprite(o.kind));
+}
+
+/** SPRITE.GOS records 45-50 and 52-57 are plain 16x32 rectangles in the editor's marker grey (8b898b) / purple (83507b) */
+export function isMarkerSprite(kind: number): boolean {
+  return kind >= 45 && kind <= 57 && kind !== 51;
 }

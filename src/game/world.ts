@@ -54,19 +54,19 @@ export class World {
    * nearest visible ground tile to stand in for it, looking left / up first, or -1 when none is close.
    */
   groundFill(cx: number, cy: number): number {
-    for (let r = 1; r <= 4; r++) {
+    let anyVisible = -1;
+    for (let r = 1; r <= 5; r++) {
       for (let dy = -r; dy <= r; dy++) {
         for (let dx = -r; dx <= r; dx++) {
           if (Math.max(Math.abs(dx), Math.abs(dy)) !== r) continue;
-          const x = cx + dx;
-          const y = cy + dy;
-          if (x < 0 || y < 0 || x >= this.map.w || y >= this.map.h) continue;
-          const t = this.ground(x, y);
-          if (this.isTile(t) && !this.isHidden(t)) return t;
+          const t = this.ground(cx + dx, cy + dy);
+          if (!this.isTile(t) || this.isHidden(t)) continue;
+          if (!this.punched.has(t)) return t; // a whole tile: no holes of its own
+          if (anyVisible < 0) anyVisible = t;
         }
       }
     }
-    return -1;
+    return anyVisible;
   }
 
   /** art tile that had editor marker colours removed from parts of it (transparent holes) */

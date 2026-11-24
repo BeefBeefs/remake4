@@ -82,8 +82,12 @@ def build_tiles(disc, out):
                 m_ = (t == np.array(mc, np.uint8)).all(-1)
                 hole |= m_
                 blk[..., 3] = np.where(m_, 0, blk[..., 3])
-            if hole.any() and not hole.all():
-                punched.append(i)  # art tile with marker-coloured pixels removed: needs a floor drawn underneath
+            # full-width bands of pure black (4 rows or more) inside an otherwise drawn tile are the editor's painting too,
+            # not a cliff edge (those are diagonal): draw the floor under them as well
+            black_rows = int((t.sum(-1) == 0).all(-1).sum())
+            band = 4 <= black_rows < t.shape[0]
+            if (hole.any() and not hole.all()) or band:
+                punched.append(i)  # art tile with marker-coloured pixels or black bands removed: needs a floor drawn underneath
             if (t == t[0, 0]).all():
                 solid.append([i, int(t[0, 0, 0]), int(t[0, 0, 1]), int(t[0, 0, 2])])
             # grey 8b898b / purple 83507b are editor markers (collision / void), never art. Some marker
