@@ -13,6 +13,7 @@ export interface SaveData {
     items: [number, number][];
     orders: [number, { title: string; ment: string[] }][];
     money: number;
+    year?: number;
     level: number;
     xp: number;
     stats: Record<StatName, number>;
@@ -53,6 +54,7 @@ export function makeSave(
       items: [...story.items],
       orders: [...story.orders],
       money: story.money,
+      year: story.year,
       level: story.level,
       xp: story.xp,
       stats: { ...story.stats },
@@ -92,6 +94,7 @@ export function applyStory(story: StoryState, d: SaveData): void {
   story.items = new Map(d.story.items);
   story.orders = new Map(d.story.orders);
   story.money = d.story.money;
+  story.year = isNum(d.story.year) ? d.story.year : 123; // a save from before the clock existed keeps every quest open
   story.level = d.story.level;
   story.xp = d.story.xp;
   story.stats = { ...story.stats, ...d.story.stats };

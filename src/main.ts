@@ -11,6 +11,7 @@ import { directionFromVector } from './game/anim';
 import { arrow, aura, Effect, effectFrame, fireBall, fireWall, ghostBolt, lightning, rain, shell, updateEffect, visual } from './game/effects';
 import { derive, LEVEL_GAIN, mitigate, Slot, slotOf, traitOf, xpToNext } from './game/stats';
 import { InventoryUI } from './ui/inventory';
+import { advanceYear } from './game/clock';
 import { Buff, BUFF_SECONDS } from './game/consumables';
 import { QuestLog } from './ui/quests';
 import { GAME_TRACKS, MoviePlayer, showSlides, showTitle, WorldMapUI } from './ui/overlays';
@@ -22,7 +23,7 @@ import { MapIndexEntry, SpriteSheetMeta, TilesetTable } from './data/types';
 import { GameRenderer, SpriteActor, VIEW_H, VIEW_W } from './render/renderer';
 import { Arg, EvtBlock, EvtFile, parseEvt } from './script/parser';
 import { EvtInterpreter } from './script/interpreter';
-import { shiftMapNumbers, UNDERWORLD_OFFSET } from './script/mapnumbers';
+import { SHARED_QUEST_FLAGS, shiftMapNumbers, UNDERWORLD_OFFSET } from './script/mapnumbers';
 import { breakableFrame, containerDrop, isBreakable } from './game/breakables';
 import { INSTANT_UNDER_MAP, InstantKind, instantBlocks, instantKindOfSprite } from './game/instant';
 import { StatName, StoryState } from './script/state';
@@ -199,6 +200,14 @@ async function boot(): Promise<void> {
     }
     return null;
   }
+  /** the entry this object answers with now: the one a script chose, else by game year (see pickBlock), else its plain entry */
+  function chooseBlock(n: Npc): { fi: number; block: EvtBlock } | null {
+    const pick = pickBlock(n.blocks, story.entry.get(`${mapEntryNo()}:${n.object}`), story.year);
+    if (pick) return pick;
+    const first = n.blocks[0];
+    const basic = first && basicBlockFor(scriptFiles[first.fi].file.blocks, first.block.name, mapEntry.id, story.year);
+    return basic ? { fi: first.fi, block: basic } : null;
+  }
   function nearestNpc(x: number, y: number, reach: number): Npc | null {
     let best: Npc | null = null;
     let bd = reach;
@@ -309,6 +318,7 @@ async function boot(): Promise<void> {
       if (name === 'GO_END1') {
         // the hellgate opens: on to the underworld (its first place on the map table is Death Rock; the real entry is a guess)
         story.flags.add(9001);
+        for (const f of SHARED_QUEST_FLAGS) story.flags.delete(f);
         await showSlides(document.getElementById('movie')!, [{ image: 'end1.webp', text: 'The hellgate has opened...\nThe heroes descend into the underworld.' }]);
         await enterMap('b1');
       }
@@ -343,7 +353,7 @@ async function boot(): Promise<void> {
         const n = Number(args[0]);
         const key = `${mapNoNow}:${curNpc.object}`;
         if (n > 0) story.entry.set(key, n);
-        else story.entry.set(key, -1);
+        else story.entry.set(key, -Math.max(100, runningExtra)); // finished: plain entry until a later year's quest unlocks
       }
       if (name === 'CHANGE_GOS' && curNpc && Number.isFinite(Number(args[0]))) {
         // the speaking object turns into SPRITE.GOS record n (a shattered door, a revealed demon...)
@@ -396,6 +406,7 @@ async function boot(): Promise<void> {
     return `${db.name(id)}${st ? ' (' + st + ')' : ''}`;
   };
   let running = false;
+  let runningExtra = 100;
   async function runBlock(file: EvtFile, block: EvtBlock): Promise<void> {
     if (running) return;
     running = true;
@@ -403,11 +414,12 @@ async function boot(): Promise<void> {
     party.leader.input.x = party.leader.input.y = 0;
     let cur = block;
     for (let hops = 0; hops < 3; hops++) {
+      runningExtra = cur.extra;
       const res = await new EvtInterpreter(file, cur, story, dlg).run();
       if (res.reason === 'ERROR') console.error('[script]', res.message);
       if (res.reason !== 'BASIC') break;
       // GO_BASIC_EVENT: fall back to the object's default (BASIC) entry - the shop / plain talk
-      const basic = basicBlockFor(file.blocks, cur.name, mapEntry.id);
+      const basic = basicBlockFor(file.blocks, cur.name, mapEntry.id, story.year);
       if (!basic) break;
       cur = basic;
     }
@@ -845,8 +857,8 @@ async function boot(): Promise<void> {
     const tapped = nearestNpc(wx, wy - 16, 30);
     if (tapped) {
       if (Math.hypot(tapped.x - party.leader.x, (tapped.y - party.leader.y) / 0.625) < 80) {
-        const pick = pickBlock(tapped.blocks, story.entry.get(`${mapEntryNo()}:${tapped.object}`));
-        if (!running) void runBlock(scriptFiles[pick.fi].file, pick.block);
+        const pick = chooseBlock(tapped);
+        if (pick && !running) void runBlock(scriptFiles[pick.fi].file, pick.block);
         return;
       }
     }
@@ -902,9 +914,9 @@ async function boot(): Promise<void> {
       return;
     }
     if (!n) return;
-    const pick = pickBlock(n.blocks, story.entry.get(`${mapEntryNo()}:${n.object}`));
+    const pick = chooseBlock(n);
     audio.unlock();
-    void runBlock(scriptFiles[pick.fi].file, pick.block);
+    if (pick) void runBlock(scriptFiles[pick.fi].file, pick.block);
   }
 
   function readKeys(): void {
@@ -934,6 +946,7 @@ async function boot(): Promise<void> {
     restoring = true;
     applyStory(story, saved);
     heroes.forEach((_, i) => story.flags.add(i + 1)); // saves from before the party flags existed lack them
+    if (params.has('year')) story.year = Number(params.get('year'));
     heroes.forEach((h, i) => {
       h.gear = { ...saved!.heroes[i].gear };
     });
@@ -948,6 +961,7 @@ async function boot(): Promise<void> {
     refreshActButtons();
     restoring = false;
   } else {
+    if (params.has('year')) story.year = Number(params.get('year')); // debugging: ?year=123 unlocks every quest entry
     await enterMap((location.hash.slice(1) || params.get('map') || 't1').toLowerCase());
   }
   window.addEventListener('pagehide', saveGame);
@@ -964,6 +978,7 @@ async function boot(): Promise<void> {
     if (world) {
       if (!dlg.open) readKeys();
       else party.leader.input.x = party.leader.input.y = 0;
+      if (!dlg.open && !running) story.year = advanceYear(story.year, dt);
       if (buffT > 0 && (buffT -= dt) <= 0) {
         buff = {};
         refreshHeroStats();
@@ -1158,7 +1173,7 @@ async function boot(): Promise<void> {
         statusT = 0;
         const l = party.leader;
         const near = dlg.open ? null : nearestNpc(lead.x, lead.y, 70);
-        status.textContent = (near ? `[E / tap] talk to ${near.name} · ` : '') + `${mapEntry.id.toUpperCase()} ${mapEntry.name} · ${l.name} cell ${Math.floor(l.x / TILE_W)},${Math.floor(l.y / TILE_H)} · tiles ${renderer.stats.drawnTiles}${lastEffect ? ' · fx: ' + lastEffect : ''}`;
+        status.textContent = (near ? `[E / tap] talk to ${near.name} · ` : '') + `Year ${Math.floor(story.year)} · ${mapEntry.id.toUpperCase()} ${mapEntry.name} · ${l.name} cell ${Math.floor(l.x / TILE_W)},${Math.floor(l.y / TILE_H)} · tiles ${renderer.stats.drawnTiles}${lastEffect ? ' · fx: ' + lastEffect : ''}`;
       }
     }
     requestAnimationFrame(frame);

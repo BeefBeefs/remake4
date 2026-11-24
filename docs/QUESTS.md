@@ -34,6 +34,11 @@ The scripts test NUM 1 / 2 / 3 for "hero 1 / 2 / 3 is in the party". If a hero d
   recited over the sword at Soul Castle; then bring it to Wizard Raegios, take the crystal key south of the castle to the
   Endless cave and kill Satan.
 
-## Timing
-The guide lists "year" numbers per quest (102-123) as if events unlock over game time. No script condition tests time
-(only NUM / ITEM / ORDER / LEVEL / MONEY / MAGIC / stats), so those years are probably the in-game order of the chain.
+## Timing (the game clock)
+The manual says "many events in the world happen after a certain amount of time in the game has elapsed" and lists each
+overworld quest with a year (102-123); the underworld has none. The last header number of every script entry (`# 115`
+below `# FLOW`) is that year (underworld entries all say 100). The save screen has a "Year" label too. The port keeps a
+clock (`src/game/clock.ts`, starts at 100, one year per 90 s of play - a guess; `?year=123` in the URL jumps ahead):
+an entry only answers once its year has come, and where one object has several entries the latest unlocked one wins
+(White Lady: ginseng/marriage at 115, "rescue Shining" at 120). A finished quest (`CHANGE 0`) leaves the object on its
+plain entry until an entry with a later year unlocks.

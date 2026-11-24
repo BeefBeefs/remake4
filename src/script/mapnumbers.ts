@@ -35,3 +35,10 @@ export function shiftMapNumbers(file: EvtFile, by: number): EvtFile {
   });
   return { ...file, ops, blocks: file.blocks.map((b) => ({ ...b, map: b.map + by })) };
 }
+
+/**
+ * Both scripts hand out "quest in progress" flags from the same range (NUM 101-111: the overworld Blacksmith's dragon
+ * scales and the underworld Intermediary's tasks both use 104), so the underworld must start with those cleared or one
+ * unfinished overworld quest would lock every Intermediary. Entering the underworld (GO_END1) clears them.
+ */
+export const SHARED_QUEST_FLAGS = [101, 103, 104, 105, 107, 108, 109, 111];

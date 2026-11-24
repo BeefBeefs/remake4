@@ -436,17 +436,17 @@ test('pickBlock honours CHANGE: an object answers with the entry the script chos
   const { pickBlock } = await import('../src/game/npcs');
   const mk = (id: number, kind: 'BASIC' | 'FLOW' = 'BASIC') => ({ fi: 0, block: { id, map: 19, object: 15, name: 'g', kind, extra: 100, line: 0, start: 0 } });
   const blocks = [mk(68), mk(69), mk(70)];
-  assert.equal(pickBlock(blocks).block.id, 68);
-  assert.equal(pickBlock(blocks, 70).block.id, 70);
-  assert.equal(pickBlock(blocks, 99).block.id, 68); // unknown id: the default entry
+  assert.equal(pickBlock(blocks)!.block.id, 68);
+  assert.equal(pickBlock(blocks, 70)!.block.id, 70);
+  assert.equal(pickBlock(blocks, 99)!.block.id, 68); // unknown id: the default entry
 });
 
 test('pickBlock: entry -1 (CHANGE 0) falls back to the BASIC entry, else the default', () => {
-  const mk = (id: number, kind: 'FLOW' | 'BASIC') => ({ fi: 0, block: { id, kind } as unknown as EvtBlock });
+  const mk = (id: number, kind: 'FLOW' | 'BASIC') => ({ fi: 0, block: { id, kind, extra: 100 } as unknown as EvtBlock });
   const both = [mk(103, 'FLOW'), mk(104, 'BASIC')];
-  assert.equal(pickBlock(both, -1).block.id, 104);
-  assert.equal(pickBlock(both, 0).block.id, 103);
-  assert.equal(pickBlock([mk(5, 'FLOW')], -1).block.id, 5);
+  assert.equal(pickBlock(both, -1)!.block.id, 104);
+  assert.equal(pickBlock(both, 0)!.block.id, 103);
+  assert.equal(pickBlock([mk(5, 'FLOW')], -1)!.block.id, 5);
 });
 
 test('STONE is a known script command with a frame count (statue puzzle)', async () => {
@@ -546,4 +546,16 @@ test('consumable effects are read from the item descriptions; passive and unsupp
   assert.deepEqual(fx(175), { cast: 2 });
   assert.deepEqual(fx(178), { smite: true });
   for (const none of [157, 158, 176, 177, 184]) assert.equal(fx(none), null, `item ${none}`);
+});
+
+test('pickBlock follows the game year: later quest entries unlock and replace earlier ones; a finished one waits for the next', () => {
+  const mk = (id: number, kind: 'FLOW' | 'BASIC', extra: number) => ({ fi: 0, block: { id, map: 1, object: 1, name: 'W', kind, extra, line: 0, start: 0 } as EvtBlock });
+  const lady = [mk(60, 'BASIC', 100), mk(54, 'FLOW', 115), mk(62, 'FLOW', 120)];
+  assert.equal(pickBlock(lady, 0, 100)!.block.id, 60); // nothing unlocked: plain entry
+  assert.equal(pickBlock(lady, 0, 115)!.block.id, 54);
+  assert.equal(pickBlock(lady, 0, 120)!.block.id, 62);
+  assert.equal(pickBlock(lady, -115, 119)!.block.id, 60); // 54 finished, 62 not yet
+  assert.equal(pickBlock(lady, -115, 121)!.block.id, 62);
+  assert.equal(pickBlock(lady, -1, 110)!.block.id, 60);
+  assert.equal(pickBlock([mk(46, 'FLOW', 123)], 0, 110), null); // a quest-only object stays quiet until its year
 });

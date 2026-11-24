@@ -34,19 +34,28 @@ export function npcSpriteRecord(name: string): number | null {
 /**
  * All blocks sharing one object id on a map: conversation (FLOW) entries first, then BASIC ones. A quest NPC has several
  * entries (one per stage); the script command `CHANGE n` makes entry id n the one it answers with, `CHANGE 0` goes back
- * to the plain BASIC entry (stored as -1), which is what keeps finished quests from being offered again.
+ * to the plain BASIC entry (stored as minus the finished entry's year, at least -100), which keeps finished quests from
+ * being offered again. Entries unlock with the game year; null means nothing answers yet (the caller tries the plain
+ * entry of the same name).
  */
-export function pickBlock(blocks: { fi: number; block: EvtBlock }[], entryId = 0): { fi: number; block: EvtBlock } {
+export function pickBlock(blocks: { fi: number; block: EvtBlock }[], entryId = 0, year = 100): { fi: number; block: EvtBlock } | null {
   if (entryId > 0) {
     const chosen = blocks.find((b) => b.block.id === entryId);
     if (chosen) return chosen;
   }
-  if (entryId < 0) {
-    // CHANGE 0 after a quest: the object falls back to its plain BASIC entry (shop / chat), not the quest-giving FLOW
-    const basic = blocks.find((b) => b.block.kind === 'BASIC');
-    if (basic) return basic;
-  }
-  return blocks.find((b) => b.block.kind === 'FLOW') ?? blocks[0];
+  // a finished quest (CHANGE 0) is stored as minus the year of its entry: the object stays on its plain entry until a
+  // quest with a later year comes up. An old save's -1 counts as "year 100".
+  const done = entryId < 0 ? Math.max(100, -entryId) : 0;
+  // quest entries unlock with the game year (the last header number of each entry); the latest one that has unlocked wins
+  let best: { fi: number; block: EvtBlock } | null = null;
+  for (const b of blocks)
+    if (b.block.kind === 'FLOW' && b.block.extra <= year && b.block.extra > done && (!best || b.block.extra > best.block.extra)) best = b;
+  if (best) return best;
+  const basic = blocks.find((b) => b.block.kind === 'BASIC');
+  if (basic) return basic;
+  // a finished quest giver without a plain entry just repeats its latest unlocked entry
+  if (entryId < 0) for (const b of blocks) if (b.block.kind === 'FLOW' && b.block.extra <= year && (!best || b.block.extra > best.block.extra)) best = b;
+  return best;
 }
 
 /**
@@ -62,8 +71,10 @@ const BASIC_BY_MAP: Record<string, Record<string, number>> = {
 };
 const BASIC_VILLAGE_ONLY = new Set([9, 10, 11, 12, 13]);
 
-export function basicBlockFor(blocks: EvtBlock[], name: string, mapId: string): EvtBlock | undefined {
-  const same = blocks.filter((b) => b.kind === 'BASIC' && b.name === name);
+export function basicBlockFor(blocks: EvtBlock[], name: string, mapId: string, year = 100): EvtBlock | undefined {
+  const same = blocks.filter((b) => b.kind === 'BASIC' && b.name === name && b.extra <= year);
   const want = BASIC_BY_MAP[mapId]?.[name];
-  return same.find((b) => b.id === want) ?? same.find((b) => !BASIC_VILLAGE_ONLY.has(b.id)) ?? same[0];
+  // of several plain entries of one name, the one for the latest year that has come wins
+  const latest = (l: EvtBlock[]) => l.reduce<EvtBlock | undefined>((a, b) => (!a || b.extra > a.extra ? b : a), undefined);
+  return same.find((b) => b.id === want) ?? latest(same.filter((b) => !BASIC_VILLAGE_ONLY.has(b.id))) ?? latest(same);
 }

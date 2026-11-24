@@ -18,6 +18,8 @@ export class StoryState {
   /** overworld places (map numbers 1-22) that are still sealed: not reachable from the world map until a script says UNSEAL n */
   sealed = new Set<number>();
   placed = new Map<string, { x: number; y: number; rec: number }>();
+  /** game clock in years: starts at 100, scripts' entries unlock when their year (last header number) has come */
+  year = 100;
   money = 0;
   level = 1;
   /** experience towards the next level (party-wide) */
