@@ -122,6 +122,9 @@ Open: kind -> sheet mapping, enemy stats/AI, hero HP and damage, trailer tables,
 - Open question: class-0 trailer objects with facing 5 and kind 5-12 (hundreds, even in caves) are drawn as SPRITE records
   5-12 (crates, barrels, and the 11-frame figures 9-12); they may really be an editor "random filler" with other art.
 
+## Session 1n
+- Quest log (`src/ui/quests.ts`, J or the Quests button): active ORDERs with their hint lines; toasts announce new / finished quests.
+
 ## Next ideas
 - Per-hero growth / real stat formulas; monster bytes b2 b4-b7; hero base stats / level / experience, magic (12 spells with names known), real enemy stats.
 - NEW_OBJECT, BASIC event triggers (GO_BASIC_EVENT), save / load.

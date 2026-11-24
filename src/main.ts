@@ -11,6 +11,7 @@ import { directionFromVector } from './game/anim';
 import { arrow, aura, Effect, effectFrame, fireBall, fireWall, ghostBolt, lightning, rain, shell, updateEffect, visual } from './game/effects';
 import { derive, LEVEL_GAIN, mitigate, Slot, slotOf, xpToNext } from './game/stats';
 import { InventoryUI } from './ui/inventory';
+import { QuestLog } from './ui/quests';
 import { GAME_TRACKS, MoviePlayer, showTitle, WorldMapUI } from './ui/overlays';
 import { Party } from './game/party';
 import { applyStory, makeSave, parseSave, SAVE_KEY } from './game/save';
@@ -560,6 +561,19 @@ async function boot(): Promise<void> {
   invBtn.textContent = 'Items (I)';
   invBtn.onclick = () => inv.toggle();
   hud.append(invBtn);
+  const quests = new QuestLog(document.getElementById('quests')!, story);
+  const questBtn = document.createElement('button');
+  questBtn.textContent = 'Quests (J)';
+  questBtn.onclick = () => quests.toggle();
+  hud.append(questBtn);
+  // announce quests as the scripts add / finish them
+  let knownOrders = new Map(story.orders);
+  function watchQuests(): void {
+    for (const [id, q] of story.orders) if (!knownOrders.has(id)) toast(`New quest: ${q.title || id}`);
+    for (const [id, q] of knownOrders) if (!story.orders.has(id)) toast(`Quest done: ${q.title || id}`);
+    knownOrders = new Map(story.orders);
+    if (quests.open) quests.render();
+  }
   const act = document.getElementById('act')!;
   const atkBtn = document.createElement('button');
   atkBtn.textContent = '⚔';
@@ -619,6 +633,7 @@ async function boot(): Promise<void> {
     const zxc = 'zxc'.indexOf(e.key.toLowerCase());
     if (zxc >= 0 && !heroes[zxc].dead) party.setLeader(zxc); // the manual's Z / X / C hot keys
     if (e.key.toLowerCase() === 'i') inv.toggle();
+    if (e.key.toLowerCase() === 'j') quests.toggle();
     if (e.key.toLowerCase() === 'f') castSpell();
     if (e.key.toLowerCase() === 'q') cycleSpell();
     if (e.key.toLowerCase() === 'm') worldUI.toggle(mapEntry.id);
@@ -703,6 +718,8 @@ async function boot(): Promise<void> {
   window.addEventListener('pagehide', saveGame);
   document.addEventListener('visibilitychange', () => document.hidden && saveGame());
   let saveT = 0;
+  let questT = 0;
+  knownOrders = new Map(story.orders); // a loaded game's quests are not news
 
   let last = performance.now();
   let statusT = 0;
@@ -854,6 +871,11 @@ async function boot(): Promise<void> {
       }
       renderer.render(party.leader.x, party.leader.y - 20);
       saveT += dt;
+      questT += dt;
+      if (questT > 0.5) {
+        questT = 0;
+        watchQuests();
+      }
       if (saveT > 5) {
         saveT = 0;
         saveGame();
