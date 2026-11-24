@@ -28,7 +28,7 @@ export class DialogueUI implements ScriptHost {
   /** who 'FACE HERO' speaks as (the party leader's name) */
   heroName: () => string = () => 'Hero';
   private waiter: (() => void) | null = null;
-  private portraits: { url: string; frames: { x: number; y: number; w: number; h: number }[]; hero: () => number } | null = null;
+  private portraits: { url: string; frames: ({ x: number; y: number; w: number; h: number } | null)[]; hero: () => number } | null = null;
 
   constructor(
     private el: HTMLElement,
@@ -117,7 +117,7 @@ export class DialogueUI implements ScriptHost {
     this.color = c;
   }
   /** the portrait sheet (ICON1.GOS record 24: frame n is FACE n; heroes use `hero()`) */
-  setPortraits(url: string, frames: { x: number; y: number; w: number; h: number }[], hero: () => number): void {
+  setPortraits(url: string, frames: ({ x: number; y: number; w: number; h: number } | null)[], hero: () => number): void {
     this.portraits = { url, frames, hero };
   }
   setFace(f: FaceSpec): void {
