@@ -115,7 +115,8 @@ export class GameRenderer {
       this.mapGroup.remove(c);
     }
     let tiles = 0;
-    for (const [layer, z] of [['ground', 0], ['objects', 1]] as const) {
+    // sprites sit at z = 2; overhead tiles (roofs) are drawn in front of them
+    for (const [layer, z] of [['ground', 0], ['objects', 1], ['overhead', 3]] as const) {
       for (let cy = 0; cy * CHUNK < w.map.h; cy++) {
         for (let cx = 0; cx * CHUNK < w.map.w; cx++) {
           const a = buildChunk(w, layer, cx, cy, ts, this.showMarkers);

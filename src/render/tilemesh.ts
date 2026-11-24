@@ -1,5 +1,7 @@
 import { TilesetMeta } from '../data/types';
-import { TILE_H, TILE_W, World } from '../game/world';
+import { isOverhead, objectTile, TILE_H, TILE_W, World } from '../game/world';
+
+export type Layer = 'ground' | 'objects' | 'overhead';
 
 export interface ChunkArrays {
   positions: Float32Array; // x, y, z per vertex; y is negated (three.js is y-up, the game is y-down)
@@ -16,7 +18,7 @@ export const CHUNK = 16;
  */
 export function buildChunk(
   world: World,
-  layer: 'ground' | 'objects',
+  layer: Layer,
   chunkX: number,
   chunkY: number,
   ts: TilesetMeta,
@@ -30,7 +32,13 @@ export function buildChunk(
   let q = 0;
   for (let cy = y0; cy < Math.min(y0 + CHUNK, world.map.h); cy++) {
     for (let cx = x0; cx < Math.min(x0 + CHUNK, world.map.w); cx++) {
-      const t = layer === 'ground' ? world.ground(cx, cy) : world.object(cx, cy);
+      let t: number;
+      if (layer === 'ground') t = world.ground(cx, cy);
+      else {
+        const raw = world.object(cx, cy);
+        if (isOverhead(raw) !== (layer === 'overhead')) continue;
+        t = objectTile(raw);
+      }
       if (!world.isTile(t)) continue;
       if (!showMarkers && world.isMarker(t)) continue;
       const col = t % ts.cols;

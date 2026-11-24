@@ -14,7 +14,7 @@ Done
 Known gaps / next
 - Terrain looks patchy: colour-key transition tiles have nothing underneath, a few marker pieces still show. Need the
   original ground fill rule and MAP trailer meaning.
-- Objects (>= 4320), NPC/enemy placement, enemies/combat, items/shops/inventory UI, world map and cutscene playback.
+- NPC/enemy placement, enemies/combat, items/shops/inventory UI, world map and cutscene playback.
 - Direction flip, animation timing and walk speed are guesses; collision is inferred from marker tiles.
 - Only the hero/enemy sprites listed in `DEFAULT_SPRITES` are converted (`--sprites all` for the rest).
 - Music per map is a placeholder.
@@ -24,3 +24,10 @@ Known gaps / next
 Dev
 - `npm install && npm run dev`; `npm test`.
 - Rebuild assets: `python3 tools/build_assets.py --disc <Akuma folder> --bin <AKUMA.bin>` (needs numpy, Pillow, ffmpeg).
+
+## Session 1b
+- Object layer decoded: values >= 10000 are tile + 10000 (an "overhead" flag); the port now draws objects (houses,
+  walls, wagons) and flagged cells above the characters. Black colour-key pieces in the ground layer are left black
+  (they look like cliff / void edges).
+- Marker detection widened (two-tone marker tiles): ~470 per tileset.
+- Next: y-sorting characters behind objects, where NPCs/enemies stand (trailer?), spawn points from WARP targets.

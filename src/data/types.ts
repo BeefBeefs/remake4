@@ -1,6 +1,8 @@
 /** Shapes of the converted assets written by tools/build_assets.py (see docs/FORMATS.md). */
 
 export const NONE = 0xffff;
+/** object-layer cells >= this are `tile + OVERHEAD_FLAG`: drawn above characters (roofs, canopies) */
+export const OVERHEAD_FLAG = 10000;
 
 export interface TilesetMeta {
   tileW: number;

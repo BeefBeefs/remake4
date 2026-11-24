@@ -1,4 +1,8 @@
-import { MapData, NONE, TILE_LIMIT, TilesetMeta } from '../data/types';
+import { MapData, NONE, OVERHEAD_FLAG, TILE_LIMIT, TilesetMeta } from '../data/types';
+
+/** object cells >= 10000 carry a flag on top of the tile index (see docs/FORMATS.md) */
+export const isOverhead = (v: number): boolean => v !== NONE && v >= OVERHEAD_FLAG;
+export const objectTile = (v: number): number => (v >= OVERHEAD_FLAG && v !== NONE ? v - OVERHEAD_FLAG : v);
 
 export const TILE_W = 32;
 export const TILE_H = 20;
@@ -35,6 +39,7 @@ export class World {
     return this.inBounds(cx, cy) ? this.map.ground[cy * this.map.w + cx] : NONE;
   }
 
+  /** raw object cell: NONE, a tile index, or a tile index + OVERHEAD_FLAG */
   object(cx: number, cy: number): number {
     return this.inBounds(cx, cy) ? this.map.objects[cy * this.map.w + cx] : NONE;
   }
@@ -43,7 +48,7 @@ export class World {
     return this.markers.has(tile);
   }
 
-  /** true when a tile index refers to real art */
+  /** true when a (flag-stripped) tile index refers to real art */
   isTile(tile: number): boolean {
     return tile !== NONE && tile < TILE_LIMIT;
   }
@@ -52,7 +57,7 @@ export class World {
     const g = this.ground(cx, cy);
     if (g === NONE || this.isMarker(g)) return true;
     const o = this.object(cx, cy);
-    return this.isMarker(o);
+    return o !== NONE && this.isMarker(objectTile(o));
   }
 
   blockedAt(px: number, py: number): boolean {

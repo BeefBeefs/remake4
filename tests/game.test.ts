@@ -70,3 +70,34 @@ test('hero walks, collides with markers and animates from the real sheet', () =>
   const rec = meta.records[f.record];
   assert.ok(rec && f.frame < rec.frames.length);
 });
+
+test('object layer: flagged cells are tiles drawn overhead, nothing is left unaccounted for', async () => {
+  const { isOverhead, objectTile } = await import('../src/game/world');
+  const ts = json<TilesetTable>('tiles/tilesets.json');
+  const index = json<{ id: string }[]>('maps/index.json');
+  let flagged = 0;
+  for (const e of index) {
+    const m = parseMap(json(`maps/${e.id}.json`));
+    const w = new World(m, ts[m.tileset]);
+    let over = 0;
+    let under = 0;
+    for (let cy = 0; cy < m.h; cy++)
+      for (let cx = 0; cx < m.w; cx++) {
+        const raw = w.object(cx, cy);
+        if (raw === 0xffff) continue;
+        assert.ok(w.isTile(objectTile(raw)), `${e.id} ${cx},${cy} value ${raw}`);
+        if (isOverhead(raw)) over++;
+        else under++;
+      }
+    for (let cy = 0; cy * CHUNK < m.h; cy++)
+      for (let cx = 0; cx * CHUNK < m.w; cx++)
+        for (const l of ['objects', 'overhead'] as const) {
+          const c = buildChunk(w, l, cx, cy, ts[m.tileset], true);
+          if (c) (l === 'overhead' ? (over -= c.quads) : (under -= c.quads));
+        }
+    assert.equal(over, 0, `${e.id} overhead tiles all meshed`);
+    assert.equal(under, 0, `${e.id} object tiles all meshed`);
+    flagged += 1;
+  }
+  assert.equal(flagged, 42);
+});

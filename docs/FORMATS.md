@@ -18,7 +18,10 @@ actions unlabelled. **?** GOS lead u16 and per-chunk flag byte.
 ## MAP
 u8 w, u8 h, then a 128x128 buffer of 4-byte cells (ground u16, object u16, 0xFFFF = none), then a 2003-byte
 trailer (**?** meaning). Ground tiles are stamped from larger pieces using consecutive indices (+1 right,
-+20 down). Object values >= 4320 are not tiles (**?** NPC / object / event references, e.g. 10354+).
++20 down). Object-layer values are tile indices; values in 10000-12999 are `tile + 10000`, and the 10000
+flag marks cells that look like roofs / upper parts of buildings, so the port draws them above the
+characters (**?** the flag's real meaning; it may be a per-cell draw-order or occlusion flag). Ground cells never use it.
+NPC / enemy placement is not in the cell data (**?** trailer or scripts).
 Map order, tileset and name come from the EXE table in `tools/build_assets.py`
 (A1-14, T1-4 -> ST1; B1-7, T5-6 -> ST2; C1-5, D1-10 -> ST3). EVT map numbers are 1-based into that order.
 
@@ -39,5 +42,5 @@ world effects (WARP, LOCATE_ENEMY, NEW_OBJECT...) go to the host. One label (`ë§
 original data; jumping to a missing label warns and ends the script.
 
 ## Open questions
-MAP trailer; object layer values >= 4320; NPC/enemy placement; real collision rules; unarmed stance and
+MAP trailer; exact meaning of the 10000 object flag; NPC/enemy placement; real collision rules; unarmed stance and
 actions 3-5, 11-13, 18-20; `GO_BASIC_EVENT`; which music plays where; walking speed and animation timing.
