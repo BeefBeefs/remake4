@@ -15,6 +15,8 @@ export class StoryState {
   /** talk entry an object currently answers with ("map:object" -> block id), set by CHANGE n; absent = its first entry */
   entry = new Map<string, number>();
   /** script objects a NEW_OBJECT has put on the map ("map:object" -> cell and SPRITE record) */
+  /** overworld places (map numbers 1-22) that are still sealed: not reachable from the world map until a script says UNSEAL n */
+  sealed = new Set<number>();
   placed = new Map<string, { x: number; y: number; rec: number }>();
   money = 0;
   level = 1;

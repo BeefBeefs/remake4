@@ -113,8 +113,11 @@ Open: kind -> sheet mapping, enemy stats/AI, hero HP and damage, trailer tables,
 - NEW_OBJECT map x y object sprite extra: the script object (Ompherjo, Patewoos, the God Stone, Shining...) appears at that cell as
   SPRITE.GOS record `sprite`; until then it is not on the map (`story.placed`, saved). Checked: every target has an EVT block,
   and the sprite numbers fit the names (Shining 59, Ompherjo 15/16). Object 20 of c1 (Hellminor) uses sprite 70 = none (a boss; not spawned).
-- Still not done: UNSEAL n (opens map n; the initial open set is unknown
-  so the world map still lists everything), STONE map amount.
+- UNSEAL n opens overworld place n (map numbers 1-22 = a1-a14, t1-t4, c1, c2, d8, d9). The places sam.evt unseals (2 3 6 8 9 10 12 13 14 22)
+  start sealed (locked markers on the world map, `story.sealed`, saved); villages and everything else start open. Shop keepers
+  and quest givers unseal neighbours one by one (t1's shopkeeper -> Shadow Mountain, its item merchant -> Dinyc, t4's White Lady ->
+  Echo Valley + Dragon Valley). The gear button's debug tools show every place. The original's real start set is a guess.
+- Still not done: STONE map amount.
 - EVT files carry Korean design notes (cp949 comments after the scripts) that explain the quests; worth mining.
 
 ## Session 1m

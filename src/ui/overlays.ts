@@ -8,6 +8,8 @@ export class WorldMapUI {
     private el: HTMLElement,
     private maps: MapIndexEntry[],
     private onGo: (id: string) => void,
+    /** true for places that cannot be entered yet (shown dimmed) */
+    private sealed: (m: MapIndexEntry) => boolean = () => false,
   ) {
     el.addEventListener('click', (e) => e.stopPropagation());
   }
@@ -56,7 +58,9 @@ export class WorldMapUI {
       const left = `${(m.wx / 800) * 100}%`;
       const top = `${(m.wy / 600) * 100}%`;
       const b = document.createElement('button');
-      b.className = 'spot' + (/^[cd]/.test(m.id) ? ' cave' : '') + (m.id === current ? ' here' : '');
+      const shut = this.sealed(m);
+      b.className = 'spot' + (/^[cd]/.test(m.id) ? ' cave' : '') + (m.id === current ? ' here' : '') + (shut ? ' sealed' : '');
+      b.disabled = shut;
       b.style.left = left;
       b.style.top = top;
       b.title = m.name;
@@ -66,7 +70,7 @@ export class WorldMapUI {
       };
       const l = document.createElement('div');
       l.className = 'lbl';
-      l.textContent = m.name;
+      l.textContent = shut ? '\u{1F512}' : m.name;
       l.style.left = left;
       l.style.top = top;
       pic.append(b, l);

@@ -112,6 +112,19 @@ async function boot(): Promise<void> {
   interface Prop { object: number; x: number; y: number; meta: SpriteSheetMeta; record: number; actor: SpriteActor; t: number }
   const props: Prop[] = [];
 
+  // Places a script can UNSEAL start out sealed (shop keepers and quest givers tell you about new places one by one;
+  // the block that unseals all 22 at once is the late-game guardian). Which places the original really starts with is a guess.
+  const initialSeals = new Set<number>();
+  for (const sf of scriptFiles.slice(0, 1)) {
+    // only the main script (sam.evt): the underworld script's unseals would lock the villages behind each other
+    const starts = sf.file.blocks.map((b) => b.start).sort((a, b) => a - b);
+    for (const b of sf.file.blocks) {
+      const end = starts.find((x) => x > b.start) ?? sf.file.ops.length;
+      const n = sf.file.ops.slice(b.start, end).filter((o) => o.t === 'cmd' && o.name === 'UNSEAL');
+      if (n.length > 0 && n.length < 10) for (const o of n) if (o.t === 'cmd' && Number.isFinite(Number(o.args[0])) && Number(o.args[0]) !== 0 && !(Number(o.args[0]) >= 15 && Number(o.args[0]) <= 18)) initialSeals.add(Number(o.args[0]));
+    }
+  }
+  const devModeOn = () => devBox.style.display !== 'none';
   // objects that only appear once a script's NEW_OBJECT puts them on the map (Ompherjo, Patewoos, the sealed sword...)
   const newTargets = new Set<string>();
   for (const sf of scriptFiles)
@@ -260,6 +273,10 @@ async function boot(): Promise<void> {
             refreshNpcList();
           }
         }
+      }
+      if (name === 'UNSEAL') {
+        const n = Number(args[0]);
+        if (story.sealed.delete(n)) toast(`${index[n - 1]?.name ?? 'A place'} is open`);
       }
       if (name === 'NEW_OBJECT' && args.length >= 5) {
         // map x y object sprite extra: the script object appears at that cell, drawn as SPRITE.GOS record `sprite`
@@ -582,7 +599,12 @@ async function boot(): Promise<void> {
       },
     },
   );
-  const worldUI = new WorldMapUI(document.getElementById('world')!, index, (id) => void enterMap(id));
+  const worldUI = new WorldMapUI(
+    document.getElementById('world')!,
+    index,
+    (id) => void enterMap(id),
+    (m) => !devModeOn() && story.sealed.has(index.indexOf(m) + 1),
+  );
   const movies = new MoviePlayer(document.getElementById('movie')!);
   const movieSelect = document.createElement('select');
   movieSelect.add(new Option('Movies…', ''));
@@ -737,6 +759,7 @@ async function boot(): Promise<void> {
       saved = null;
     }
   }
+  if (!saved) for (const n of initialSeals) story.sealed.add(n);
   if (saved) {
     restoring = true;
     applyStory(story, saved);
