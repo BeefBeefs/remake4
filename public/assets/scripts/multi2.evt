@@ -1,0 +1,6746 @@
+/* 대장장이   200 250 0 */ 
+/* 상점주인   250 220 0 */ 5
+/* 아이템상인 250 200 0 */ 7
+/* 보석상     160 160 200 */ 11
+/* 마녀       240 20 190 */ 6
+/* 마을사람   210 210 210 */ 
+/* 주인공     250 250 0 */ 
+
+/시나리오 제 2부
+/--------------------------------------------------------
+/마을5의 대장장이
+# 1
+# 8
+# 1
+# "Blacksmith"
+# BASIC
+# 100
+@ IF ITEM HAVE 213 THEN GO_DOWN 개골차1
+@ IF NUM HAVE 105 THEN GO_DOWN 도둑1
+@ CLEAR_BUFFER
+@ BOX BLUE 6
+@ FACE 8 "Blacksmith" 200 250 0
+@ COLOR 200 200 0
+@ TALK "Hello. I sell weapons, and repair them here."
+@ TALK "How can I help you?"
+@ WAIT
+* 사주대장장이
+@ CLEAR_BUFFER
+@ COLOR 250 250 0
+@ SELECT 255 255 255
+CASE "Select a weapon" GO_DOWN 장비고르기2
+CASE "Sell a weapon" GO_DOWN 장비팔기
+CASE "Repair a weapon" GO_DOWN 장비수리
+CASE "Talking" GO_DOWN T5-1
+CASE "<Exit>" GO_DOWN 끝
+SELECT_END
+
+@ END
+
+* T5-1
+@ CLEAR_BUFFER
+@ BOX BLUE 6
+@ FACE 8 "Blacksmith" 200 250 0
+@ COLOR 200 200 0
+@ SELECT 255 255 255
+CASE "<Talking about the underworld>" GO_DOWN T5-1A
+CASE "<Talking about Satan's lieutenants>" GO_DOWN T5-1B
+CASE "<Talking about Raegios's family>" GO_DOWN T5-1C
+CASE ""
+CASE "<Stop talking>" GO_UP 사주대장장이
+SELECT_END
+@ END
+
+* T5-1A
+@ CLEAR_BUFFER
+@ BOX BLUE 6
+@ FACE 8 "Blacksmith" 200 250 0
+@ COLOR 200 200 0
+@ TALK "How did you enter the underworld?"
+@ TALK "Obviously something covers the underworld." 
+@ TALK "Only Raegios's family knows the secret of how to leave."
+@ WAIT
+@ CLEAR_BUFFER
+@ SELECT 255 255 255
+CASE "<What's the reason you are here?>" GO_DOWN T5-1A-1
+SELECT_END
+@ END
+
+* T5-1A-1
+@ CLEAR_BUFFER
+@ BOX BLUE 6
+@ FACE 8 "Blacksmith" 200 250 0
+@ COLOR 200 200 0
+@ TALK "Do you want to know why I'm here?"
+@ TALK "Devils in the underworld are"
+@ TALK "preparing themselves" 
+@ TALK "for the fight again humans..."
+@ TALK "Many people were kidnapped and brought down here."
+@ TALK "The devils have learned fighting skills from them."
+@ TALK "The devils wanted to learn from humans..."
+@ WAIT
+@ CLEAR_BUFFER
+@ TALK "We were their prisoners...We were promised"
+@ TALK "our lives in exchange for our word that" 
+@ TALK "we would teach them our skills..."
+@ TALK ""
+@ TALK "We also... got offered favors from them" 
+@ TALK "for our help."
+@ WAIT
+@ CLEAR_BUFFER
+@ TALK "It was a good decision for us facing death as we did."
+@ TALK "It was help them or die."
+@ TALK "We have nothing to say if you misunderstand us..."
+@ WAIT
+@ GO_UP T5-1
+@ END
+
+* T5-1B
+@ CLEAR_BUFFER
+@ BOX BLUE 6
+@ FACE 8 "Blacksmith" 200 250 0
+@ COLOR 200 200 0
+@ TALK "The Devil..."
+@ TALK "No-one may talk about the name of Satan here,"
+@ TALK "in the underworld..."
+@ WAIT
+@ CLEAR_BUFFER
+@ TALK "Do you know that the Devil and the demon hunters" 
+@ TALK "fought bitterly in the last demon wars?"
+@ TALK "He faced a crisis because some of his devils helped"
+@ TALK "the hunters escape."
+@ WAIT
+@ CLEAR_BUFFER
+@ TALK "Finally... he was defeated and trapped"
+@ TALK "in the underworld."
+@ TALK "But now... his demons have inherited the Devil's power"
+@ TALK "and have prepared themselves"
+@ TALK "for the fight against humanity..."  
+@ WAIT
+@ CLEAR_BUFFER
+@ TALK "The underworld is in confusion."
+@ TALK "I wonder what his four war-lords are plotting?"      
+@ TALK "They have kept to themselves..."
+@ TALK "Strangely they only send a few devils into our world..."
+@ TALK "the rest of them remain down here."
+@ WAIT
+@ CLEAR_BUFFER
+@ TALK "I think that the two sides may attack each other"
+@ TALK "as soon as only a few devils are left"
+@ TALK "in the underworld." 
+@ WAIT
+@ CLEAR_BUFFER
+@ TALK "And... this is a secret..." 
+@ TALK "The Devil... reclaimed the Sword from the world..."
+@ TALK "It's Shadow Sword"
+@ TALK "Now... Blood will cover the underworld..."
+@ WAIT
+@ GO_UP T5-1
+@ END
+
+* T5-1C
+@ CLEAR_BUFFER
+@ BOX BLUE 6
+@ FACE 8 "Blacksmith" 200 250 0
+@ COLOR 200 200 0
+@ TALK "You ask... I can tell you about Raegios's family."
+@ TALK "They were powerful... but then a spell"
+@ TALK "was cast upon them..."
+@ TALK "and they lost all their power. They are miserable..."
+@ WAIT
+@ CLEAR_BUFFER
+@ TALK "The witch Raedina and the wizard Raegios are under"
+@ TALK "this spell cast by Western demon and Eastern demon."
+@ TALK "It was a cruel blow of fate..."
+@ TALK "They were our spokesmen..."
+@ WAIT
+@ GO_UP T5-1
+@ END
+
+* 도둑1
+@ CLEAR_BUFFER
+@ BOX BLUE 5
+@ FACE HERO 250 250 0
+@ COLOR 250 250 0
+@ TALK "Hey! Host!"
+@ WAIT
+
+@ CLEAR_BUFFER
+@ BOX BLUE 6
+@ FACE 8 "Blacksmith" 200 250 0
+@ COLOR 200 200 0
+@ TALK "Oh...You must be a devil hunter..."
+@ TALK "What can I do for you? Do you want to buy weapons?"
+@ WAIT
+
+@ CLEAR_BUFFER
+@ BOX BLUE 5
+@ FACE HERO 250 250 0
+@ COLOR 250 250 0
+@ TALK "Have you heard about the devils emerging around"
+@ TALK "Devil's Tomb?"
+@ WAIT
+
+@ CLEAR_BUFFER
+@ BOX BLUE 6
+@ FACE 8 "Blacksmith" 200 250 0
+@ COLOR 200 200 0
+@ TALK "What are you talking about?"
+@ TALK "This is news to me!!"
+@ WAIT
+
+@ CLEAR_BUFFER
+@ BOX BLUE 5
+@ FACE HERO 250 250 0
+@ COLOR 250 250 0
+@ TALK "Oh... Are you sure no-one knows?"
+@ TALK "It's lucky I came to warn you...!"
+@ WAIT
+
+@ CLEAR_BUFFER
+@ BOX BLUE 6
+@ FACE 8 "Blacksmith" 200 250 0
+@ COLOR 200 200 0
+@ TALK "What... what's happening?"
+@ TALK "What else do you know?"
+@ WAIT
+
+@ CLEAR_BUFFER
+@ BOX BLUE 5
+@ FACE HERO 250 250 0
+@ COLOR 250 250 0
+@ TALK "I'm here to tell you that devils will come here"
+@ TALK "for revenge..."
+@ WAIT
+
+@ CLEAR_BUFFER
+@ BOX BLUE 6
+@ FACE 8 "Blacksmith" 200 250 0
+@ COLOR 200 200 0
+@ TALK "Is that true?"
+@ WAIT
+
+@ CLEAR_BUFFER
+@ BOX BLUE 5
+@ FACE HERO 250 250 0
+@ COLOR 250 250 0
+@ TALK "Please... tell everyone it's true."
+@ TALK "It's a very urgent that they know this!"
+@ TALK "Then they can prepare to defend themselves..."
+@ WAIT
+
+@ CLEAR_BUFFER
+@ BOX BLUE 6
+@ FACE 8 "Blacksmith" 200 250 0
+@ COLOR 200 200 0
+@ TALK "Hey! Wait a minute!!"
+@ TALK "Please...listen to me!!"
+@ TALK "I have an idea... I have this bow you could use..."
+@ TALK "I didn't think this would happen...I need your help..."
+@ WAIT
+@ CLEAR_BUFFER
+@ TALK "Please fight the demons for us!!"
+@ TALK "I'll give you the bow... Could you deal with"
+@ TALK "the angry devils?"
+@ TALK "And take this money... it's for your help!!"
+@ GIVE MONEY 5000
+@ TALK "5,000 gold pieces..."
+@ TALK "Please take it and help us!!"
+@ WAIT
+@ CLEAR_BUFFER
+@ TALK "It'd be better if I went and hid in the mountains..."
+@ TALK "You are my savior..."
+@ TALK "the only one I believe can help me!"
+@ REMOVE NUM_TO_ALL 105
+@ GIVE ITEM 55 1
+@ WAIT
+
+@ CLEAR_BUFFER
+@ BOX BLUE 5
+@ FACE HERO 250 250 0
+@ COLOR 250 250 0
+@ TALK "So stupid... It was a lie." 
+@ TALK "It'd be better to go back to the devils again."
+@ WAIT
+@ END
+
+* 개골차1
+@ CLEAR_BUFFER
+@ BOX BLUE 5
+@ FACE HERO 250 250 0
+@ COLOR 250 250 0
+@ TALK "Hello, I'm here with tea leaves from Bear Village."
+@ WAIT
+
+@ CLEAR_BUFFER
+@ BOX BLUE 6
+@ FACE 8 "Blacksmith" 200 250 0
+@ COLOR 200 200 0
+@ TALK "Oh... You brought the tea leaves!"
+@ TALK "Thank you!!"
+@ TALK "I did ask for some. They're so hard to get these days."
+@ WAIT
+@ CLEAR_BUFFER
+@ TALK "By the way...how much did I say I'd give you...?"
+@ TALK "5,000gold pieces? 6,000gold pieces...?"
+@ TALK "Maybe...7,000gold pieces! Now which was it?"
+@ CLEAR_BUFFER
+@ SELECT 255 255 255
+CASE "<5000 Gold pieces>" GO_DOWN 개골차1-1
+CASE "<6000 Gold pieces>" GO_DOWN 개골차1-2
+CASE "<7000 Gold pieces>" GO_DOWN 개골차1-3
+SELECT_END
+
+* 개골차1-1
+@ CLEAR_BUFFER
+@ BOX BLUE 6
+@ FACE 8 "Blacksmith" 200 250 0
+@ COLOR 200 200 0
+@ TALK "I can't remember what I said..."
+@ TALK "You are reliable bringing them through such dangers..."
+@ TALK "But I don't know you well.. You could cheat me..."
+@ TALK "But it's great to get the tea!"
+@ TALK "I'll give you...7,000gold pieces!"
+@ GIVE MONEY 7000
+@ WAIT
+@ CLEAR_BUFFER
+@ TALK "Please keep my honesty in your mind!"
+@ TALK "Thank you for delivering my tea leaves!"
+@ REMOVE ITEM 213
+@ REMOVE NUM_TO_ALL 108
+@ REMOVE_ORDER 54
+@ WAIT
+@ END
+
+* 개골차1-2
+@ CLEAR_BUFFER
+@ BOX BLUE 6
+@ FACE 8 "Blacksmith" 200 250 0
+@ COLOR 200 200 0
+@ TALK "I'm not sure what I said...?"
+@ TALK "Hmm... It might be 5,000gold pieces..."
+@ TALK "Anyway... I'll give you 6,000gold pieces!"
+@ GIVE MONEY 6000
+@ WAIT
+@ CLEAR_BUFFER
+@ TALK "Thank you for the tea leaves!"
+@ REMOVE ITEM 213
+@ REMOVE NUM_TO_ALL 108
+@ REMOVE_ORDER 54
+@ WAIT
+@ END
+
+* 개골차1-3
+@ CLEAR_BUFFER
+@ BOX BLUE 6
+@ FACE 8 "Blacksmith" 200 250 0
+@ COLOR 200 200 0
+@ TALK "What!! Was it 7,000gold pieces?"
+@ TALK "What are you talking about?"
+@ TALK "Hmm... I can't believe I said I'd pay that much."
+@ TALK "It's true I'm not clever but I'm very upset"
+@ TALK "you want so much..."
+@ TALK "I tell you what... I'll give you 5,000gold pieces..."
+@ WAIT
+@ TALK " don't be dishonest and cheat me."
+@ TALK "Please be straight with me..."
+@ GIVE MONEY 5000
+@ REMOVE ITEM 213
+@ REMOVE NUM_TO_ALL 108
+@ REMOVE_ORDER 54
+@ WAIT
+@ END
+
+/--------------------------------------------------------
+/마을5의 상점주인
+# 2
+# 8
+# 2
+# "Shopkeeper"
+# BASIC
+# 100
+@ CLEAR_BUFFER
+@ BOX BLUE 6
+@ FACE 7 "Shopkeeper" 250 220 0
+@ COLOR 250 220 0
+@ TALK "How are you? Can I help you?"
+@ TALK "What do you need?"
+@ WAIT
+@ IF NUM HAVE 151 THEN GO_DOWN 산삼1
+* 사주상점주인
+@ CLEAR_BUFFER
+@ BOX BLUE 6
+@ COLOR 250 250 0
+@ SELECT 250 250 255
+CASE "Buying weapon" GO_DOWN 장비고르기1
+CASE "Selling weapon" GO_DOWN 장비팔기
+CASE "Buying item" GO_DOWN 아이템사기3
+CASE "Selling Item" GO_DOWN 아이템팔기
+CASE "Talking" GO_DOWN T5-2
+CASE "<Exit>" GO_DOWN 끝
+SELECT_END
+@ END
+
+* T5-2
+@ CLEAR_BUFFER
+@ BOX BLUE 6
+@ FACE 7 "Shopkeeper" 250 220 0
+@ COLOR 250 220 0
+@ SELECT 255 255 255
+CASE "<Talking about the Devil>" GO_DOWN T5-A
+CASE "<Talking about Satan's lieutenants>" GO_DOWN T5-B
+CASE "<Talking about Raegios's family>" GO_DOWN T5-C
+CASE "<Stop talking>" GO_UP 사주상점주인
+SELECT_END
+@ END
+
+* T5-A
+@ CLEAR_BUFFER
+@ BOX BLUE 6
+@ FACE 7 "Shopkeeper" 250 220 0
+@ COLOR 250 220 0
+@ TALK "You know now that we are in the underworld"
+@ TALK "I can tell there is no point humans and devils fighting" 
+@ TALK "Humans would lose."
+@ WAIT
+@ CLEAR_BUFFER
+@ TALK "Each of the demon war-lords is prepared to fight " 
+@ TALK "to dominate the underworld."
+@ TALK "If the devils got their power together" 
+@ TALK "we humans would be wiped out."
+@ WAIT
+@ CLEAR_BUFFER
+@ SELECT 255 255 255
+CASE "<Satan's lieutenants>" GO_DOWN T5-A-1
+SELECT_END
+@ END
+
+* T5-A-1
+@ CLEAR_BUFFER
+@ BOX BLUE 6
+@ FACE 7 "Shopkeeper" 250 220 0
+@ COLOR 250 220 0
+@ TALK "According to the rumor when Satan was trapped down here"
+@ TALK "there were two of his lieutenants... Western demon" 
+@ TALK "and Esterndemon. One who got Satan's eyes and"
+@ TALK "one who got Satan's ears."
+@ TALK "They are the strongest of all the devils."
+@ WAIT
+@ CLEAR_BUFFER
+@ TALK "They were Satan's right-hand men but after he was"
+@ TALK "trapped... they divided the world into two under their" 
+@ TALK "control."
+@ WAIT
+@ GO_UP T5-2
+@ END
+
+* T5-B
+@ CLEAR_BUFFER
+@ BOX BLUE 6
+@ FACE 7 "Shopkeeper" 250 220 0
+@ COLOR 250 220 0
+@ TALK "Hmm...the devil...?"
+@ TALK "Satan had the reputation as being the greatest devil"
+@ TALK "but now maybe not."
+@ TALK "According to the rumor"
+@ TALK "he is living in forced retireEndless Cave"
+@ TALK "...after giving his power to his underlings."
+@ WAIT
+@ CLEAR_BUFFER
+@ TALK "On the other hand, a rumor says he got"
+@ TALK "Shadow Sword in the world..."
+@ TALK "and that gives him great power still."
+@ WAIT
+@ CLEAR_BUFFER
+@ TALK "But why doesn't he use it?"
+@ TALK "He hopes that the war-lords will fight each other"
+@ TALK "and destroy themselves so that"
+@ TALK "he is the sole power again."
+@ WAIT
+@ CLEAR_BUFFER
+@ TALK "Do you know that the war-lords betrayed Satan"
+@ TALK "right after they got his power?"
+@ TALK "They want to keep him retired."
+@ WAIT
+@ GO_UP T5-2 
+
+* T5-C
+@ CLEAR_BUFFER
+@ BOX BLUE 6
+@ FACE 7 "Shopkeeper" 250 220 0
+@ COLOR 250 220 0
+@ TALK "You means that Raegios's family is..."
+@ TALK "Raedina and Raegios?"
+@ WAIT
+@ CLEAR_BUFFER
+@ TALK "A witch Redina and wizard Raegios are under"
+@ TALK "a spell cast by the Western demons and Eastern demon."
+@ TALK "Demons were afraid of their power..."
+@ TALK "Maybe the magicians were opposed "
+@ TALK "to the demons attacking the world."
+@ CLEAR_BUFFER
+@ TALK "But now they've lost their power..."
+@ TALK "And no one knows how the world is going to survive."
+@ WAIT
+@ GO_UP T5-2 
+
+
+* 산삼1
+@ CLEAR_BUFFER
+@ BOX BLUE 5
+@ FACE HERO 250 250 0
+@ COLOR 250 250 0
+@ SELECT 255 255 255
+CASE "<Talking about wild ginseng>" GO_DOWN 산삼2
+CASE "<Talking about goods>" GO_UP 사주상점주인
+CASE "<Exit>" GO_DOWN 중계끝
+SELECT_END
+
+* 산삼2
+@ CLEAR_BUFFER
+@ BOX BLUE 5
+@ FACE HERO 250 250 0
+@ COLOR 250 250 0
+@ TALK "Do you sell wild ginseng here?!"
+@ TALK "I need some urgently..."
+@ WAIT
+
+@ CLEAR_BUFFER
+@ BOX BLUE 6
+@ FACE 7 "Shopkeeper" 250 220 0
+@ COLOR 250 220 0
+@ TALK "Wild ginseng?"
+@ TALK "Wild ginseng... I have one root..."
+@ TALK "But... It's hard to replace..."
+@ WAIT
+
+@ CLEAR_BUFFER
+@ BOX BLUE 5
+@ FACE HERO 250 250 0
+@ COLOR 250 250 0
+@ TALK "Please!"
+@ TALK "Help me!!"
+@ TALK "It's for saving a girl's life."
+@ WAIT
+
+@ CLEAR_BUFFER
+@ BOX BLUE 6
+@ FACE 7 "Shopkeeper" 250 220 0
+@ COLOR 250 220 0
+@ TALK "Hmm... I can understand your situation but..."
+@ TALK "It's so hard to get more of it, it's very valuable."
+@ TALK "But if you pay 10,000 gold pieces..."
+@ TALK "I could let you have it."
+@ WAIT
+
+@ CLEAR_BUFFER
+@ BOX BLUE 5
+@ FACE HERO 250 250 0
+@ COLOR 250 250 0
+@ SELECT 255 255 255
+CASE "<Hand over the Money>" GO_DOWN 산삼1-1
+CASE "<Don't give Money>" GO_DOWN 산삼1-2
+SELECT_END
+
+* 산삼1-1
+@ CLEAR_BUFFER
+@ BOX BLUE 6
+@ FACE 7 "Shopkeeper" 250 220 0
+@ COLOR 250 220 0
+@ IF MONEY GE 10000 THEN GO_DOWN 산삼OK
+@ TALK "What... You try and cheat me! You have no money..."
+@ TALK "You want to buy something? With no money?"
+@ TALK "Are you kidding?"
+@ TALK "Get out of here... Right now!"
+@ WAIT
+@ END
+
+* 산삼1-2
+@ CLEAR_BUFFER
+@ BOX BLUE 6
+@ FACE 7 "Shopkeeper" 250 220 0
+@ COLOR 250 220 0
+@ TALK "I can't help it if you don't like it..."
+@ TALK "Please don't bad mouth me!"
+@ TALK "It's only natural for a merchant to want to"
+@ TALK "make a profit."
+@ TALK "See you another time!"
+@ WAIT
+@ END
+
+* 산삼OK
+@ CLEAR_BUFFER
+@ BOX BLUE 6
+@ FACE 7 "Shopkeeper" 250 220 0
+@ COLOR 250 220 0
+@ REMOVE MONEY 10000
+@ GIVE ITEM 168 1
+@ TALK "Here! It's wild ginseng!"
+@ TALK "You know... It's almost too good to sell...."
+@ TALK "It's really hard to get..."
+@ TALK "Anyway here it's. I hope it's going to be useful..."
+@ TALK "It's such an expensive thing."
+@ REMOVE NUM_TO_ALL 151
+@ WAIT
+@ END
+
+/--------------------------------------------------------
+* 마을5의 마녀
+# 3
+# 8
+# 3
+# "Witch"
+# BASIC
+# 100
+* 사주마녀
+@ CLEAR_BUFFER
+@ COLOR 240 20 190
+@ IF LEARN_MAGIC THEN GO_DOWN MAGIC_STOP
+@ BOX BLUE 5
+@ FACE 6 "A witch at her magical encamp Endless Cave" 240 20 190
+@ TALK "What can I do for you?"
+@ WAIT
+@ CLEAR_BUFFER
+@ COLOR 250 250 0
+@ SELECT 250 250 250
+CASE "Talking" GO_DOWN T5-3
+CASE "Training in witchcraft" GO_DOWN 마법훈련1
+CASE "<Exit>" GO_DOWN 끝
+SELECT_END
+
+* T5-3
+@ CLEAR_BUFFER
+@ BOX BLUE 5
+@ FACE 6 "A Witch at her magical encamp Endless Cave" 240 20 190
+@ COLOR 240 20 190
+@ TALK "You're asking me first without paying me anything..."
+@ TALK "OK...Whatever. It doesn't matter."
+@ TALK "What do you need?"
+@ WAIT
+
+* T5-3A
+@ CLEAR_BUFFER
+@ BOX BLUE 5
+@ FACE 6 "A Witch at her magical encampment" 240 20 190
+@ COLOR 240 20 190
+@ SELECT 255 255 255
+CASE "<About Western demon>" GO_DOWN T5-3-1
+CASE "<About Eastern demon>" GO_DOWN T5-3-2
+CASE "<Talking about Raegios's Family>" GO_DOWN T5-3-3
+CASE "<Stop talking>" GO_UP 사주마녀
+SELECT_END
+@END
+
+* T5-3-1
+@ CLEAR_BUFFER
+@ BOX BLUE 5
+@ FACE 6 "A witch at her magical encampment" 240 20 190
+@ COLOR 240 20 190
+@ TALK "The Western demon lives in the Castle of the West."
+@ TALK "In order to get there you must go through a cave"
+@ TALK "full of bats"
+@ TALK "which opens into a lava tube from the volcano."
+@ TALK "But devils block the way"
+@ TALK "so it's not easy to get through."
+@ WAIT
+@ GO_UP T5-3A 
+
+* T5-3-2
+@ CLEAR_BUFFER
+@ BOX BLUE 5
+@ FACE 6 "A witch at her magical encampment" 240 20 190
+@ COLOR 240 20 190
+@ TALK "I don't know what I can tell you about this demon..."
+@ TALK "The Eastern demon has great influence" 
+@ TALK "in the east. If you want to reach him, go through" 
+@ TALK "the Pandemonium Cave in the northeastern part of"
+@ TALK "the East village."
+@ TALK "But be careful, devils block the way."
+@ WAIT
+@ GO_UP T5-3A
+
+* T5-3-3
+@ CLEAR_BUFFER
+@ BOX BLUE 5
+@ FACE 6 "A witch at her magical encampment" 240 20 190
+@ COLOR 240 20 190
+@ TALK "So, you want to know about Raegios's family?"
+@ TALK "Raegios's family are magicians... " 
+@ TALK "I can't say anything about that family" 
+@ TALK "without mentioning my friend Raedina."
+@ WAIT
+@ CLEAR_BUFFER
+@ TALK "As a witch her disposition and magics were..."
+@ TALK "so reverential..."
+@ WAIT
+@ TALK "But now she and her family...they are under a spell..."
+@ WAIT
+@ CLEAR_BUFFER
+@ TALK "I don't want to talk about that... It upsets me!"
+@ WAIT
+@ GO_UP T5-3A
+
+/----------------------------------------------------
+# 15
+# 8
+# 4
+# "Item merchant"
+# BASIC
+# 100
+* 아이템상인명령1
+@ CLEAR_BUFFER
+@ BOX BLUE 5
+@ FACE 5 "Item merchant" 250 200 0
+@ COLOR 250 200 0
+@ TALK "How are you? What can I do for you?"
+@ TALK "I'll help you find what you need."
+@ WAIT
+* 사주아이템
+@ CLEAR_BUFFER
+@ BOX BLUE 5
+@ COLOR 250 250 0
+@ SELECT 255 255 255
+CASE "Buying item" GO_DOWN 아이템사기2
+CASE "Selling item" GO_DOWN 아이템팔기
+CASE "Talking" GO_DOWN 사주아이템T-1
+CASE "Exit" GO_DOWN 끝
+SELECT_END
+
+* 사주아이템T-1
+@ CLEAR_BUFFER
+@ BOX BLUE 5
+@ FACE 5 "Item merchant" 250 200 0
+@ COLOR 250 200 0
+@ TALK "I think you are from outside, the world,"
+@ TALK "aren't you?"
+@ TALK "I knew that at first sight... But it's wise" 
+@ TALK "to be careful. I don't know why you're here..."
+@ TALK "But it's not easy to exist here..."
+@ WAIT
+@ CLEAR_BUFFER
+@ TALK "Only strong devils are here in the underworld."
+@ TALK "The weak devils are outside in the world."
+@ TALK "Nowadays they are very touchy because"
+@ TALK "there is feuding amongst them..."
+@ WAIT
+@ CLEAR_BUFFER
+@ TALK "If it's possible it'd be better for you to go back"
+@ TALK "to the world."
+@ WAIT
+@ GO_UP 사주아이템
+/----------------------------------------------------
+# 16
+# 8
+# 5
+# "Jeweler"
+# BASIC
+# 100
+* 사주보석상
+/싼것과 비싼 장신구 취급하는 상점
+@ IF NUM HAVE 32 THEN GO_DOWN STEP1
+@ CLEAR_BUFFER
+@ BOX BLUE 5
+@ FACE 11 "Jeweler" 160 160 200
+@ COLOR 160 160 200
+@ TALK "How are you We have fine jewelry here."
+@ TALK "Choose anything you like... " 
+@ TALK "If you have the money to pay for it."
+@ WAIT
+@ COLOR 250 250 0
+@ CLEAR_BUFFER
+@ SELECT 255 255 255
+CASE "Buying cheap jewelry" GO_DOWN 장신구사기1
+CASE "Buying expensive jewelry" GO_DOWN 장신구사기3
+CASE "Talking" GO_DOWN T3-2
+CASE "<Exit>" GO_DOWN 끝
+SELECT_END
+
+* STEP1
+@ CLEAR_BUFFER
+@ BOX BLUE 5
+@ FACE 11 "Jeweler" 160 160 200
+@ COLOR 160 160 200
+@ TALK "Greetings. May I show you some jewelry?"
+@ TALK "Hmm... I have so much lovely jewelry here."
+@ WAIT
+* 보석상명령1
+@ CLEAR_BUFFER
+@ COLOR 250 250 0
+@ SELECT 255 255 255
+CASE "Buying cheap jewelry" GO_DOWN 장신구사기1
+CASE "Buying expensive jewelry" GO_DOWN 장신구사기3
+CASE "Exit" GO_DOWN 끝
+SELECT_END
+@ END
+
+* T3-2
+@ CLEAR_BUFFER
+@ BOX BLUE 5
+@ FACE 11 "Jeweler" 160 160 200
+@ COLOR 160 160 200
+@ SELECT 255 255 255
+CASE "<About the underworld>" GO_DOWN T3-2-1
+CASE "<About the local situation>" GO_DOWN T3-2-2 
+CASE "<Stop talking>" GO_UP 사주보석상
+SELECT_END
+@ END
+
+* T3-2-1
+@ CLEAR_BUFFER
+@ BOX BLUE 5
+@ FACE 11 "Jeweler" 160 160 200
+@ COLOR 160 160 200
+@ TALK "You must be from the upper world."
+@ TALK "How did you get here?"
+@ TALK "Did you find a door connecting the" 
+@ TALK "real and underworlds? "
+@ TALK "There has always been a door for devils to get through."
+@ WAIT
+@ CLEAR_BUFFER
+@ TALK "You were brought here against your will weren't you?"
+@ TALK "But you are heroes so maybe not..."
+@ TALK "Be careful here..." 
+@ TALK "You could lose your life so easily..."
+@ TALK "The demons are quarreling with each other..."
+@ TALK "It's not easy to live here..."
+@ WAIT
+@ GO_UP T3-2
+
+* T3-2-2
+@ CLEAR_BUFFER
+@ BOX BLUE 5
+@ FACE 11 "Jeweler" 160 160 200
+@ COLOR 160 160 200
+@ TALK "This world is now in chaos because of the"
+@ TALK "fighting between the Western demon"
+@ TALK "and the Eastern demon"
+@ TALK "The world is full of death."
+@ TALK "There is no safety or justice anywhere..."
+@ WAIT
+@ CLEAR_BUFFER
+@ TALK "A girl living next door is one of the victims."
+@ TALK "Would you like to do a good deed here?"
+@ TALK "She is so pretty..."
+@ WAIT
+@ CLEAR_BUFFER
+@ SELECT 255 255 255
+CASE "<Listen to the story>" GO_DOWN T3-2-3
+CASE "<Say that I have no time>" GO_DOWN T3-2-4
+SELECT_END
+
+* T3-2-3
+@ CLEAR_BUFFER
+@ BOX BLUE 5
+@ FACE 11 "Jeweler" 160 160 200
+@ COLOR 160 160 200
+@ TALK "She is in my house now... hiding from devils."
+@ TALK "Hey BlueMoon! come here..."
+@ NEW_OBJECT 8 54 30 6 59 17
+@ WAIT
+@ TALK "May I introduce BlueMoon."
+@ WAIT
+@ END
+
+* T3-2-4
+@ CLEAR_BUFFER
+@ BOX BLUE 5
+@ FACE 11 "Jeweler" 160 160 200
+@ COLOR 160 160 200
+@ TALK "Don't worry... I'm not forcing you to help her," 
+@ TALK "if you don't like her that's ok..."
+@ TALK "Her beauty attracts trouble..."
+@ TALK "especially here in this world of ugly monsters!"
+@ WAIT
+@ END
+
+
+/----------------------------------------------------
+# 17
+# 8
+# 6
+# "BlueMoon"
+# FLOW
+# 100
+@ IF ITEM HAVE 204 THEN GO_DOWN 청하4 
+@ IF ORDER HAVE 17 THEN GO_DOWN 청하3
+@ CLEAR_BUFFER
+@ BOX BLUE 5
+@ FACE 12 "BlueMoon" 210 210 210
+@ COLOR 210 210 210
+@ TALK "Ah... You must be a devil hunter" 
+@ TALK "from the world..."
+@ WAIT
+
+@ CLEAR_BUFFER
+@ BOX BLUE 5
+@ FACE HERO 250 250 0
+@ COLOR 250 250 0
+@ TALK "I've heard that you are in trouble?"
+@ WAIT
+
+@ CLEAR_BUFFER
+@ BOX BLUE 5
+@ FACE 12 "BlueMoon" 210 210 210
+@ COLOR 210 210 210
+@ TALK "Yes... but... I don't want to get you in trouble too.."
+@ TALK "....."
+@ TALK "But If you'd like to hear my story"
+@ TALK "I can tell you about myself."
+@ TALK "I'm a second generation underworlder,"
+@ TALK "I was born here..."
+@ TALK "My family lives in poverty working for he devils."  
+@ WAIT
+@ TALK "One day I went on an errand to buy important"
+@ TALK "things... I was attacked by devils"
+@ TALK "who kidnapped me."
+@ WAIT
+@ CLEAR_BUFFER
+@ TALK "The devils said that I have to work for them"
+@ TALK "as a slave...I ran away ..."
+@ TALK "so I'm here hiding from them."
+@ TALK "I'm sorry... I talk too much." 
+@ WAIT
+
+@ CLEAR_BUFFER
+@ BOX BLUE 5
+@ FACE HERO 250 250 0
+@ COLOR 250 250 0
+@ SELECT 255 255 255
+CASE "<I can help you>" GO_DOWN 청아1
+CASE "<I can't take the risk>" GO_DOWN 청아2
+SELECT_END
+>>>>>>>>>
+* 청아1
+@ CLEAR_BUFFER
+@ BOX BLUE 5
+@ FACE 12 "BlueMoon" 210 210 210
+@ COLOR 210 210 210
+@ TALK "Can you help me...?"
+@ TALK "But... I'm afraid if I get you in trouble..."
+@ TALK "We may all die!"
+@ WAIT
+
+@ CLEAR_BUFFER
+@ BOX BLUE 5
+@ FACE HERO 250 250 0
+@ COLOR 250 250 0
+@ TALK "It's the job of devil hunters to help people"
+@ TALK "plagued by devils. "
+@ TALK "So, what would you like me to do?"
+@ IF ORDER_SPACE NOTHAVE THEN GO_DOWN NO_SPACE
+@ WAIT
+
+@ CLEAR_BUFFER
+@ BOX BLUE 5
+@ FACE 12 "BlueMoon" 210 210 210
+@ COLOR 210 210 210
+@ TALK "When I was attacked at Four Winds Valley"
+@ TALK "I lost the precious crystal stone I'd just bought."
+@ ORDER 17 "Find the thing she lost"
+MENT "Go to Four Winds Valley and kill the Bagiramas"
+MENT "and find a crystal stone"
+MENT "then come back here again with it."
+ORDER_END
+@ UNSEAL 5
+
+@ LOCATE_ENEMY 5 80 4 39 70 204
+@ WAIT
+
+@ CLEAR_BUFFER
+@ BOX BLUE 5
+@ FACE HERO 250 250 0
+@ COLOR 250 250 0
+@ TALK "Well... I hope I'll see you later!"
+@ WAIT
+
+@ CLEAR_BUFFER
+@ BOX BLUE 5
+@ FACE 12 "BlueMoon" 210 210 210
+@ COLOR 210 210 210
+@ TALK "I'm sorry... you will have a dangerous time"
+@ TALK "because of me,"
+@ TALK "and what I lost - the crystal stone..."
+@ TALK "Please take care of yourself..."
+@ GIVE NUM_TO_ALL 51
+@ WAIT
+@ END
+>>>>>>>>
+* 청하 2
+@ CLEAR_BUFFER
+@ BOX BLUE 5
+@ FACE 12 "BlueMoon" 210 210 210
+@ COLOR 210 210 210
+@ TALK "You know. Even if you don't want me as your girlfriend."
+@ TALK "I still want you to do this mission for me..."
+@ TALK "Well if your answer's no, that's OK.."
+@ TALK "Please go your own way."
+@ WAIT
+@ END
+>>>>>>>>
+* 청하3
+@ CLEAR_BUFFER
+@ BOX BLUE 5
+@ FACE 12 "BlueMoon" 210 210 210
+@ COLOR 210 210 210
+@ TALK "I'm sorry I gave you a difficult task..."
+@ TALK "and you have had a hard time because of me."
+@ TALK "I'm so sorry."
+@ WAIT
+@ END
+>>>>>>>
+* 청하4
+@ CLEAR_BUFFER
+@ BOX BLUE 5
+@ FACE 12 "BlueMoon" 210 210 210
+@ COLOR 210 210 210
+@ TALK "Ah! devil hunter!!! You have come back safely!!!"
+@ TALK "I've prayed for you everyday."
+@ WAIT
+
+@ CLEAR_BUFFER
+@ BOX BLUE 5
+@ FACE HERO 250 250 0
+@ COLOR 250 250 0
+@ TALK "Here! It's a crystal stone."
+@ REMOVE ITEM 204
+@ WAIT
+
+@ CLEAR_BUFFER
+@ BOX BLUE 5
+@ FACE 12 "BlueMoon" 210 210 210
+@ COLOR 210 210 210
+@ TALK "Ah... devil hunter, Thank you very much..."
+@ TALK "Thanks to you I can stay here in safety."
+@ TALK "How can I repay you for your help?"
+@ TALK "I'd like to give you an heirloom handed down"
+@ TALK "from my ancestors in return for your help."
+@ TALK "My father gave it to me himself..."
+@ TALK "It's an amulet containing holy medicines."
+@ TALK "It'll help protect you when you fight demons..."
+@ GIVE ITEM 177 1 
+@ GIVE ITEM 178 1 
+@ GIVE ITEM 179 1 
+@ GIVE ITEM 181 1 
+@ GIVE ITEM 173 1 
+@ GIVE ITEM 174 1 
+@ TALK "I'll never forget you."
+@ REMOVE_ORDER 17
+@ REMOVE NUM_TO_ALL 51
+@ GIVE NUM_TO_ALL 32
+@ CHANGE 46
+@ WAIT
+@ END
+
+# 46
+# 8
+# 6
+# "BlueMoon"
+# FLOW
+# 100
+@ IF NUM HAVE 32 THEN GO_DOWN 청하2-1
+@ CLEAR_BUFFER
+@ BOX BLUE 5
+@ FACE 12 "BlueMoon" 210 210 210
+@ COLOR 210 210 210
+@ TALK "The situation with humans and"
+@ TALK "devils here is confused but..."
+@ TALK "It'll be OK if you go back to the world..."
+@ WAIT
+@ END
+
+
+* 청하2-1
+@ CLEAR_BUFFER
+@ BOX BLUE 5
+@ FACE 12 "BlueMoon" 210 210 210
+@ COLOR 210 210 210
+@ TALK "Ah... You made it."
+@ TALK "I'm fine here now."
+@ TALK "Everything is thanks to you..."
+@ TALK "Thank you very much."
+@ WAIT
+@ END
+
+/----------------------------------------------------
+/사냥꾼의 부탁 이벤트
+# 19
+# 8
+# 9
+# "Devil hunter"
+# FLOW
+# 100
+@ CLEAR_BUFFER
+@ BOX BLUE 5
+@ FACE 4 "Retired Devil hunter" 113 165 242 
+@ COLOR 113 165 242
+@ IF ITEM HAVE 232 THEN GO_DOWN 중계2-1B
+@ IF NUM HAVE 102 THEN GO_DOWN 중계2-1C
+@ TALK "Oh... Are you a demon hunter?"
+@ TALK "I've been waiting for you!"
+@ WAIT
+@ CLEAR_BUFFER
+@ SELECT 255 255 255
+CASE "<Listen to the story of the retired devil hunter>" GO_DOWN 중계2-1
+CASE "<Stop talking>" GO_DOWN 끝
+SELECT_END
+@ END
+
+* 중계2-1
+@ CLEAR_BUFFER
+@ BOX BLUE 5
+@ FACE 4 "Retired Devil hunter" 113 165 242 
+@ COLOR 113 165 242
+@ TALK "Have you heard of the potion known as Ganza?"
+@ TALK "It's a miraculous medicine, it can raise the dead."
+@ TALK ""
+@ TALK "I have a beautiful daughter but..."
+@ TALK "She's been ailing for a long time..."
+@ WAIT
+
+@ CLEAR_BUFFER
+@ TALK "She and I have been living alone since her mother died."
+@ TALK "While I've been ill she went out picking medicinal"  
+@ TALK "herbs instead of me and..."
+@ TALK "She got poisoned by something..."
+@ TALK "I'm not sure which herb it was."
+@ WAIT
+
+@ CLEAR_BUFFER
+@ TALK "According to rumor an old man is living"
+@ TALK "at Totem Mountain who could make a Ganza potion"
+@ TALK "that could cure my daughter..."
+@ TALK ""
+@ TALK "But It's too hard for me to get there now." 
+@ TALK "I'm in despair over her long sickness..."
+@ WAIT
+
+@ CLEAR_BUFFER
+@ TALK "Please...do me a favor..."
+@ TALK "Save my daughter."
+@ TALK "If you don't... she will die."
+@ TALK "Please, would you do this for me?"
+@ WAIT
+@ CLEAR_BUFFER
+@ SELECT 255 255 255
+CASE "<I can do it for you>" GO_DOWN 중계2-1A
+CASE "<I can't spare the time>" GO_DOWN 사냥끝
+SELECT_END
+
+* 중계2-1A
+@ CLEAR_BUFFER
+@ BOX BLUE 5
+@ FACE 4 " Retired Devil hunter" 113 165 242 
+@ COLOR 113 165 242
+@ IF ORDER_SPACE NOTHAVE THEN GO_DOWN NO_SPACE
+@ TALK "Thank you very much!!!"
+@ TALK "This is the most important thing in my life...!"
+@ TALK "I realize it may"
+@ TALK "endanger your life..."
+@ TALK ""
+@ TALK "I'm so sorry I need to ask you to do this for me..."
+@ WAIT
+@ CLEAR_BUFFER
+@ TALK "Only the old man living at Totem Mountain"
+@ TALK "can make a potion from Ganza."
+@ TALK "Please... do it for my daughter..."
+@ ORDER 18 "Find the Ganza potion"
+MENT "Take Ganza potion from an old man at Totem Mountain"
+MENT "to a retired devil hunter at Vulcan Village."
+ORDER_END
+@ GIVE NUM_TO_ALL 102
+@ UNSEAL 3
+@ NEW_OBJECT 3 107 32 1 18 20 
+/우마왕 골에 있는 노인 이벤트(20)을 불러온다. 
+@ WAIT
+@ END
+
+* 중계2-1B
+@ CLEAR_BUFFER
+@ BOX BLUE 5
+@ FACE 4 " Retired Devil hunter" 113 165 242 
+@ COLOR 113 165 242
+@ TALK "Ah... You came back!!"
+@ TALK "It's lucky you're back in time."
+@ TALK "My daughter is still alive."
+@ TALK "Did you bring a Ganza potion?"
+@ REMOVE ITEM 232
+@ WAIT
+@ TALK "That's good! you did a great job!!"
+@ WAIT
+@ CLEAR_BUFFER
+@ TALK "How can I say thank you sufficiently?"
+@ TALK "You've saved our lives!"
+@ TALK "Thank you very much..."
+@ GIVE MONEY 5000
+@ TALK "Here... 5,000 gold pieces. That's all I have...!"
+@ TALK "Please take it..."
+@ WAIT
+@ CLEAR_BUFFER
+@ TALK "Also, take this powerful bow."
+@ TALK "I received it from my master but now it's yours..."
+@ GIVE ITEM 53 1
+@ TALK "Thank you very much!"
+@ TALK "Everyone in the village will never forget you!"
+@ REMOVE_ORDER 18 
+@ REMOVE NUM_TO_ALL 102
+@ CHANGE 39
+@ WAIT
+@ END
+
+* 중계2-1C
+@ CLEAR_BUFFER
+@ BOX BLUE 5
+@ FACE 4 "Retired Devil hunter" 113 165 242 
+@ COLOR 113 165 242
+@ TALK "You're still here..."
+@ TALK "Please help me... my daughter will die..."
+@ TALK "if she doesn't get medicine in time."
+@ TALK "An old man living at Totem Mountain could make"
+@ TALK "a potion from Ganza. You can get the medicine from him."
+@ TALK "Please help me!"
+@ WAIT
+@ END
+
+* 사냥끝
+@ CLEAR_BUFFER
+@ BOX BLUE 5
+@ FACE 4 "Retired Devil hunter" 113 165 242 
+@ COLOR 113 165 242
+@ TALK "Hmm... my last hope has gone..."
+@ TALK "If I was stronger I'd do it myself but..."
+@ TALK "Anyway you will have nothing to do with this mission..."
+@ TALK "Please go away now..."
+@ WAIT
+@ END
+/------------------
+# 39
+# 8
+# 9
+# "Retired Devil hunter"
+# FLOW
+# 100
+@ CLEAR_BUFFER
+@ BOX BLUE 5
+@ FACE 4 "Retired Devil hunter" 113 165 242 
+@ COLOR 113 165 242
+@ TALK "The underworld is now in chaos..."
+@ TALK "I'm really worried about that..."
+@ TALK "If I could only go back home..."
+@ WAIT
+@ END
+
+/-------------------------------------------------
+/이벤트 비사1
+# 20
+# 3
+# 1
+# "Old man"
+# FLOW
+# 100
+@ CLEAR_BUFFER
+@ BOX BLUE 5
+@ FACE 11 "Old man" 160 160 200
+@ COLOR 160 160 200
+@ IF NUM HAVE 151 && ITEM HAVE 168 THEN GO_DOWN 비사1-A
+@ IF NUM HAVE 151 THEN GO_DOWN 비사NO
+@ TALK "Hak hak..."
+@ TALK "Why are you hanging around here?"
+@ WAIT
+@ CLEAR_BUFFER
+@ SELECT 255 255 255
+CASE "<Ask about the old man>" GO_DOWN 비사1
+SELECT_END
+
+* 비사1
+@ CLEAR_BUFFER
+@ BOX BLUE 5
+@ FACE 11 "Old man" 160 160 200
+@ COLOR 160 160 200
+@ TALK "Who are you?"
+@ TALK "What do you want?"
+@ TALK "It's very rude to ask the name of an elder" 
+@ TALK "before you introduce yourself! Who are you?"
+@ TALK "Why are you here?"
+@ WAIT
+@ CLEAR_BUFFER
+@ BOX BLUE 5
+@ FACE HERO 250 250 0
+@ COLOR 250 250 0
+@ TALK "I'm a Devil hunter."
+@ TALK "I'm here to find a Ganza potion."
+@ WAIT
+@ CLEAR_BUFFER
+@ BOX BLUE 5
+@ FACE 11 "Old man" 160 160 200
+@ COLOR 160 160 200
+@ TALK "What... a Ganza potion?"
+@ TALK "What do you want to use it for?"
+@ WAIT
+@ CLEAR_BUFFER
+@ BOX BLUE 5
+@ FACE HERO 250 250 0
+@ COLOR 250 250 0
+@ TALK "In order to save a young girl's life!"
+@ WAIT
+@ CLEAR_BUFFER
+@ BOX BLUE 5
+@ FACE 11 "Old man" 160 160 200
+@ COLOR 160 160 200
+@ TALK "I don't have to pretend to be virtuous..."
+@ WAIT
+@ TALK "I'm too old to be kind... Anyway..."
+@ TALK "There is no one can make the Ganza potion"
+@ TALK "except me!"
+@ TALK "You must give me wild ginseng before I'll help you!"
+@ WAIT
+@ GIVE NUM_TO_ALL 151
+@ CLEAR_BUFFER
+@ BOX BLUE 5
+@ FACE HERO 250 250 0
+@ COLOR 250 250 0
+@ TALK "Where could I get wild ginseng?"
+@ WAIT
+@ CLEAR_BUFFER
+@ BOX BLUE 5
+@ FACE 11 "Old man" 160 160 200
+@ COLOR 160 160 200
+@ TALK "You want to know where to find it?"
+@ TALK "Go see a shopkeeper. Stupid warrior!"
+@ WAIT
+@ END
+
+* 비사1-A
+@ CLEAR_BUFFER
+@ BOX BLUE 5
+@ FACE 11 "Old man" 160 160 200
+@ COLOR 160 160 200
+@ TALK "You've got the wild ginseng?"
+@ TALK "OK... Hmm... so now pay me 2,000 gold pieces for"
+@ TALK "the Ganza potion!"
+@ IF MONEY GE 2000 THEN GO_DOWN 비사1-C
+@ TALK "How did you think you could you buy this medicine"
+@ TALK "without money?"
+@ TALK "Get lost. Come back when you've got some money!"
+@ TALK "Stupid warrior!"
+@ WAIT
+@ END
+
+* 비사1-C
+@ CLEAR_BUFFER
+@ BOX BLUE 5
+@ FACE 11 "Old man" 160 160 200
+@ COLOR 160 160 200
+@ REMOVE ITEM 168
+@ TALK "You know 2,000 gold pieces, it's a very low price!"
+@ REMOVE MONEY 2000
+@ WAIT
+@ TALK "OK! Here this is the Ganza potion!"
+@ GIVE ITEM 232 1
+@ REMOVE NUM_TO_ALL 151
+@ WAIT
+@ CLEAR_BUFFER
+@ TALK "Now why are you hanging around?"
+@ TALK "Get out of here right now."
+@ TALK "Clear off!"
+@ CHANGE_GOS 19
+@ WAIT
+@ REMOVE_OBJECT THIS
+@ END
+
+* 비사NO
+@ CLEAR_BUFFER
+@ BOX BLUE 5
+@ FACE 11 "Old man" 160 160 200
+@ COLOR 160 160 200
+@ TALK "I asked you to find wild ginseng..."
+@ WAIT
+@ END
+
+/========================================================
+/ 기사의 활을 구해다 주기
+# 18
+# 8
+# 7
+# "Knight"
+# FLOW
+# 100
+@ CLEAR_BUFFER
+@ BOX BLUE 5
+@ FACE 9 "Knight" 86 171 171
+@ COLOR 86 171 171
+@ IF ITEM HAVE 54 && ORDER HAVE 3 THEN GO_DOWN 기사활1
+@ IF NUM HAVE 24 THEN GO_DOWN T1
+@ TALK "Oh... You must be a devil hunter!"
+@ TALK "Do you have any powerful weapons?"
+@ TALK "I have no suitable weapons for fighting demons!"
+@ TALK "I must get a weapon to fight with."
+@ TALK "Could you go and get a Heaven Bow for me?"
+@ WAIT
+@ CLEAR_BUFFER
+@ TALK "I'll pay you well for the bow if you get it for me"
+@ TALK "But it's going to be hard to get it..."
+@ TALK "Please will you do it for me!"
+@ WAIT
+@ TALK "What do you think? Can you help me?"
+@ WAIT
+@ CLEAR_BUFFER
+@ SELECT 255 255 255
+CASE "<I can do it for you>" GO_DOWN 기사활1-1
+CASE "<I can't spare the time>" GO_DOWN 기사활1-2
+SELECT_END
+
+* T1
+@ TALK "A hook demon at Cave of Bones has the bow."
+@ TALK "I'm not skilled enough to kill it with a sword."
+@ TALK "I need more training before I can use a sword well..."
+@ WAIT
+@ CLEAR_BUFFER
+@ TALK "Well... I really believe you can get it."
+@ TALK "I'll pay you 20,000 gold pieces for it!"
+@ WAIT
+@ END
+* 기사활1-1
+@ CLEAR_BUFFER
+@ BOX BLUE 5
+@ FACE 9 "Knight" 86 171 171
+@ COLOR 86 171 171
+@ IF ORDER_SPACE NOTHAVE THEN GO_DOWN NO_SPACE
+@ TALK "Thank you... It'll be good experience for you."
+@ TALK "Well... I'll tell you how to get it..."
+@ TALK "A hook demon at Cave of Bones has the bow."
+@ TALK "I'm not skilled enough to kill it myself."
+@ TALK "I need more training before I can use a sword well..."
+@ WAIT
+@ CLEAR_BUFFER
+@ TALK "Well... I really believe you can do it."
+@ TALK "I'll pay you 20,000 gold pieces for it!"
+@ WAIT
+@ TALK "Then... go now!"
+@ ORDER 3 "Take the Heaven Bow to a knight"
+MENT "Take the Heaven Bow to a knight at Vulcan Village"    
+MENT "after killing the hook demon at Cave of Bones."
+MENT "I'll pay you 20,000 gold pieces for it!"
+ORDER_END
+@ UNSEAL 17
+@ LOCATE_ENEMY 17 47 28 17 70 54
+@ GIVE NUM_TO_ALL 24
+@ END
+
+* 기사활1-2
+@ CLEAR_BUFFER
+@ BOX BLUE 5
+@ FACE 9 "Knight" 86 171 171
+@ COLOR 86 171 171
+@ TALK "Hmm... well?"
+@ TALK "I'll have to try and fetch it myself if you can't"
+@ TALK "spare the time"
+@ TALK "I'm powerful enough to do it by myself but... "
+@ TALK "it will be dangerous and troublesome work..."
+@ TALK "It's worth a lot of money to me if you'll fetch"
+@ TALK "the bow."
+@ TALK "20,000 gold pieces is a not inconsiderable sum."
+@ TALK "Well...?"
+@ WAIT
+@ END
+
+* 기사활1
+@ CLEAR_BUFFER
+@ BOX BLUE 5
+@ FACE 9 "Knight" 86 171 171
+@ COLOR 86 171 171
+@ TALK "Oh... you came back!"
+@ TALK "Give me the bow!"
+@ REMOVE ITEM 54
+@ TALK "Wonderful, is that really the Heaven Bow...?"
+@ TALK "It's so beautiful..."
+@ TALK "Thank you very much!"
+@ TALK "Here's 20,000 gold pieces as I promised."
+@ GIVE MONEY 20000
+@ WAIT
+@ CLEAR_BUFFER
+@ TALK "I finally get a great bow thanks to you."
+@ TALK "Well... I hope you'll have success as a devil hunter..."
+@ GIVE NUM_TO_ALL 152
+@ REMOVE_ORDER 3
+@ REMOVE NUM_TO_ALL 24
+@ CHANGE 40
+@ WAIT
+@ END
+/------------------------------
+# 40
+# 8
+# 7
+# "Knight"
+# FLOW
+# 100
+@ CLEAR_BUFFER
+@ BOX BLUE 5
+@ FACE 9 "Knight" 86 171 171
+@ COLOR 86 171 171
+@ IF NUM HAVE 152 THEN GO_DOWN 기사활2
+@ TALK "I'm a knight in possession of a Heaven Bow!"
+@ TALK "A Heaven bow... only a person" 
+@ TALK "who has a blessing from heaven can own it."
+@ TALK "Hmm... Do you envy me?"
+@ TALK "Don't worry... if you work hard"
+@ TALK "you could be like me..."
+@ WAIT
+@ END
+
+* 기사활2
+@ CLEAR_BUFFER
+@ BOX BLUE 5
+@ FACE 9 "Knight" 86 171 171
+@ COLOR 86 171 171
+@ TALK "Oh... I suppose you are the man"
+@ TALK "who fetched the Heaven Bow"
+@ TALK "for me? I'm very pleased with it, thanks to you..."
+@ TALK " maybe next time there are demons to be fought,"
+@ TALK "I can join the fight with my bow..."
+@ WAIT
+@ END
+
+/----------------------------------------------------
+/ 강 주변의 향진마귀를 없애기
+# 27 
+# 8
+# 11
+# "Intermediary"
+# FLOW
+# 100
+@ CLEAR_BUFFER
+@ BOX BLUE 5
+@ FACE 3 "Intermediary" 113 165 242
+@ COLOR 113 165 242
+@ IF ITEM HAVE 233 THEN GO_DOWN 중계2-2B
+@ IF NUM HAVE 103 THEN GO_DOWN 중계다1/2?
+@ TALK "Come on! Gather around! Are you looking for a quest?"
+@ TALK "Many quests available here!"
+@ WAIT
+@ CLEAR_BUFFER
+@ SELECT 255 255 255
+CASE "<Slay devils>" GO_DOWN 중계2-2
+CASE "<Stop talking>" GO_DOWN 중계끝
+SELECT_END
+
+* 중계2-2
+@ CLEAR_BUFFER
+@ BOX BLUE 5
+@ FACE 3 "Intermediary" 113 165 242
+@ COLOR 113 165 242
+@ TALK "There's a river runs through my village."
+@ TALK "Recently Hellminor, a demon, came and polluted"
+@ TALK "the river"
+@ TALK "It's a real nuisance - now we can't drink the water."
+@ WAIT
+
+@ CLEAR_BUFFER
+@ TALK "I'll give you a sword if you take Hellminor" 
+@ TALK "away from the village and kill him."
+@ WAIT
+
+@ CLEAR_BUFFER
+@ SELECT 255 255 255
+CASE "<OK! I can do it for you>" GO_DOWN 중계2-2A
+CASE "<No! I can't spare the time>" GO_DOWN 중계끝
+SELECT_END
+
+* 중계2-2A
+@ CLEAR_BUFFER
+@ BOX BLUE 5
+@ FACE 3 "Intermediary" 113 165 242
+@ COLOR 113 165 242
+@ TALK "That's a good decision!"
+@ TALK "It's not that hard to kill Hellminor."
+@ WAIT
+@ LOCATE_ENEMY 18 27 19 42 60 233
+@ UNSEAL 18
+@ CLEAR_BUFFER
+@ TALK "Hellminor usually hides in the Pandemonium Cave"
+@ TALK "at noon."
+@ TALK "It's time that devil was killed."
+@ TALK "I'll be here waiting for you!"
+@ GIVE NUM_TO_ALL 103
+@ ORDER 8 "Slay Hellminor"
+MENT "Slay a Hellminor at Pandemonium and then"
+MENT "take a calabash of Hellminor's blood to an Intermediary" 
+MENT "at Vulcan Village"
+MENT "for the sword..."
+ORDER_END
+@ WAIT
+@ END
+
+* 중계2-2B
+@ CLEAR_BUFFER
+@ BOX BLUE 5
+@ FACE 3 "Intermediary" 113 165 242
+@ COLOR 113 165 242
+@ TALK "You're finally here!"
+@ TALK "Everything's turned out fine thanks to you."
+@ TALK "We don't have to drink polluted water any more!"
+@ WAIT
+@ CLEAR_BUFFER
+@ REMOVE ITEM 233
+@ TALK "Here is the sword I promised!"
+@ GIVE ITEM 32 1
+@ TALK "It's Saver Blade will be the greatest sword of all" 
+@ TALK "if you destroy the Blood Sword."
+@ TALK "Return it to me after you've killed Satan."
+@ WAIT
+@ TALK "Thank you for your help!"
+@ TALK "See you later!"
+@ REMOVE_ORDER 8
+@ REMOVE NUM_TO_ALL 103
+@ CHANGE 28
+@ WAIT
+@ END
+
+
+/--------------------------------------------------------
+/정화의 석화수를 구하기
+# 28
+# 8
+# 11
+# "Intermediary"
+# FLOW
+# 100
+@ CLEAR_BUFFER
+@ BOX BLUE 5
+@ FACE 3 "Intermediary" 113 165 242
+@ COLOR 113 165 242
+@ IF ITEM HAVE 234 THEN GO_DOWN 중계2-3B
+@ IF NUM HAVE 153 THEN GO_DOWN 중계다시
+@ TALK "Gather around warriors! Are you looking for a quest?"
+@ TALK "I have many quests here!"
+@ WAIT
+@ CLEAR_BUFFER
+@ SELECT 255 255 255
+CASE "<Get holy well water>" GO_DOWN 중계2-3
+CASE "<Stop talking>" GO_DOWN 중계끝
+SELECT_END
+@ END
+
+* 중계2-3
+@ CLEAR_BUFFER
+@ BOX BLUE 5
+@ FACE 3 "Intermediary" 113 165 242
+@ COLOR 113 165 242
+@ TALK "Do you know that killing Hellminor didn't solve"
+@ TALK "our problems?"
+@ TALK "It's been very peaceful here after you killed him but.."
+@ WAIT
+
+@ CLEAR_BUFFER
+@ TALK "Hellminor's poison was spread around before his death.."
+@ TALK "and now its ruining our peaceful life!"
+@ TALK "It's so awful."
+@ TALK "Sickness is spreading throughout the village..."
+@ WAIT
+
+@ CLEAR_BUFFER
+@ TALK "In order to solve this serious situation we need" 
+@ TALK "holy well water but... Only Bear Village sells it."
+@ TALK "If you get it for us I'll give you my strength and" 
+@ TALK "experience in return for your help."
+@ TALK "What do you think of my suggestion?"
+@ WAIT
+@ CLEAR_BUFFER
+@ SELECT 255 255 255
+CASE "<I can do it for you>" GO_DOWN 중계2-3A
+CASE "<I can't be bothered>" GO_DOWN 중계끝
+SELECT_END
+
+* 중계2-3A
+@ CLEAR_BUFFER
+@ BOX BLUE 5
+@ FACE 3 "Intermediary" 113 165 242
+@ COLOR 113 165 242
+@ TALK "That's good!"
+@ TALK "It's a good decision!"
+@ TALK "Do it for everyone... Thank you!"
+@ TALK "Now get going! It's urgent!"
+@ WAIT
+@ GIVE NUM_TO_ALL 153
+@ ORDER 40 "Get holy well water"
+MENT "Get holy well water from Bear Village and"
+MENT "take it to an Intermediary at Vulcan Village."
+MENT "Then receive strength and experience from him..."
+ORDER_END
+@ END
+
+* 중계2-3B
+@ CLEAR_BUFFER
+@ BOX BLUE 5
+@ FACE 3 "Intermediary" 113 165 242
+@ COLOR 113 165 242
+@ TALK "You are finally here!"
+@ TALK "Did you get the holy well water?"
+@ REMOVE ITEM 234
+@ WAIT
+@ CLEAR_BUFFER
+@ TALK "Thank you!"
+@ TALK "We don't have to struggle with sickness any more."
+@ TALK "Our well-being is thanks to you..."
+@ WAIT
+@ CLEAR_BUFFER
+@ TALK "OK... I'll make good my promise."
+@ TALK "I give you strength 26 and experience 5000."
+@ INCREASE STRENGTH 26
+@ GIVE EXP 5000
+@ TALK "In addition, our people in the village give you"
+@ TALK "2,500 gold pieces for your help."
+@ GIVE MONEY 2500
+@ REMOVE_ORDER 40
+@ WAIT
+@ CLEAR_BUFFER
+@ TALK "Thank you! you did a good job!"
+@ TALK "See you later!"
+@ CHANGE 41
+@ WAIT
+@ REMOVE NUM_TO_ALL 153
+@ END
+/-------------------------------------------------
+/갈라파고스 비늘 찾기
+# 41
+# 8
+# 11
+# "Intermediary"
+# FLOW
+# 100
+@ CLEAR_BUFFER
+@ BOX BLUE 5
+@ FACE 3 "Intermediary" 113 165 242
+@ COLOR 113 165 242
+@ IF ITEM HAVE 229 THEN GO_DOWN 중계3-3B
+@ IF NUM HAVE 101 THEN GO_DOWN 중계3-3G
+@ IF NUM HAVE 103 THEN GO_DOWN 중계다시
+@ TALK "Many quests are here...Come and get a quest."
+@ WAIT
+@ CLEAR_BUFFER
+@ SELECT 255 255 255
+CASE "<Find Devil's Scale>" GO_DOWN 중계3-3
+SELECT_END
+@ END
+
+* 중계3-3
+@ CLEAR_BUFFER
+@ BOX BLUE 5
+@ FACE 3 "Intermediary" 113 165 242
+@ COLOR 113 165 242
+@ TALK "Do you know about the Devil's Scale"
+@ TALK "that a medicine buyer"
+@ TALK "lost at Dinyc on his way to the village."
+@ TALK "We couldn't find it..."
+@ TALK ""
+@ WAIT
+@ CLEAR_BUFFER
+@ TALK "If you find it he'll give you 7,000 gold pieces"
+@ TALK "for your help."
+@ TALK "What do you think of the plan?"
+@ WAIT
+
+@ CLEAR_BUFFER
+@ TALK "It's  very important to find the scale..."
+@ TALK "He'll pay you a lot of money!"
+@ TALK "Would you like to give it a try?"
+@ WAIT
+@ CLEAR_BUFFER
+@ SELECT 255 255 255
+CASE "<I can do it for you>" GO_DOWN 중계3-3A
+CASE "<I'm not interested>" GO_DOWN 중계끝
+SELECT_END
+@ END
+
+* 중계3-3A
+@ CLEAR_BUFFER
+@ BOX BLUE 5
+@ FACE 3 "Intermediary" 113 165 242
+@ COLOR 113 165 242
+@ TALK "There hasn't been anyone who could do this task..."
+@ TALK "but you are special..."
+@ TALK "Thank you very much for deciding to help."
+@ TALK ""
+@ TALK "I believe in you!"
+@ GIVE NUM_TO_ALL 103
+@ IF ORDER_SPACE NOTHAVE THEN GO NO_SPACE
+@ ORDER 56 "Find Devil's Scale"
+
+MENT "Find Devil's Scale at Dinyc and"
+MENT "take it to an Intermediary at Vulcan Village."
+MENT "Receive 7,000 gold pieces for help."
+ORDER_END
+@ UNSEAL 16
+@ LOCATE_ITEM 16 48 23 229
+@ WAIT
+@ END
+
+* 중계3-3B
+@ CLEAR_BUFFER
+@ BOX BLUE 5
+@ FACE 3 "Intermediary" 113 165 242
+@ COLOR 113 165 242
+@ TALK "You're here with the Devil's Scale!"
+@ TALK "I don't know if you were the warrior who made" 
+@ TALK "a deal with me."
+@ TALK "I'd promised that I'd pay 7,000 gold pieces"
+@ TALK "to whoever brought me the Devil's Scale."
+@ TALK "There is someone who really needs that scale." 
+@ WAIT
+
+@ CLEAR_BUFFER
+@ TALK "Did you make a contract with me?"
+@ WAIT
+@ CLEAR_BUFFER
+@ SELECT 255 255 255
+CASE "<Yes! I did>" GO_DOWN 중계3-3C
+CASE "<No! I didn't>" GO_DOWN 중계3-3D
+SELECT_END
+
+* 중계3-3C
+@ CLEAR_BUFFER
+@ BOX BLUE 5
+@ FACE 3 "Intermediary" 113 165 242
+@ COLOR 113 165 242
+@ TALK "That's good!"
+@ TALK "I knew you could do it"
+@ TALK "Give me the Devil's Scale!"
+@ REMOVE ITEM 229
+@ WAIT
+
+@ CLEAR_BUFFER
+@ TALK "Here is 7,000 gold pieces."
+@ GIVE MONEY 7000
+@ TALK "It's a good deal!"
+@ TALK "Thank you for your help!"
+@ TALK "See you later!"
+@ REMOVE_ORDER 56
+@ REMOVE NUM_TO_ALL 103
+@ CHANGE 42
+@ WAIT
+@ END
+
+* 중계3-3D
+@ CLEAR_BUFFER
+@ BOX BLUE 5
+@ FACE 3 "Intermediary" 113 165 242
+@ COLOR 113 165 242
+@ TALK "Are you sure that you're not willing to part with it?"
+@ TALK "Hmm I wish we could have got the Devil's Scale"
+@ TALK "Could you sell it if I offered more money?"
+@ TALK "How about 8,000 gold pieces?"
+@ TALK "What do you think of that?"
+@ WAIT
+
+@ CLEAR_BUFFER
+@ SELECT 255 255 255
+CASE "<Sell it>" GO_DOWN 중계3-3E
+CASE "<Refuse>" GO_DOWN 중계3-3F          
+SELECT_END
+@ END
+
+* 중계3-3E
+@ CLEAR_BUFFER
+@ BOX BLUE 5
+@ FACE 3 "Intermediary" 113 165 242
+@ COLOR 113 165 242
+@ TALK "It's a good decision!"
+@ TALK "Everything will turn out fine thanks to you!"
+@ TALK "Well... give it to me."
+@ REMOVE ITEM 229
+@ WAIT
+
+@ CLEAR_BUFFER
+@ TALK "Here is 8,000 gold pieces."
+@ GIVE MONEY 8000
+@ TALK "It's a good deal."
+@ TALK "Thank you for deciding to sell it!"
+@ TALK "See you later!"
+@ REMOVE_ORDER 56
+@ REMOVE NUM_TO_ALL 103
+@ REMOVE NUM 101
+@ CHANGE 42
+@ WAIT
+@ END
+
+* 중계3-3F
+@ CLEAR_BUFFER
+@ BOX BLUE 5
+@ FACE 3 "Intermediary" 113 165 242
+@ COLOR 113 165 242
+@ TALK "I can't force you - if you're not interested."
+@ TALK "Come here again if you change your mind!"
+@ GIVE NUM 101
+@ WAIT
+@ END
+
+* 중계3-3G
+@ CLEAR_BUFFER
+@ BOX BLUE 5
+@ FACE 3 "Intermediary" 113 165 242
+@ COLOR 113 165 242
+@ TALK "Are you here again to sell Devil's Scale?"
+@ TALK "I'll offer 9,000 gold pieces!"
+@ TALK "Please sell it..."
+@ TALK "What do you want...?"
+@ WAIT
+
+@ CLEAR_BUFFER
+@ SELECT 255 255 255
+CASE "<Sell it>" GO_DOWN 중계3-3E
+CASE "<Not sell it>" GO_DOWN 중계3-3F
+SELECT_END
+
+* 중계3-3E
+@ CLEAR_BUFFER
+@ BOX BLUE 5
+@ FACE 3 "Intermediary" 113 165 242
+@ COLOR 113 165 242
+@ TALK "It's a good decision!"
+@ TALK "Everything will turn out fine thanks to you!"
+@ TALK "Well... hand it over."
+
+@ REMOVE ITEM 229
+@ WAIT
+
+@ CLEAR_BUFFER
+@ TALK "Here! it's 9,000 gold pieces."
+@ GIVE MONEY 9000
+@ TALK "It's a good deal."
+@ TALK "Thank you for deciding to sell it!"
+@ TALK "See you later!"
+@ REMOVE_ORDER 56
+@ REMOVE NUM_TO_ALL 103
+@ REMOVE NUM 101
+@ CHANGE 42
+@ WAIT
+@ END
+
+* 중계3-3F
+@ CLEAR_BUFFER
+@ BOX BLUE 5
+@ FACE 3 "Intermediary" 113 165 242
+@ COLOR 113 165 242
+@ TALK "I can't force you - if you're not interested."
+@ TALK "Come here again if you change your mind!"
+@ GIVE NUM 101
+@ WAIT
+@ END
+
+/========================================================
+/귀신 퇴치
+# 42
+# 8
+# 11
+# "Intermediary"
+# FLOW
+# 100
+@ CLEAR_BUFFER
+@ BOX BLUE 5
+@ FACE 3 "Intermediary" 113 165 242
+@ COLOR 113 165 242
+@ IF NUM HAVE 106 THEN GO_DOWN 중계4-1B 
+@ IF NUM HAVE 103 THEN GO_DOWN 중계다시
+@ TALK "Come on! Are you seeking a quest?"
+@ TALK "I have many quests here!"
+@ WAIT
+@ CLEAR_BUFFER
+@ SELECT 255 255 255
+CASE "<Slay devils around Daemyr Cemetery>" GO_DOWN 중계4-1
+SELECT_END
+@ END
+
+* 중계4-1
+@ CLEAR_BUFFER
+@ BOX BLUE 5
+@ FACE 3 "Intermediary" 113 165 242
+@ COLOR 113 165 242
+@ TALK "According to the rumor a devil that looks human" 
+@ TALK "is appearing near Daemyr Cemetery."
+@ TALK "People are worried about that..."
+@ WAIT
+
+@ CLEAR_BUFFER
+@ TALK "I don't know all the details but..."
+@ TALK "the demon looks like a knight"
+@ TALK "and comes out at noon murmuring something to itself."
+@ TALK "Be careful... remember it looks like a human..."
+@ WAIT
+
+@ CLEAR_BUFFER
+@ TALK "Would you like to try it?"
+@ TALK ""
+@ CLEAR_BUFFER
+@ SELECT 255 255 255
+CASE "<I'll do it>" GO_DOWN 중계4-1A
+CASE "<I'm not interested>" GO_DOWN 중계끝
+SELECT_END
+
+* 중계4-1A
+@ CLEAR_BUFFER
+@ BOX BLUE 5
+@ FACE 3 "Intermediary" 113 165 242
+@ COLOR 113 165 242
+@ CLEAR_BUFFER
+@ TALK "That's good!"
+@ TALK "I believe that you can do it."
+@ TALK "Well... take care of yourself!"
+@ GIVE NUM_TO_ALL 103
+@ NEW_OBJECT 6 44 78 1 16 43
+@ IF ORDER_SPACE NOTHAVE THEN GO NO_SPACE
+@ ORDER 57 "Slay Knight Devil near Daemyr Cemetery"
+MENT "Slay devil near Daemyr Cemetery."
+MENT "It looks like a knight."
+MENT "After killing devil receive the money"
+MENT "from an Intermediary at Vulcan Village."
+ORDER_END
+@ WAIT
+@ END
+
+* 중계4-1B
+@ CLEAR_BUFFER
+@ BOX BLUE 5
+@ FACE 3 "Intermediary" 113 165 242
+@ COLOR 113 165 242
+@ TALK "You did a good job!"
+@ TALK "I wonder how you knew the blacksmith was involved?"
+@ TALK "Anyway, here's 3,000 gold pieces for your help."
+@ GIVE MONEY 3000
+@ TALK "See you later!"
+@ REMOVE_ORDER 57
+@ REMOVE NUM_TO_ALL 106
+@ REMOVE NUM_TO_ALL 103
+@ CHANGE 38
+@ WAIT
+@ END
+/---------------------------------------------------
+/더 이상 일이 없슴.
+# 38
+# 8
+# 11
+# "Intermediary"
+# FLOW
+# 100
+@ CLEAR_BUFFER
+@ BOX BLUE 5
+@ FACE 3 "Intermediary" 113 165 242
+@ COLOR 113 165 242
+@ TALK "Hmm... It's a nice day... but..."
+@ TALK "there's nothing to do around here."
+@ TALK "You're a devil hunter..." 
+@ TALK "How about you doing some devil killing for me?"
+@ WAIT
+@ END
+/--------------------------------------------------------
+# 43
+# 1
+# 6
+# "Knight Devil"
+# FLOW
+# 100
+@ CLEAR_BUFFER
+@ BOX RED 5
+@ FACE 9 "Knight Devil" 206 0 103
+@ COLOR 255 255 255
+@ CHANGE_GOS 19
+@ CHANGE_GOS 16
+@ IF ITEM HAVE 55 THEN GO_DOWN A4-E2
+@ IF NUM HAVE 103 THEN GO_DOWN A4-E1
+@ TALK "Please...get me... my... bow..."
+@ WAIT
+@ END
+
+* A4-E1
+@ CLEAR_BUFFER
+@ BOX RED 5
+@ FACE 9 "Knight Devil" 206 0 103
+@ CHANGE_GOS 19
+@ CHANGE_GOS 16
+@ COLOR 255 255 255
+@ TALK "Where... is... my... bow...?"
+@ CHANGE_GOS 19
+@ WAIT
+
+@ CLEAR_BUFFER
+@ CHANGE_GOS 16
+@ TALK "Please...get me... my... bow..."
+@ CHANGE_GOS 19
+@ WAIT
+
+@ CLEAR_BUFFER
+@ BOX BLUE 5
+@ FACE HERO 250 250 0
+@ COLOR 250 250 0
+@ TALK "Ah! it's the Knight Devil!"
+@ WAIT
+@ TALK "What is he murmuring about?"
+@ WAIT
+
+@ CLEAR_BUFFER
+@ BOX RED 5
+@ FACE 9 "Knight Devil" 206 0 103
+@ COLOR 255 255 255
+@ CHANGE_GOS 16
+@ TALK "Where... is... my... bow...?"
+@ CHANGE_GOS 19
+@ WAIT
+
+@ CLEAR_BUFFER
+@ BOX BLUE 5
+@ FACE HERO 250 250 0
+@ COLOR 250 250 0
+@ TALK "Maybe he's talking about a bow that he's lost..."
+@ WAIT
+@ CLEAR_BUFFER
+@ TALK "Hey! What are you murmuring about?"
+@ TALK "Who are you?"
+@ WAIT
+
+@ CHANGE_GOS 16
+@ CLEAR_BUFFER
+@ BOX RED 5
+@ FACE 9 "Knight Devil" 206 0 103
+@ COLOR 255 255 255
+@ TALK "I've lost my bow which was handed down from"
+@ TALK "my master..."
+@ CHANGE_GOS 19
+@ WAIT
+
+@ CLEAR_BUFFER
+@ CHANGE_GOS 16
+@ TALK "One day... when I fell asleep..."
+@ TALK "someone stole it..."
+@ CHANGE_GOS 19
+
+@ CLEAR_BUFFER
+@ BOX BLUE 5
+@ FACE HERO 250 250 0
+@ COLOR 250 250 0
+@ TALK "Who was that?"
+@ WAIT
+
+@ CLEAR_BUFFER
+@ BOX RED 5
+@ FACE 9 "Knight Devil" 206 0 103
+@ COLOR 255 255 255
+@ CHANGE_GOS 16
+@ TALK "He... reeked.... of... iron..."
+@ TALK "and he is now in Vulcan Village..."
+@ CHANGE_GOS 19
+@ CHANGE_GOS 16 
+@ WAIT
+
+@ CLEAR_BUFFER
+@ BOX BLUE 5
+@ FACE HERO 250 250 0
+@ COLOR 250 250 0
+@ TALK "Iron smell?"
+@ TALK "Vulcan Village?"
+@ TALK "Hmm, who could that be who lives in Vulcan Village...?"
+@ WAIT
+@ GIVE NUM_TO_ALL 105
+@ END
+
+* A4-E2
+@ CLEAR_BUFFER
+@ BOX RED 5
+@ FACE 9 "Knight Devil" 206 0 103
+@ COLOR 255 255 255
+@ CHANGE_GOS 19
+@ CHANGE_GOS 16
+@ CLEAR_BUFFER
+@ BOX RED 5
+@ FACE 9 "Knight Devil" 206 0 103
+@ COLOR 255 255 255
+@ TALK "You... have... my... bow... now."
+@ CHANGE_GOS 19
+@ WAIT
+
+@ CLEAR_BUFFER
+@ BOX BLUE 5
+@ FACE HERO 250 250 0
+@ COLOR 250 250 0
+@ CHANGE_GOS 16
+@ TALK "Yes, here it is... your bow...!"
+@ TALK "The Blacksmith who is greedy for money maybe"
+@ TALK "stole your bow."
+@ WAIT
+@ TALK "Take your bow."
+@ WAIT
+@ CHANGE_GOS 19
+
+@ CLEAR_BUFFER
+@ BOX RED 5
+@ FACE 9 "Knight Devil" 206 0 103
+@ COLOR 255 255 255
+@ CHANGE_GOS 16
+@ TALK "I ...deeply... appreciate... your... kindness..."
+@ TALK "It is... fated... the bow...will find... another..."
+@ TALK "master...out of me..."
+@ TALK "From... now on... it's... yours..."
+@ CHANGE_GOS 19
+@ WAIT
+
+@ CLEAR_BUFFER
+@ CHANGE_GOS 16
+@ TALK "I'll... leave... now..."
+@ REMOVE NUM_TO_ALL 103
+@ GIVE NUM_TO_ALL 106
+@ REMOVE_ORDER 57
+@ CHANGE_GOS 19
+@ CHANGE_GOS 16
+@ CHANGE_GOS 19
+@ WAIT
+@ REMOVE_OBJECT THIS
+
+/-------------------------------------------------
+* 중계2-3C
+@ CLEAR_BUFFER
+@ BOX BLUE 5
+@ FACE 3 "Intermediary" 113 165 242
+@ COLOR 113 165 242
+@ TALK "Why don't you leave now?"
+@ TALK "Excuse me but... it's really urgent..."
+@ TALK "Please do it for me!"
+@ WAIT
+@ END
+/========================================================
+
+/--------------------------------------------------------
+* 마을6의 대장장이
+# 4
+# 9
+# 1
+# "Blacksmith" 
+# BASIC
+# 100
+@ CLEAR_BUFFER
+@ BOX BLUE 6
+@ COLOR 200 200 0
+@ FACE 8 "Blacksmith" 200 250 0
+@ TALK "How are you? I sell and repair weapons."
+@ TALK "How can I help you?"
+* 곰바위대장장이
+@ CLEAR_BUFFER
+@ COLOR 250 250 0
+@ SELECT 255 255 255
+CASE "Buying weapon" GO_DOWN 장비고르기2
+CASE "Selling weapon" GO_DOWN 장비팔기
+CASE "Repairing weapon" GO_DOWN 장비수리
+CASE "Talking" GO_DOWN T6-1
+CASE "<Exit>" GO_DOWN 끝
+SELECT_END
+
+* T6-1
+@ CLEAR_BUFFER
+@ BOX BLUE 6
+@ FACE 8 "Blacksmith" 200 250 0
+@ COLOR 200 250 0
+@ SELECT 255 255 255
+CASE "<About the rumor>" GO_DOWN T6-1A
+CASE "<About the situation locally>" GO_DOWN T6-1B
+CASE ""
+CASE "<Stop talking>" GO_UP 곰바위대장장이
+SELECT_END
+
+* T6-1A
+@ CLEAR_BUFFER
+@ COLOR 200 250 0
+@ FACE 8 "Blacksmith" 200 250 0
+@ BOX BLUE 5
+@ TALK "Well the rumor...?"
+@ TALK "Anyway...how did you get here?"
+@ TALK "According to the rumor devil hunters are"
+@ TALK "storming through"
+@ TALK "the underworld... you must be them..."
+@ TALK "You are causing a big disturbance down here..."
+@ WAIT
+@ CLEAR_BUFFER
+@ TALK "The demons are making a desperate effort to find you..."
+@ TALK "Be careful..."
+@ WAIT
+@ GO_UP T6-1
+@ END
+
+* T6-1B
+@ CLEAR_BUFFER
+@ BOX BLUE 6
+@ FACE 8 "Blacksmith" 200 250 0
+@ COLOR 200 250 0
+@ TALK "The situation around here?... We can't travel" 
+@ TALK "beyond the village. We feel trapped."
+@ TALK "And we have no idea what's going on."
+@ WAIT
+@ IF ITEM HAVE 253 THEN GO_DOWN 곰바위1
+@ GO_UP T6-1
+
+* 곰바위1
+@ CLEAR_BUFFER
+@ BOX BLUE 6
+@ FACE 8 "Blacksmith" 200 250 0
+@ COLOR 200 250 0
+@ TALK "Oh...?!"
+@ WAIT
+@ TALK "Ah! I have seen that tattoo you have..."
+@ TALK "Hmm... now where did see it?"
+@ TALK ""
+@ TALK "Ah yes... it's the same as Raegios's tattoo."
+@ WAIT
+@ CLEAR_BUFFER
+@ SELECT 255 255 255
+CASE "<About Raegios's family>" GO_DOWN T6-1C
+SELECT_END
+
+* T6-1C
+@ CLEAR_BUFFER
+@ BOX BLUE 6
+@ FACE 8 "Blacksmith" 200 250 0
+@ COLOR 200 250 0
+@ TALK "Everyone knows them in the underworld..."
+@ TALK "Many people were kidnapped from the world "
+@ TALK "and brought to the underworld. " 
+@ TALK "It's not strange that so many people disappeared..."
+@ TALK "the demons were hunting humans."
+@ WAIT
+@ CLEAR_BUFFER
+@ TALK "According to a rule from our ancestors"
+@ TALK "we should marry outside the village"
+@ TALK "to ensure healthy strong descendants."
+@ TALK "The same thing applies for humans and devils..."
+@ TALK "So the devils made up their mind to marry humans."
+@ WAIT
+@ CLEAR_BUFFER
+@ TALK "The devils kidnapped one girl who had strong"
+@ TALK "magic powers"
+@ TALK "and she now has children..."
+@ TALK ""
+@ TALK "Raegios is one of her descendents."
+@ WAIT
+@ CLEAR_BUFFER
+@ TALK "As time passed it was hardly surprising that"
+@ TALK "the children"
+@ TALK "came to have amazing power."
+@ TALK "They were usually stronger than their parents..."
+@ WAIT
+@ CLEAR_BUFFER
+@ TALK "But... some of the devils were jealous of their"
+@ TALK "unbelievable power and a rumor was spread" 
+@ TALK "that a mixed-blood person will control the world..."
+@ TALK "The rumor spread so far that many devils"
+@ TALK "decided to kill them."
+@ WAIT
+@ CLEAR_BUFFER
+@ TALK "I heard that Raegios wasn't exactly killed"
+@ TALK "by the demons..."
+@ TALK "but..."
+@ TALK "eventually Raegios and Raedina and their children"
+@ TALK "had their power sealed so they couldn't use it."
+@ WAIT
+@ CLEAR_BUFFER
+@ TALK "Oh... I talked too much..." 
+@ TALK "That tattoo you're wearing is the symbol of"
+@ TALK "Raegios's family." 
+@ GO_UP T6-1
+/--------------------------------------------------------
+# 5 
+# 9
+# 2
+# "Raedina" 
+# BASIC
+# 100
+* 마녀 레디나
+@ CLEAR_BUFFER
+@ COLOR 240 20 190
+@ IF LEARN_MAGIC THEN GO_DOWN MAGIC_STOP
+@ BOX BLUE 5
+@ FACE 6 "Raedina" 240 20 190
+@ IF NUM HAVE 26 THEN GO_DOWN 레디나5-1
+@ IF ITEM HAVE 208 THEN GO_DOWN 레디나4-1
+/이두마신의 눈을 가지고 있으면 나타난다.
+/한마디로.. 이벤트 해결하다 들르면 나오는 이벤트
+@ IF ITEM HAVE 28 THEN GO_DOWN 마녀1
+@ IF NUM HAVE 107 THEN GO_DOWN 레디나6-1
+/두번 물어보면 대답하는 것
+* 마녀레디나명령
+@ CLEAR_BUFFER
+@ COLOR 240 20 190
+@ TALK "Hello. How can I help you?"
+@ WAIT
+@ CLEAR_BUFFER
+@ COLOR 250 250 0
+@ SELECT 250 250 250
+CASE "Training in magic" GO_DOWN 마법훈련2
+CASE "Talking" GO_DOWN 마녀레디나
+CASE ""
+CASE "Exit" GO_DOWN 끝
+SELECT_END
+@ END
+
+* 마녀레디나명령2
+@ CLEAR_BUFFER
+@ BOX BLUE 5
+@ FACE 6 "Raedina" 240 20 190
+@ COLOR 240 20 190
+@ TALK "Hmm... How can I help you?"
+@ WAIT
+@ CLEAR_BUFFER
+@ COLOR 250 250 0
+@ SELECT 250 250 250
+CASE "Training in magic" GO_DOWN 마법훈련2
+CASE ""
+CASE "Exit" GO_DOWN 끝
+SELECT_END
+@ END
+
+* NNT1
+@ TALK "To unseal their spell requires an incantation doll." 
+@ TALK "But the Doll-Maker was captured by demons"
+@ TALK "and taken to Spider Cave."
+@ WAIT
+@ GO_UP 마녀레디나명령2
+
+* NNT2
+@ TALK "If we had that incantation doll we could unseal"
+@ TALK "them from the spell."
+@ WAIT
+@ GO_UP 마녀레디나명령2
+
+* 마녀레디나
+@ CLEAR_BUFFER
+@ BOX BLUE 5
+@ FACE 6 "Raedina" 240 20 190
+@ COLOR 250 250 0
+@ IF NUM HAVE 21 THEN GO_UP NNT2
+@ IF NUM HAVE 74 THEN GO_UP NNT1
+@ TALK "Hmm... From the look of you, you must be"
+@ TALK "from the world...?"
+@ WAIT
+@ TALK "I'm a witch called Raedina."
+@ WAIT
+@ CLEAR_BUFFER
+@ FACE HERO 250 250 0
+@ COLOR 250 250 0
+@ BOX BLUE 5
+@ TALK "Ulp! Raedina!"
+@ WAIT
+@ CLEAR_BUFFER
+@ BOX BLUE 5
+@ FACE 6 "Raedina" 240 20 190
+@ COLOR 250 250 0
+@ TALK "Have you heard about me?"
+@ TALK "Maybe not as you don't live here..."
+@ WAIT
+@ CLEAR_BUFFER
+@ FACE HERO 250 250 0
+@ COLOR 250 250 0
+@ TALK "I've heard about you many times."
+@ WAIT
+@ CLEAR_BUFFER
+@ BOX BLUE 5
+@ FACE 6 "Raedina" 240 20 190
+@ COLOR 250 250 0
+@ TALK "I'm useless nowadays,"
+@ TALK "Now I'm too old..."
+@ TALK "and powerless because of the spell."
+@ WAIT
+@ CLEAR_BUFFER
+@ BOX BLUE 6
+@ FACE HERO 250 250 0
+@ COLOR 250 250 0
+@ TALK "A spell?"
+@ WAIT
+@ CLEAR_BUFFER
+@ BOX BLUE 5
+@ FACE 6 "Raedina" 240 20 190
+@ COLOR 250 250 0
+@ TALK "Um... I'm under a spell... but..."
+@ TALK "If I had the Breath Blade..."
+@ WAIT
+@ TALK "I'm sorry... It's nothing... forget it."
+@ WAIT
+@ CLEAR_BUFFER
+@ SELECT 255 255 255
+CASE "<Tell me more>" GO_DOWN 마녀1
+CASE "<I'm busy doing other things right now>" GO_UP 마녀레디나명령2
+SELECT_END
+@ END
+
+* 마녀1
+@ CLEAR_BUFFER
+@ BOX BLUE 5
+@ FACE 6 "Raedina" 240 20 190
+@ COLOR 250 250 0
+@ IF NUM HAVE 21 THEN GO_UP NNT2
+@ IF NUM HAVE 74 THEN GO_UP NNT1
+@ TALK "Do you... have a Breath Blade?"
+@ WAIT
+@ CLEAR_BUFFER
+@ BOX BLUE 6
+@ FACE HERO 250 250 0
+@ COLOR 250 250 0
+@ IF ITEM NOTHAVE 28 THEN GO_DOWN NNO1
+@ TALK "Yes... why?"
+@ WAIT
+@ CLEAR_BUFFER
+@ BOX BLUE 5
+@ FACE 6 "Raedina" 240 20 190
+@ COLOR 250 250 0
+@ TALK "It's the only thing that can unseal our spell..."
+@ TALK "and you have it... it's unbelievable..."
+@ TALK ""
+@ WAIT
+
+@ CLEAR_BUFFER
+@ BOX BLUE 5
+@ FACE 6 "Raedina" 240 20 190
+@ COLOR 250 250 0
+@ TALK "Could you please sell it to me?"
+@ TALK "I'll pay you 20,000 gold pieces for it."
+@ TALK "What do you think?"
+@ WAIT
+@ CLEAR_BUFFER
+@ SELECT 255 255 255
+CASE "<Yes>" GO_DOWN 레디나1
+CASE "<No>" GO_DOWN 레디나2
+CASE "<I'm busy doing other things right now>" GO_UP 마녀레디나명령2
+SELECT_END
+* NNO1
+@ TALK "Only the sword can unseal our spell..."
+@ GO_DOWN 레디나4
+
+* 레디나1
+@ CLEAR_BUFFER
+@ BOX BLUE 5
+@ FACE 6 "Raedina" 240 20 190
+@ COLOR 250 250 0
+@ TALK "Thank you! we can unseal our spell thanks to you..."
+@ GO_DOWN 레디나4
+@ END
+
+* 레디나2
+@ CLEAR_BUFFER
+@ BOX BLUE 5
+@ FACE 6 "Raedina" 240 20 190
+@ COLOR 250 250 0
+@ TALK "I can't stop you from saying no..."
+@ TALK "It's not an important thing to you "
+@ TALK "But on the other hand it's momentous to me..."
+@ TALK "It's a pity you won't help me... " 
+@ TALK "If you change your mind... come to me again!"
+@ GIVE NUM_TO_ALL 107
+@ WAIT
+@ END
+
+* 레디나4
+@ NEW_OBJECT 9 26 21 11 18 6 
+@ CLEAR_BUFFER
+@ BOX BLUE 5
+@ FACE 11 "Raegios" 160 160 200
+@ COLOR 160 160 200
+@ TALK "What are you talking about?"
+@ WAIT
+
+@ CLEAR_BUFFER
+@ BOX BLUE 5
+@ FACE 6 "Raedina" 240 20 190
+@ COLOR 250 250 0
+@ TALK "Oh! My brother... how did you get here?"
+@ WAIT
+
+@ CLEAR_BUFFER
+@ FACE 11 "Raegios" 160 160 200
+@ BOX BLUE 5
+@ COLOR 160 160 200
+@ TALK "Wherever I look everything I planned to do is ruined." 
+@ WAIT
+@ CLEAR_BUFFER
+@ BOX BLUE 5
+@ FACE HERO 250 250 0
+@ COLOR 250 250 0
+@ TALK "Who is he?"
+@ WAIT
+
+@ CLEAR_BUFFER
+@ BOX BLUE 5
+@ FACE 6 "Raedina" 240 20 190
+@ COLOR 250 250 0
+@ TALK "This is my brother Raegios..."
+@ TALK "What happened?"
+@ WAIT
+
+@ CLEAR_BUFFER
+@ BOX BLUE 5
+@ FACE HERO 250 250 0
+@ COLOR 250 250 0
+@ TALK "Ah... this is Raegios..."
+@ WAIT
+
+@ CLEAR_BUFFER
+@ BOX BLUE 5
+@ FACE 6 "Raedina" 240 20 190
+@ COLOR 250 250 0
+@ TALK "He is also under a spell like me..."
+@ TALK "We were... sealed."
+@ TALK "We lost access to our magical powers..."
+@ WAIT
+
+@ CLEAR_BUFFER
+@ BOX BLUE 5
+@ FACE 11 "Raegios" 160 160 200
+@ COLOR 160 160 200
+@ TALK "That's why you tried to kill yourself!"
+@ WAIT
+
+@ CLEAR_BUFFER
+@ BOX BLUE 5
+@ FACE 6 "Raedina" 240 20 190
+@ COLOR 250 250 0
+@ TALK "So did you!"
+@ WAIT
+
+@ CLEAR_BUFFER
+@ BOX BLUE 5
+@ FACE HERO 250 250 0
+@ COLOR 250 250 0
+@ TALK "You tried to kill yourselves... how terrible."
+@ WAIT
+
+@ CLEAR_BUFFER
+@ BOX BLUE 5
+@ FACE 11 "Raegios" 160 160 200
+@ COLOR 160 160 200
+@ TALK "But now we know there are other answers:"
+@ TALK "The Breath Blade is useful to undo a spell"
+@ TALK "if you use it to kill the person who cast the spell."
+@ WAIT
+
+@ CLEAR_BUFFER
+@ BOX BLUE 5
+@ FACE HERO 250 250 0
+@ COLOR 250 250 0
+@ TALK "Why did you talk about dying?"
+@ WAIT
+
+@ CLEAR_BUFFER
+@ BOX BLUE 5
+@ FACE 6 "Raedina" 240 20 190
+@ COLOR 250 250 0
+@ TALK "Because if I use that sword I risk my life."
+@ TALK "It can undo any spell but... the risk is too great..."
+@ WAIT
+
+@ CLEAR_BUFFER
+@ BOX BLUE 5
+@ FACE HERO 250 250 0
+@ COLOR 250 250 0
+@ TALK "Well... both of you seem to have found the sword idea"
+@ TALK "to risky to try until now..."
+@ WAIT
+
+@ CLEAR_BUFFER
+@ BOX BLUE 5
+@ FACE 11 "Raegios" 160 160 200
+@ COLOR 160 160 200
+@ TALK "Yeah... one of us should be left alive to take revenge."
+@ WAIT
+
+@ CLEAR_BUFFER
+@ BOX BLUE 5
+@ FACE HERO 250 250 0
+@ COLOR 250 250 0
+@ TALK "Is there any other way to undo the sealing spell?"
+@ WAIT
+
+@ CLEAR_BUFFER
+@ BOX BLUE 5
+@ FACE 11 "Raegios" 160 160 200
+@ COLOR 160 160 200
+@ TALK "Hmm... the only other way"
+@ TALK "is if we find an incantation doll but..."
+@ TALK "It's so hard to find one and..."
+@ TALK "the only man who could make such a doll"
+@ TALK "has disappeared..."
+@ WAIT
+@ CLEAR_BUFFER
+@ IF ITEM NOTHAVE 28 THEN GO_DOWN NNO2
+@ TALK "So, please give me the Breath Blade!"
+@ WAIT
+@ CLEAR_BUFFER
+@ BOX BLUE 5
+@ FACE 6 "Raedina" 240 20 190
+@ COLOR 250 250 0
+@ TALK "No...You should give me the sword!"
+@ TALK "Brother...If you are released you should kill"
+@ TALK "Satan for me...!"
+@ WAIT
+@ CLEAR_BUFFER
+@ BOX BLUE 5
+@ FACE 11 "Raegios" 160 160 200
+@ COLOR 160 160 200
+@ TALK "No way, others could fight against Satan...!"     
+@ TALK "Better I should sacrifice myself and use the"
+@ TALK "Breath Blade!"
+@ WAIT
+@ CLEAR_BUFFER
+@ BOX BLUE 5
+@ FACE HERO 250 250 0
+@ COLOR 250 250 0
+@ TALK "Stop it!"
+@ TALK "Try and think of a way to be alive together..."
+@ TALK "I won't give you the sword!"
+@ WAIT
+@ CLEAR_BUFFER
+@ TALK "(What shall I do?"
+@ TALK "I think I need advice from others.)"
+@ WAIT
+@ GIVE NUM 74
+@ REMOVE NUM_TO_ALL 107
+@ END
+* NNO2
+@ BOX BLUE 5
+@ FACE HERO 250 250 0
+@ COLOR 250 250 0
+@ TALK "Look, let's come up with a solution where"
+@ TALK "you both survive."
+@ TALK "I'll try to find some way that works."
+@ WAIT
+@ GIVE NUM 74
+@ REMOVE NUM_TO_ALL 107
+@ END
+
+&&&&&&&&&&&&&
+* 레디나6-1
+@ CLEAR_BUFFER
+@ BOX BLUE 5
+@ FACE 6 "Raedina" 240 20 190
+@ COLOR 250 250 0
+@ TALK "Could you please give me the Breath Blade?"
+@ TALK "Please..."
+@ WAIT
+@ CLEAR_BUFFER
+@ BOX BLUE 5
+@ FACE HERO 250 250 0
+@ COLOR 250 250 0
+@ TALK "I can't give you the Breath Blade."
+@ TALK "I'll try to find another way."
+@ WAIT
+@ REMOVE NUM_TO_ALL 107
+@ WAIT
+@ GO_UP 마녀레디나명령2
+@ END
+
+&&&&&&&&&&&&
+/이두마신의 눈을 가지고 있으면 나타난다.
+/한마디로.. 이벤트 해결하다 들르면 나오는 이벤트
+
+* 레디나4-1
+@ CLEAR_BUFFER
+@ BOX BLUE 5
+@ FACE 6 "Raedina" 240 20 190
+@ COLOR 250 250 0
+@ TALK "Hey! It's been a long time since I saw you last..."
+@ WAIT
+@ CLEAR_BUFFER
+@ BOX BLUE 5
+@ FACE HERO 250 250 0
+@ COLOR 250 250 0
+@ TALK "I've found an incantation doll..."
+@ WAIT
+
+@ CLEAR_BUFFER
+@ BOX BLUE 5
+@ FACE 6 "Raedina" 240 20 190
+@ COLOR 250 250 0
+@ TALK "What? Did you say an incantation doll?"
+@ TALK "Only one person could make an incantation doll..."
+@ WAIT
+@ TALK "I thought he was killed by the Western demon..."  
+@ WAIT
+@ CLEAR_BUFFER
+@ BOX BLUE 5
+@ FACE HERO 250 250 0
+@ COLOR 250 250 0
+@ TALK "The Western demon is dead and the Doll-Maker "
+@ TALK "went somewhere to find golden straw."
+@ WAIT
+@ CLEAR_BUFFER
+@ BOX BLUE 5
+@ CLEAR_BUFFER
+@ BOX BLUE 5
+@ FACE 6 "Raedina" 240 20 190
+@ COLOR 250 250 0
+@ TALK "What... golden straw!"
+@ TALK "golden straw grows in Eight Ears Valley" 
+@ TALK "where devils are living..."
+@ TALK "Nobody can go there...nobody knows where to find"
+@ TALK "the straw."
+@ WAIT
+@ CLEAR_BUFFER
+@ TALK "Even if he finds the straw... the demons have"
+@ TALK "unimaginable power..."
+@ TALK "until now no one has ever got into the valley..."
+@ WAIT
+@ CLEAR_BUFFER
+@ BOX BLUE 5
+@ FACE HERO 250 250 0
+@ COLOR 250 250 0
+@ TALK "Well... how do we find that incantation Doll-Maker?"
+@ WAIT
+@ CLEAR_BUFFER
+@ BOX BLUE 5
+@ FACE 6 "Raedina" 240 20 190
+@ COLOR 250 250 0
+@ TALK "Thank you for your kindness but..."
+@ TALK "You'd be getting involved in too much trouble..."
+@ TALK "It'd be better to just give me the sword."
+@ TALK "Give up on trying to find another way." 
+@ WAIT
+@ CLEAR_BUFFER
+@ BOX BLUE 5
+@ FACE HERO 250 250 0
+@ COLOR 250 250 0
+@ TALK "Trouble is my destiny... it doesn't matter"           
+@ WAIT
+@ TALK "I expect to be involved in trouble..."
+@ TALK "I'll never give up on fighting evil."
+@ WAIT
+@ CLEAR_BUFFER
+@ BOX BLUE 5
+@ FACE 6 "Raedina" 240 20 190
+@ COLOR 250 250 0
+@ TALK " Whatever you decide be careful..."
+@ WAIT
+@ GO_UP 마녀레디나명령2
+@ END
+
+* 레디나5-1
+@ CLEAR_BUFFER
+@ BOX BLUE 5
+@ FACE 6 "Raedina" 240 20 190
+@ COLOR 250 250 0
+@ TALK "You... came back here again..."
+@ TALK "The underworld is now in total chaos..."
+@ TALK "No one has the power to fight against Satan."
+@ TALK "Yet you keep defeating his strongest demons." 
+@ WAIT
+@ CLEAR_BUFFER
+@ BOX BLUE 5
+@ FACE HERO 250 250 0
+@ COLOR 250 250 0
+@ TALK "Was the spell undone?"
+@ WAIT
+@ CLEAR_BUFFER
+@ BOX BLUE 5
+@ FACE 6 "Raedina" 240 20 190
+@ COLOR 250 250 0
+@ TALK "I feel the spell binding us has gone away" 
+@ TALK "since the Western demon and Eastern demon died."
+@ TALK "However we thought we could kill Satan"
+@ TALK "with an incantation doll..."
+@ TALK "but... all our efforts came to nothing."
+@ WAIT
+
+@ CLEAR_BUFFER
+@ TALK "Thanks to you my brother is preparing himself"
+@ TALK "to kill Satan! He went to Pandemonium Cave to get"
+@ TALK "some weapons. I'll also leave here soon..."
+@ TALK "Thank you so much for your help!"
+@ WAIT
+
+@ CLEAR_BUFFER
+@ TALK "I'll do my best to fight against Satan" 
+@ TALK "even at the risk of my life!"
+@ WAIT
+@ NEW_OBJECT 18 8 4 1 18 12
+@ PLAY MASO4.WAV
+@ CHANGE_GOS 19
+@ PLAY MASO4.WAV
+/ 레디나와 레기오스가 사라진다.
+@ CLEAR_BUFFER
+@ BOX BLUE 5
+@ FACE HERO 250 250 0
+@ COLOR 250 250 0
+@ TALK "Ah! Wait a minute!"
+@ TALK "What are you going to do?"
+@ TALK "Why do you want to risk your life?"
+
+@ CLEAR_BUFFER
+@ TALK "I'm the one who must fight"
+@ TALK "I won't sit and wait any longer!"
+@ TALK "I'm leaving for Pandemonium Cave to find Satan!"
+@ GIVE NUM_TO_ALL 27
+@ WAIT
+@ REMOVE_OBJECT 9 11
+@ REMOVE_OBJECT THIS
+@ END
+
+/-----------------------------------------------------
+# 6
+# 9
+# 11
+# "Raegios"
+# FLOW
+# 100
+@ CLEAR_BUFFER
+@ BOX BLUE 5
+@ FACE 11 "Raegios" 160 160 160
+@ COLOR 160 160 200
+@ TALK "I'm the wizard Raegios."
+@ TALK "I don't want to talk too much."
+@ TALK "But if you want to buy a special piece of"
+@ TALK " magic jewelry..."
+@ TALK "I'll sell it to you."
+@ WAIT
+@ CLEAR_BUFFER
+@ COLOR 250 250 0
+@ SELECT 255 255 255
+CASE "Buying jewelry" GO_DOWN 장신구사기2
+CASE "<Exit>" GO_DOWN 끝
+SELECT_END
+@ END
+
+# 76
+# 9
+# 8
+# "Jeweler"
+# FLOW
+# 100
+@ CLEAR_BUFFER
+@ BOX BLUE 5
+@ FACE 11 "Jeweler" 160 160 200
+@ COLOR 160 160 200
+@ TALK "I have many items here."
+@ TALK "May I show you?"
+@ WAIT
+@ CLEAR_BUFFER
+@ COLOR 250 250 0
+@ SELECT 255 255 255
+CASE "Buying jewelry" GO_ DOWN 장신구사기2
+CASE "Buying item" GO_DOWN 아이템사기2
+CASE "<Exit>" GO_DOWN 끝
+SELECT_END
+@ END
+
+/--------------------------------------------------------
+# 7
+# 9 
+# 4
+# "Shopkeeper"
+# BASIC
+# 100
+@ CLEAR_BUFFER
+@ BOX BLUE 6
+@ FACE 7 "Shopkeeper" 250 220 0
+@ COLOR 250 220 0
+@ IF NUM HAVE 153 THEN GO_DOWN 정화1
+@ TALK "How are you?"
+@ TALK "What do you need from my store?"
+* 곰바위상점주인
+@ CLEAR_BUFFER
+@ BOX BLUE 6
+@ COLOR 250 250 0
+@ SELECT 250 250 255
+CASE "Buying weapon" GO_DOWN 장비고르기1
+CASE "Selling weapon" GO_DOWN 장비팔기
+CASE "Buying item" GO_DOWN 아이템사기3
+CASE "Selling item" GO_DOWN 아이템팔기
+CASE "Talking" GO_DOWN T6-2
+CASE "<Exit>" GO_DOWN 끝
+SELECT_END
+@ END
+
+* T6-2
+@ CLEAR_BUFFER
+@ BOX BLUE 5
+@ FACE 7 "Shopkeeper" 250 220 0
+@ COLOR 250 220 0
+@ SELECT 255 255 255 
+CASE "<About people around here>" GO_DOWN T6-A
+CASE "<About Satan>" GO_DOWN T6-B
+CASE ""
+CASE "<Stop talking>" GO_UP 곰바위상점주인
+SELECT_END
+@ END
+
+* T6-A
+@ CLEAR_BUFFER
+@ BOX BLUE 5
+@ FACE 7 "Shopkeeper" 250 220 0
+@ COLOR 250 220 0
+@ TALK "People around here...?"
+@ TALK "There's a lot of gossip and rumor."
+@ TALK "Haven't you heard all the talk?"
+@ TALK "I don't want to say too much about them..."
+@ TALK "They are scared, hidebound, they don't like risks."
+@ WAIT
+@ CLEAR_BUFFER
+@ TALK "There is a way to solve the Raegios problem"
+@ TALK "with an incantation doll..."
+@ TALK "but they are too conservative..."
+@ TALK "They don't think its a good idea - to undo a spell"
+@ TALK "at the risk of their lives."
+@ WAIT
+@ CLEAR_BUFFER
+@ SELECT 255 255 255
+CASE "<About the incantation doll>" GO_DOWN T6-A1
+SELECT_END
+
+* T6-A1
+@ CLEAR_BUFFER
+@ BOX BLUE 5
+@ FACE 7 "Shopkeeper" 250 220 0
+@ COLOR 250 220 0
+@ TALK "An incantation doll...?"
+@ TALK "Only one person could make an incantation doll but..."
+@ TALK "he disappeared when the Raegios were put under"
+@ TALK "the spell..."
+@ TALK "It's not a coincidence."
+@ WAIT
+
+@ CLEAR_BUFFER
+@ TALK "But I know where he is."
+@ TALK "He was taken to Spider Cave"
+@ TALK "where the Western demon lives"
+@ WAIT
+@ IF NUM HAVE 76 THEN END
+@ CLEAR_BUFFER
+@ BOX BLUE 5
+@ FACE HERO 250 250 0
+@ COLOR 250 250 0
+@ TALK "OK, is sounds as if,if I go there"
+@ TALK "I can see the incantation Doll-Maker..."
+@ TALK "If so... Let's go to Spider Cave."
+@ WAIT
+@ ORDER 7 "Meet the incantation Doll-Maker at Spider Cave."
+MENT "Meet the incantation Doll-Maker at Spider Cave."
+ORDER_END
+@ NEW_OBJECT 14 47 70 1 12 8
+&&&&&&&&&&&&&
+/귀떼기동굴4(47,70) 에 아이디 1인 이벤트 번호 8인 인형 기술자를 생성시킨다.
+@ GO_UP T6-2
+
+* T6-B
+@ CLEAR_BUFFER
+@ BOX BLUE 5
+@ FACE 7 "Shopkeeper" 250 220 0
+@ COLOR 250 220 0
+@ TALK "Hmm...Satan...?"
+@ TALK "Satan unified the underworld."
+@ TALK "Of course he did many evil deeds but..."
+@ TALK "evil is his nature."
+@ WAIT
+@ GO_UP T6-2
+
+* 정화1
+@ CLEAR_BUFFER
+@ BOX BLUE 5
+@ FACE HERO 250 250 0
+@ COLOR 250 250 0
+@ TALK "Hello! I'm here to find holy well water."
+@ WAIT
+
+@ CLEAR_BUFFER
+@ BOX BLUE 5
+@ FACE 7 "Shopkeeper" 250 220 0
+@ COLOR 250 220 0
+@ TALK "Holy well water? Ah, you must be from"
+@ TALK "Vulcan Village." 
+@ TALK "Ok... take the holy well water and"
+@ TALK "return to your village!"
+@ GIVE ITEM 234 1
+@ WAIT
+@ REMOVE NUM_TO_ALL 153
+@ END
+
+/--------------------------------------------------------
+# 21
+# 9 
+# 5
+# "Warrior"
+# FLOW
+# 100
+@ CLEAR_BUFFER
+@ BOX BLUE 5
+@ FACE 10 "Warrior" 86 171 171
+@ COLOR 86 171 171
+@ TALK "Oh... You must be a devil hunter!"
+@ TALK "It's against the rules for a human"
+@ TALK "to use a sword here..."
+@ TALK "But I must say it's good to see you using one!"
+@ WAIT
+
+@ CLEAR_BUFFER
+@ BOX BLUE 5
+@ FACE HERO 250 250 0
+@ COLOR 250 250 0
+@ TALK "Are you living here as a Warrior?"
+@ WAIT
+
+@ CLEAR_BUFFER
+@ BOX BLUE 5
+@ FACE 10 "Warrior" 86 171 171
+@ COLOR 86 171 171
+@ TALK "I was only a rank and file warrior in the world."
+@ TALK "But in here I'm teaching the devils military arts."
+@ TALK "You can say I'm wrong to do that but..."
+@ TALK "I couldn't help it because my daughter"
+@ TALK "is being held captive here..."
+"
+@ WAIT
+@ CLEAR_BUFFER
+@ TALK "Do you know much about swordmanship?"
+@ TALK "I'd like to tell you swordmanship."
+@ WAIT
+@ CLEAR_BUFFER
+@ SELECT 255 255 255
+CASE "<OK... tell me about it>" GO_DOWN 배우기      
+CASE "<No... I'm not interested>" GO_DOWN 안배우기
+SELECT_END 
+
+* 배우기
+@ CLEAR_BUFFER
+@ BOX BLUE 7
+@ FACE 10 "Warrior" 86 171 171
+@ COLOR 86 171 171
+@ TALK "That's good!"
+* 배우기RE
+@ CLEAR_BUFFER
+@ TALK "If you just wave it in the air a sword is"
+@ TALK "nothing but a sword."
+@ TALK "But there are special ways you can employ it."
+@ CLEAR_BUFFER
+@ SELECT 255 255 255
+CASE "<About wind swordmanship>" GO_DOWN 배우기1-1
+CASE "<About stone swordmanship>" GO_DOWN 배우기2-1
+CASE "<Hiding behind the sword>" GO_DOWN 배우기3-1
+CASE "<About cloud swordmanship>" GO_DOWN 배우기4-1
+CASE "<About the use of a bow>" GO_DOWN 배우기5-1 
+CASE "  "
+CASE "<Stop talking>" GO_DOWN 배우기X
+SELECT_END
+
+* 배우기1-1
+@ CLEAR_BUFFER
+@ BOX BLUE 5 
+@ FACE 10 "Warrior" 86 171 171
+@ COLOR 86 171 171
+@ TALK "The basis of swordplay is... wind swordmanship!"
+@ TALK "Strength is the power of your spirit." 
+@ TALK "A Sword expresses your morality."
+@ TALK "Your body is just a vehicle." 
+@ WAIT
+
+@ CLEAR_BUFFER
+@ TALK "If you brandish the sword"
+@ TALK "with spirit and sword working together"
+@ TALK "you have real power." 
+@ TALK "If you truly realize the power of wind swordmanship," 
+@ TALK "you could cut stone with a sword.."
+@ GO_UP 배우기RE
+@ WAIT
+
+@ CLEAR_BUFFER
+@ TALK "The real way of the sword is in your mind."
+@ TALK "If you win the struggle against yourself "
+@ TALK "you can see the way of the sword."
+@ WAIT
+@ END
+
+* 안배우기
+@ CLEAR_BUFFER
+@ BOX BLUE 5
+@ FACE 10 "Warrior" 86 171 171
+@ COLOR 86 171 171
+@ TALK "Well I've tried to help you a little but"
+@ TALK "if you don't like what I say I can't help it!"
+@ TALK "Everything is up to you so do your best..."
+@ WAIT
+@ END
+
+* 배우기2-1
+@ CLEAR_BUFFER
+@ BOX BLUE 5
+@ FACE 10 "Warrior" 86 171 171
+@ COLOR 86 171 171 
+@ TALK "You must know stone swordmanship."
+@ TALK "Stone swordmanship means that eyes, body,"
+@ TALK "feet, and hands all work together."
+@ WAIT
+
+@ CLEAR_BUFFER
+@ TALK "There is a sequence to using a sword."
+@ TALK "It is called stone swordmanship."
+@ TALK "Anticipate the moves of the enemy by watching his eyes."
+@ TALK "Think only of your target,"
+@ TALK "your body will move automatically."
+@ TALK "And your sword will strike your enemy."
+@ WAIT
+
+@ CLEAR_BUFFER
+@ TALK "Never forget it!"
+@ TALK "Remember!! A real swordsman is always striving" 
+@ TALK "to do his best at everything he attempts!"
+@ WAIT
+@ GO_UP 배우기RE
+@ END
+
+* 배우기3-1
+@ CLEAR_BUFFER
+@ BOX BLUE 5
+@ FACE 10 "Warrior" 86 171 171
+@ COLOR 86 171 171
+@ TALK "Do you know the story that says one can hide"
+@ TALK "behind a sword? A sword can be bigger than your body."
+@ TALK "It all depends how you handle the sword."
+@ WAIT
+
+@ CLEAR_BUFFER
+@ TALK "The most important thing is watching for the"
+@ TALK "moment when the enemy is off his guard..."
+@ TALK "Watch all his actions and attack him"
+@ TALK "when his guard is down."
+@ WAIT
+
+@ CLEAR_BUFFER
+@ TALK "Hiding behind the sword we can watch in perfect safety"
+@ TALK "and attack without any blow from him reaching us."
+@ WAIT
+
+@ CLEAR_BUFFER
+@ TALK "It must become natural that body and sword act as one."
+@ TALK "Even though you're holding a sword "
+@ TALK "you'll feel nothing in your hand."
+@ TALK "If you want to reach this stage"
+@ TALK "try your best to follow my instructions... "
+@ WAIT
+@ GO_UP 배우기RE
+@ END
+
+* 배우기4-1
+@ CLEAR_BUFFER
+@ BOX BLUE 5
+@ FACE 10 "Warrior" 86 171 171
+@ COLOR 86 171 171
+@ TALK "Victory or defeat can depend on who draws"
+@ TALK "his sword first out of the scabbard!"
+@ TALK "It's called cloud swordmanship."
+@ WAIT
+
+@ CLEAR_BUFFER
+@ TALK "It needs ceaseless practice..."
+@ TALK "In order to draw a sword swiftly"
+@ TALK "you need concentration of spirit"
+@ TALK "and then it'll be real cloud swordmanship."
+@ WAIT
+
+@ CLEAR_BUFFER
+@ TALK "You could be called a real swordsman"
+@ TALK "if you reach the stage of cloud swordmanship."
+@ TALK "How you fight is determined by how you live..."
+@ WAIT
+@ GO_UP 배우기RE
+@ END
+
+* 배우기5-1
+@ CLEAR_BUFFER
+@ BOX BLUE 5
+@ FACE 10 "Warrior" 86 171 171
+@ COLOR 86 171 171
+@ CLEAR_BUFFER
+@ TALK "Good choice!"
+@ TALK "There are eight things you must do "
+@ TALK "before shooting with a bow." 
+@ TALK "First is to see how the wind blows relative "
+@ TALK "to the enemy!"
+@ WAIT
+@ TALK "Second is to point your bow allowing for the wind."
+@ WAIT
+
+@ CLEAR_BUFFER
+@ TALK "Third is to stand flexibly on your legs!"
+@ TALK "Forth is to be balanced on your feet!"
+@ WAIT
+@ CLEAR_BUFFER
+@ TALK "Fifth is to make your arm steady for targeting!"
+@ WAIT
+@ TALK "Sixth is to feel nothing in your hand"
+@ TALK "when you release the arrow!"
+@ WAIT
+
+@ CLEAR_BUFFER
+@ TALK "Seventh, try again if you miss."
+@ WAIT
+@ TALK "Eighth is to search your heart for success!"
+@ WAIT
+@ TALK "That's all you need to know."
+@ TALK "If you keep these pointers in your mind"
+@ TALK "you'll be great!"
+@ WAIT
+@ GO_UP 배우기RE
+@ END
+
+* 배우기X
+@ CLEAR_BUFFER
+@ BOX BLUE 5
+@ FACE 10 "Warrior" 86 171 171
+@ COLOR 86 171 171
+@ TALK "Learning rules can seem so boring"
+@ TALK "but it'll be useful in your life..."
+@ TALK "If you'd like to return for more lessons..." 
+@ TALK "come here again at any time."
+@ WAIT
+@ END
+/----------------------------------------------------
+# 26
+# 9
+# 10
+# "Item merchant"
+# BASIC
+# 100
+* 아이템상인명령1
+@ CLEAR_BUFFER
+@ BOX BLUE 5
+@ FACE 5 "Item merchant" 250 200 0
+@ COLOR 250 200 0
+@ TALK "How are you? How can I help you?"
+@ TALK " "
+* 곰바위아이템
+@ CLEAR_BUFFER
+@ BOX BLUE 5
+@ COLOR 250 250 0
+@ SELECT 255 255 255
+CASE "Buying item" GO_DOWN 아이템사기2
+CASE "Selling item" GO_DOWN 아이템팔기 
+CASE "Talking" GO_DOWN 곰바위아이템T-1
+CASE "Exit" GO_DOWN 끝
+SELECT_END
+
+* 곰바위아이템T-1
+@ CLEAR_BUFFER
+@ BOX BLUE 5
+@ FACE 5 "Item merchant" 250 200 0
+@ COLOR 250 200 0
+@ TALK "Ah... I've never seen you before..."
+@ TALK "You must be from the world, I heard that"
+@ TALK "there are humans here from the world..."
+@ TALK "It's been 10 years since I was brought here..."
+@ TALK "Is the world OK still?"
+@ TALK "They've been spreading a rumor that" 
+@ TALK "the world was destroyed."
+@ TALK "So whenever I thought about my parents" 
+@ TALK "I couldn't sleep for worrying..."
+@ CLEAR_BUFFER
+@ TALK "We are under the demons control and work hard..."
+@ TALK "The Blue lady at Vulcan Village is one of us."
+@ TALK "Please... save the Blue lady..."
+@ WAIT
+@ GO_UP 곰바위아이템
+/----------------------------------------------------
+/중개인
+# 29
+# 9
+# 7
+# "Intermediary"
+# FLOW
+# 100
+@ CLEAR_BUFFER
+@ BOX BLUE 5
+@ FACE 3 "Intermediary" 113 165 242
+@ COLOR 113 165 242
+@ TALK "Come on! What kind of quest are you looking for?"
+@ WAIT
+@ CLEAR_BUFFER
+@ IF ITEM HAVE 249 THEN GO_DOWN 중계1-1B 
+@ IF NUM HAVE 104 THEN GO_DOWN 중계다시
+@ SELECT 255 255 255
+CASE "<Slay Galapagos>" GO_DOWN 중계1-1
+CASE "<Stop talking>" GO_DOWN 중계끝
+SELECT_END
+@ END
+
+* 중계1-1
+@ CLEAR_BUFFER
+@ BOX BLUE 5
+@ FACE 3 "An Intermediary" 113 165 242
+@ COLOR 113 165 242
+@ TALK "Hmm...I can't trust you" 
+@ TALK "because I have never seen you before..."
+@ TALK "Yet if I don't trust you we'll never have anyone"
+@ TALK "to fight against the devils for us."
+@ WAIT
+@ CLEAR_BUFFER
+@ TALK "So, if you want to volunteer to fight...."
+@ WAIT
+
+@ CLEAR_BUFFER
+@ TALK "Remember! if you die I'm not responsible for"
+@ TALK "your death..."
+@ WAIT
+
+@ CLEAR_BUFFER
+@ TALK "You could meet a devil called Galapagos at Death Rock." 
+@ TALK "We haven't dared go there since he appeared."
+@ WAIT
+
+@ CLEAR_BUFFER
+@ TALK "How does this sound? "
+@ TALK "If you slay Galapagos we'll give you a great bow"
+@ TALK "plus arrows!"
+@ WAIT
+
+@ CLEAR_BUFFER
+@ SELECT 255 255 255
+CASE "<OK! I'll do it!>" GO_DOWN 중계1-1A
+CASE "<No! I'm not interested>" GO_DOWN 중계끝
+SELECT_END
+
+* 중계1-1A
+@ CLEAR_BUFFER2
+@ BOX BLUE 5
+@ FACE 3 "Intermediary" 113 165 242
+@ COLOR 113 165 242
+@ IF ORDER_SPACE NOTHAVE THEN GO NO_SPACE
+@ TALK "I hope that's a good decision!"
+@ TALK "You must prove that you killed him." 
+@ TALK "After killing him take his book of the magic bow"
+@ TALK "to prove that you did it"
+@ GIVE NUM_TO_ALL 104
+@ ORDER 51 "Slay Galapagos"
+MENT "Slay Galapagos at Death Rock"
+MENT "and take his book of the magic bow"
+MENT "to an Intermediary at Bear Village."
+MENT "Then receive a great bow and arrows."
+ORDER_END
+@ LOCATE_ENEMY 1 106 65 40 85 249
+@ LOCATE_ENEMY 1 102 61 12 45 0
+@ LOCATE_ENEMY 1 105 62 12 45 0
+@ LOCATE_ENEMY 1 109 63 12 45 0
+@ LOCATE_ENEMY 1 107 64 12 45 0
+@ WAIT
+@ END
+
+* 중계1-1B
+@ CLEAR_BUFFER
+@ BOX BLUE 5
+@ FACE 3 "Intermediary" 113 165 242
+@ COLOR 113 165 242
+@ TALK "Oh! You're back!"
+@ TALK "Did you slay Galapagos?"
+@ WAIT
+
+@ CLEAR_BUFFER
+@ BOX BLUE 5
+@ FACE HERO 250 250 0
+@ COLOR 250 250 0
+@ TALK "Yes I did! Here... this is his book of the magic bow."
+@ REMOVE ITEM 249
+@ WAIT
+
+@ CLEAR_BUFFER
+@ BOX BLUE 5
+@ FACE 3 "Intermediary" 113 165 242
+@ COLOR 113 165 242
+@ TALK "You did a good job!"
+@ TALK "This is his book of the magic bow "
+@ GIVE ITEM 56 1
+@ TALK "Hmm...now I believe you."
+@ TALK "See you later!"
+@ REMOVE_ORDER 51
+@ REMOVE NUM_TO_ALL 104
+@ CHANGE 30
+@ WAIT
+@ END
+/--------------------------------------------------------
+/미시림의 풀을 구해오기
+# 30
+# 9
+# 7
+# "Intermediary"
+# FLOW
+# 100
+@ CLEAR_BUFFER
+@ BOX BLUE 5
+@ FACE 3 "Intermediary" 113 165 242
+@ COLOR 113 165 242
+@ TALK "Come on! What kind of tasks are you looking for?"
+@ WAIT
+@ CLEAR_BUFFER
+@ IF ITEM HAVE 230 THEN GO_DOWN 중계1-2B 
+@ IF NUM HAVE 104 THEN GO_DOWN 중계다시
+@ SELECT 255 255 255
+CASE "<Fetch Booth Plants>" GO_DOWN 중계1-2
+CASE "<Stop talking>" GO_DOWN 중계끝
+SELECT_END
+
+* 중계1-2
+@ CLEAR_BUFFER
+@ BOX BLUE 5
+@ FACE 3 "Intermediary" 113 165 242
+@ COLOR 113 165 242
+@ TALK "Could you bring me some Booth Plants from"
+@ TALK "Devil's Tomb?"
+@ TALK "What you have to do is go and pick the Booth Plants"
+@ TALK "from Devil's Tomb..."
+@ WAIT
+@ CLEAR_BUFFER
+@ TALK "The Booth Plants grows only near Devil's Tomb."
+@ TALK "There are many devils around the area but it's not hard"
+@ TALK "to approach there."
+@ WAIT 
+
+@ CLEAR_BUFFER
+@ TALK "The only things I have that I can give you"
+@ TALK "are three roots of wild ginseng!"
+@ TALK "It'll be a fair trade for your help"
+@ TALK "because it's an expensive thing..."
+@ WAIT
+
+@ CLEAR_BUFFER
+@ TALK "What do you think? Will you do it?"
+@ SELECT 255 255 255
+CASE "<OK! I'll do it!>" GO_DOWN 중계1-2A
+CASE "<No! I'm not interested>" GO_DOWN 중계끝
+SELECT_END
+
+* 중계1-2A
+@ IF ORDER_SPACE NOTHAVE THEN GO NO_SPACE
+@ CLEAR_BUFFER
+@ TALK "That's good!"
+@ TALK "It's not so difficult..."
+@ TALK "OK! go now!"
+@ LOCATE_ITEM 6 43 78 230
+@ ORDER 52 "Find the Booth Plants"
+MENT "Find Booth Plants near the Daemyr Cemetery"
+MENT "and take them to an Intermediary at Bear Village."
+MENT "Receive three roots of wild ginseng."
+ORDER_END
+@ WAIT
+@ END
+
+* 중계1-2B
+ 
+@ CLEAR_BUFFER
+@ TALK "Oh... You did a good job!"
+@ TALK "It wasn't difficult was it?"
+@ TALK "Thank you!"
+@ REMOVE ITEM 230
+@ WAIT
+
+@ CLEAR_BUFFER
+@ TALK "Here! These are the wild ginseng roots that"
+@ TALK "I promised you!"
+@ GIVE ITEM 168 3 
+@ TALK "It's a good deal."
+@ TALK "Come and visit us again!"
+@ REMOVE_ORDER 52
+@ REMOVE NUM_TO_ALL 104
+@ CHANGE 31
+@ WAIT
+@ END
+/--------------------------------------------------------
+/돈 40000을 구해오기
+# 31
+# 9
+# 7
+# "Intermediary"
+# FLOW
+# 100
+@ CLEAR_BUFFER
+@ BOX BLUE 5
+@ FACE 3 "Intermediary" 113 165 242
+@ COLOR 113 165 242
+@ TALK "Come talk with me! I have a special offer for you."
+@ WAIT
+@ CLEAR_BUFFER
+@ IF MONEY GE 40000 && NUM HAVE 109 THEN GO_DOWN 중계1-3B 
+@ IF NUM HAVE 109 THEN GO_DOWN 중계다시
+@ SELECT 255 255 255
+CASE "<Buy ancient sword>" GO_DOWN 중계1-3
+CASE "<Stop talking>" GO_DOWN 중계끝
+SELECT_END
+
+* 중계1-3
+@ CLEAR_BUFFER
+@ BOX BLUE 5
+@ FACE 3 "Intermediary" 113 165 242
+@ COLOR 113 165 242
+@ TALK "Someone in the village is urgently in need of money"
+@ TALK "to buy medicines for his mother who has been ill."
+@ WAIT
+
+@ CLEAR_BUFFER
+@ TALK "Do you have 40,000 gold pieces?"
+@ TALK "If so he'll sell you his own ancient sword "
+@ TALK "for 40,000 gold pieces. He is from the family of"
+@ TALK "a famous general"
+@ TALK "it's worth a great deal of money, more than"
+@ TALK "what he's asking..."
+@ TALK ""
+@ TALK "I'd like to help them myself but... "
+@ TALK "right now I'm short of money."
+@ WAIT
+@ TALK "What do think of the offer?"
+@ WAIT
+@ CLEAR_BUFFER
+@ SELECT 255 255 255
+CASE "<OK! I'll buy the sword!>" GO_DOWN 중계1-3A
+CASE "<No! I'm not interested>" GO_DOWN 중계끝
+SELECT_END
+@ END
+
+* 중계1-3A
+@ CLEAR_BUFFER
+@ BOX BLUE 5
+@ FACE 3 "Intermediary" 113 165 242
+@ COLOR 113 165 242
+@ TALK "That's a good idea!"
+@ TALK "It's a rare opportunity you know!"
+@ TALK "Doesn't every warrior desires a great sword?"
+@ TALK "See you later!"
+@ GIVE NUM_TO_ALL 109
+@ WAIT
+@ IF ORDER_SPACE NOTHAVE THEN GO NO_SPACE
+@ ORDER 53 "Earn 40,000 gold pieces"
+MENT "Earn 40,000 gold pieces then take it to an Intermediary"
+MENT "at Bear Village. "
+MENT "Receive the sword in exchange for the money."
+ORDER_END
+@ END
+
+* 중계1-3B
+@ CLEAR_BUFFER
+@ BOX BLUE 5
+@ FACE 3 "Intermediary" 113 165 242
+@ COLOR 113 165 242
+@ TALK "You! You've earned all that money?"
+@ TALK "It's so soon...I thought that"
+@ TALK "it'd take you a long time..."
+@ WAIT
+@ TALK "The first time I saw you"
+@ TALK "I thought the sword would be yours!"
+@ TALK "Give me the money!"
+@ REMOVE MONEY 40000
+@ WAIT
+
+@ CLEAR_BUFFER
+@ TALK "Here's the sword! It's yours!"
+@ GIVE ITEM 32 1
+@ TALK "It's called Saver Blade!"
+@ TALK "Keep up the good work!"
+@ WAIT
+@ CLEAR_BUFFER
+@ TALK "I'm sure I'll have more tasks next time you visit me."
+@ TALK "Come again!"
+@ REMOVE_ORDER 53
+@ REMOVE NUM_TO_ALL 109
+@ CHANGE 32
+@ WAIT
+@ END
+/-------------------------------------------------
+/물건 배달하기
+# 32
+# 9
+# 7
+# "Intermediary"
+# FLOW
+# 100
+@ CLEAR_BUFFER
+@ BOX BLUE 5
+@ FACE 3 "Intermediary" 113 165 242
+@ COLOR 113 165 242
+@ TALK "Welcome! What kind of quest are you looking for?"
+@ WAIT
+@ CLEAR_BUFFER
+@ IF NUM HAVE 108 THEN GO_DOWN 중계다시
+@ SELECT 255 255 255
+CASE "<Delivering goods>" GO_DOWN 중계3-1
+CASE "<Stop talking>" GO_DOWN 중계끝
+SELECT_END
+
+* 중계3-1
+@ CLEAR_BUFFER
+@ BOX BLUE 5
+@ FACE 3 "Intermediary" 113 165 242
+@ COLOR 113 165 242
+@ TALK "I have something to deliver to the blacksmith."     
+@ TALK "at Vulcan Village."
+@ TALK "There is no suitable person from the village"
+@ TALK "to take it."
+@ TALK "Would you like to try?"
+@ WAIT
+
+@ CLEAR_BUFFER
+@ TALK "If you deliver these tea leaves to him..."
+@ TALK "I'll pay you 5,000 gold pieces for your help."
+@ TALK "It's an easy thing to do!"
+@ WAIT
+
+@ CLEAR_BUFFER
+@ SELECT 255 255 255
+CASE "<OK! I'll do it!>" GO_DOWN 중계3-1A
+CASE "<No! I'm not interested>" GO_DOWN 중계끝
+SELECT_END
+@ END
+
+* 중계3-1A
+@ CLEAR_BUFFER
+@ BOX BLUE 5
+@ FACE 3 "Intermediary" 113 165 242
+@ COLOR 113 165 242
+@ TALK "That's good."
+@ TALK "It's a smallish payment but..."
+@ TALK "it'll be good for both of us."
+@ GIVE ITEM 213 1
+@ GIVE NUM_TO_ALL 108
+@ WAIT
+@ IF ORDER_SPACE NOTHAVE THEN GO NO_SPACE
+@ ORDER 54 "Delivery goods"
+MENT "Deliver tea leaves to a blacksmith" 
+MENT "at Vulcan Village."
+MENT "Receive 5,000 gold pieces for help."
+ORDER_END
+@ CHANGE 33
+@ END
+/--------------------------------------------------
+# 33
+# 9
+# 7
+# "Intermediary"
+# FLOW
+# 100
+@ CLEAR_BUFFER
+@ BOX BLUE 5
+@ FACE 3 "Intermediary" 113 165 242
+@ COLOR 113 165 242
+@ IF ITEM HAVE 231 THEN GO_DOWN 중계3-2B
+@ IF NUM HAVE 104 THEN GO_DOWN 중계다시
+@ TALK "Welcome warrior! What kind of quest"
+@ TALK "are you looking for?"
+
+@ WAIT
+@ CLEAR_BUFFER
+@ SELECT 255 255 255
+CASE "<Get nail of Vampire Demon>" GO_DOWN 중계3-2
+CASE "<Stop talking>" GO_DOWN 중계끝
+SELECT_END
+
+* 중계3-2
+@ CLEAR_BUFFER
+@ BOX BLUE 5
+@ FACE 3 "Intermediary" 113 165 242
+@ COLOR 113 165 242
+@ TALK "Do you know the Vampire Demon?"
+@ TALK "The nails of the Vampire Demon are an important"
+@ TALK "ingredient"
+@ TALK "in Chinese medicine."
+@ TALK ""
+@ WAIT
+@ TALK "One of my customers has asked me to find some!"
+@ WAIT
+
+@ CLEAR_BUFFER
+@ TALK "I'll pay you 6,000 gold pieces for your help."
+@ TALK "Would you like to try?"
+@ TALK ""
+@ CLEAR_BUFFER
+@ SELECT 255 255 255
+CASE "<OK! I'll do it!>" GO_DOWN 중계3-2A
+CASE "<No! I'm not interested>" GO_DOWN 중계끝
+SELECT_END
+
+* 중계3-2A
+@ CLEAR_BUFFER
+@ BOX BLUE 5
+@ FACE 3 "Intermediary" 113 165 242
+@ COLOR 113 165 242
+@ IF ORDER_SPACE NOTHAVE THEN GO NO_SPACE
+@ TALK "That's good!"
+@ TALK "I believe you could easily slay a Vampire Demon."
+@ TALK "Bring the nails of the Vampire Demon to me"
+@ TALK "without fail!"
+@ WAIT
+@ CLEAR_BUFFER
+@ TALK "If you get the nails, I'll give you a golden shield"
+@ TALK "for your help."
+@ TALK "What do you think? Would you like to try this quest?"
+@ ORDER 55 "Get the nails of Vampire Demon"
+MENT "Slay Vampire Demons at Vampire Valley"
+MENT "and collect their nails"
+MENT "Take them to an Intermediary."
+MENT "Receive a golden shield for your help."
+ORDER_END
+@ GIVE NUM_TO_ALL 104
+@ LOCATE_ENEMY 7 70 25 41 65 231
+@ UNSEAL 7
+/비성골(70, 25)의 화양귀(32) 아이템은 화양귀의 손톱
+@ WAIT
+@ END
+
+* 중계3-2B
+@ CLEAR_BUFFER
+@ BOX BLUE 5
+@ FACE 3 "Intermediary" 113 165 242
+@ TALK "You came back here again!"
+@ TALK "Did you get the nails?"
+@ WAIT
+
+@ CLEAR_BUFFER
+@ TALK "The customer is waiting for the nails...!"
+@ TALK "Now! Give me the nails!"
+@ REMOVE ITEM 231
+@ WAIT
+@ TALK "Good, that's what I wanted!"
+@ TALK "Here! This is a golden shield."
+@ GIVE ITEM 69 1
+@ REMOVE NUM_TO_ALL 104
+@ REMOVE_ORDER 55
+@ WAIT
+@ CLEAR_BUFFER
+@ TALK "You've got a good deal!"
+@ TALK "Come again!"
+@ CHANGE 34
+@ WAIT
+@ END
+
+/끝
+# 34
+# 9
+# 7
+# "Intermediary"
+# FLOW
+# 100
+@ CLEAR_BUFFER
+@ BOX BLUE 5
+@ FACE 3 "Intermediary" 113 165 242
+@ COLOR 113 165 242
+@ TALK "Hmm... no more quests to do here anymore!"
+@ TALK "You'd better try another village."
+@ WAIT
+@ END
+
+/====================================================
+/곰바위 마을의 상점 주인과 이야기 하면 생기는 인형 기술자
+# 8
+# 14
+# 1
+# "Doll-Maker"
+# FLOW
+# 100
+/인형 기술자
+@ CLEAR_BUFFER
+@ BOX RED 5
+@ FACE 7 "Doll-Maker" 250 200 0
+@ COLOR 250 200 0
+@ IF ITEM HAVE 207 THEN GO_DOWN 인형4-1
+/ 이두마신의 눈과 저울마왕의 귀를 함께 가지고 있다면
+@ IF NUM HAVE 25 THEN GO_DOWN 인형3-1
+/ 2번째 저울 마왕 제거 이벤트를 줄 때 주인공이 다시 물어보면
+@ IF ITEM HAVE 208 THEN GO_DOWN 인형2-1
+/ 이두마신의 눈을 가지고 있다면
+@ IF NUM HAVE 22 THEN GO_DOWN 인형1-3 
+/ 인형 기술자의 제의를 거절하고 다시 물어볼 때
+@ IF NUM HAVE 21 THEN GO_DOWN 인형OK
+@ TALK "Who are you?"
+@ TALK "I think you're from the world."
+@ TALK "What brings you here?"
+@ WAIT
+
+@ CLEAR_BUFFER
+@ BOX BLUE 5
+@ FACE HERO 250 250 0
+@ COLOR 250 250 0
+@ TALK "We are here to save a Doll-Maker who was captured"
+@ TALK "by devils at Silla."
+@ WAIT
+
+@ CLEAR_BUFFER
+@ BOX RED 5
+@ FACE 7 "Doll-Maker" 250 200 0
+@ COLOR 250 200 0
+@ TALK "What? A Doll-Maker?"
+@ TALK "I'm that Doll-Maker!"
+@ REMOVE_ORDER 7
+@ GIVE NUM_TO_ALL 76
+@ WAIT
+
+@ CLEAR_BUFFER
+@ FACE HERO 250 250 0
+@ COLOR 250 250 0
+@ BOX BLUE 5
+@ TALK "Are you really? Prove it to us."
+@ TALK "We need an incantation doll to break the spell"
+@ TALK "on Raegios's family."
+@ TALK "Please... can you make an incantation doll!"
+@ WAIT
+
+@ CLEAR_BUFFER
+@ BOX RED 5
+@ FACE 7 "Doll-Maker" 250 200 0
+@ COLOR 250 200 0
+@ TALK "Make a doll for you?"
+@ TALK "What are talking about...?"
+@ TALK "I'm a Doll-Maker but..."
+@ WAIT
+
+@ CLEAR_BUFFER
+@ TALK "How could I make a doll while"
+@ TALK "I'm under the control of the the Western demon?"
+@ TALK "If you release me then I can..."
+@ WAIT
+@ GO_DOWN 인형1-4
+
+* 인형1-4
+@ CLEAR_BUFFER
+@ BOX RED 5
+@ FACE 7 "Doll-Maker" 250 200 0
+@ COLOR 250 200 0
+@ TALK "Well, will you do it?"
+@ WAIT
+@ CLEAR_BUFFER
+@ SELECT 255 255 255
+CASE "<Yes!>" GO_DOWN 인형1-1
+CASE "<No!>" GO_DOWN 인형1-2
+SELECT_END
+@ END
+
+* 인형1-1
+@ CLEAR_BUFFER
+@ BOX RED 5
+@ FACE 7 "Doll-Maker" 250 200 0
+@ COLOR 250 200 0
+@ TALK "I'm glad you agree. I'm sorry to make things difficult"
+@ TALK "but... I want to get free..."
+@ TALK "If you help me escape I'll make a doll."
+@ TALK "We'll talk later after you've killed the Western demon!"
+@ WAIT
+
+@ CLEAR_BUFFER
+@ FACE HERO 250 250 0
+@ COLOR 250 250 0
+@ BOX BLUE 5
+@ TALK "Ok! Let's go to Silla and kill him!" 
+
+@ REMOVE NUM_TO_ALL 22
+@ GIVE NUM_TO_ALL 21
+@ NEW_OBJECT 11 69 18 1 69 9
+/마신성굴에 (69,18)에 아이디 1 에 해골선원(69) 이벤트 9번
+@ NEW_OBJECT 11 35 17 2 65 10
+/마신성굴에 (37,19)에 아이디 2 에 이두마신(65) 이벤트 10번
+@ IF ORDER_SPACE NOTHAVE THEN GO_DOWN NO_SPACE
+@ ORDER 8 "Slay the Western demon"
+MENT "Kill the Western demon at Silla"
+MENT "and take its eyes to the Doll-Maker at Spider Cave."
+ORDER_END
+@ WAIT
+@ END
+
+* 인형1-2
+@ CLEAR_BUFFER
+@ BOX RED 5
+@ FACE 7 "Doll-Maker" 250 200 0
+@ COLOR 250 200 0
+@ TALK "It's too bad that you won't help me..."
+@ TALK "Maybe it's not the time to escape"
+@ TALK "from the Western demon..."
+@ WAIT
+@ CLEAR_BUFFER
+@ TALK "But remember this! I'm the only one"
+@ TALK "down here in the underworld who can make"
+@ TALK "an incantation doll"
+@ WAIT
+@ GIVE NUM_TO_ALL 22
+@ END
+
+* 인형OK
+@ CLEAR_BUFFER
+@ BOX RED 5
+@ FACE 7 "Doll-Maker" 250 200 0
+@ COLOR 250 200 0
+@ TALK "Why haven't you left yet?"
+@ TALK "If you are in such a hurry go right now..."
+@ WAIT
+@ END
+
+* 인형1-3
+@ CLEAR_BUFFER
+@ BOX RED 5
+@ FACE 7 "Doll-Maker" 250 200 0
+@ COLOR 250 200 0
+@ TALK "Hmm... Do you have a problem with leaving?"
+@ TALK "I don't care but..."
+@ TALK "I tell you again, only I can make"
+@ TALK "an incantation doll."
+@ TALK "What do you think? Still want to leave without me?"
+@ WAIT
+@ GO_UP 인형1-4 
+@ END
+
+* 인형2-1
+@ CLEAR_BUFFER
+@ BOX RED 5
+@ FACE 7 "Doll-Maker" 250 200 0
+@ COLOR 250 200 0
+@ TALK "Oh!...You came back again!"
+@ TALK "Well... was it difficult to kill the Western demon?"
+@ TALK "maybe not."
+@ WAIT
+@ CLEAR_BUFFER
+@ BOX BLUE 5
+@ FACE HERO 250 250 0
+@ COLOR 250 250 0
+@ TALK "How did you know the the Western demon was dead?"
+@ WAIT
+@ CLEAR_BUFFER
+@ BOX RED 5
+@ FACE 7 "Doll-Maker" 250 200 0
+@ COLOR 250 200 0
+@ TALK "Ah...!"
+@ WAIT
+@ TALK "..."
+@ TALK "Well... I heard about it from others around here..."
+@ TALK "I'm very close with the devils..."
+@ WAIT
+@ REMOVE ITEM 208
+@ REMOVE_ORDER 8
+
+@ CLEAR_BUFFER
+@ TALK "OK! now I'll make an incantation doll for you."
+@ TALK ""
+@ TALK "It's not so difficult but..."
+@ TALK "I need the souls of the demons" 
+@ TALK "who cast the spell on Raegios's family"
+@ TALK "in order to break the spell."
+@ TALK ""
+@ TALK "In order to break that sealing spell..."
+@ WAIT
+@ CLEAR_BUFFER
+@ TALK "Both the demons who cast it have to die..." 
+@ TALK "It's a very powerful spell to undo."
+@ WAIT
+@ CLEAR_BUFFER
+@ TALK "Go now to Soul Castle and get the Eastern demon's ears."
+@ TALK "Then I'll make two incantation dolls!"
+@ TALK "While you do that I'll get golden straw."
+@ WAIT
+@ CLEAR_BUFFER
+@ BOX BLUE 5
+@ FACE HERO 250 250 0
+@ COLOR 250 250 0
+@ TALK "What? Golden straw?"
+@ WAIT
+@ CLEAR_BUFFER
+@ BOX RED 5
+@ FACE 7 "Doll-Maker" 250 200 0
+@ COLOR 250 200 0
+@ TALK "An incantation doll... it acts as a connection"
+@ TALK "between people's souls."
+@ TALK "To make that connection."
+@ TALK "I must have Golden straw."
+@ WAIT
+@ CLEAR_BUFFER
+@ BOX BLUE 5
+@ FACE HERO 250 250 0
+@ COLOR 250 250 0
+@ TALK "Hmm... I think I understand... If so...!"
+@ TALK "Where will you get golden straw...?"
+@ WAIT
+@ CLEAR_BUFFER
+@ BOX RED 5
+@ FACE 7 "Doll-Maker" 250 200 0
+@ COLOR 250 200 0
+@ GIVE NUM_TO_ALL 25
+@ TALK "Don't worry. While you go after the demon"
+@ TALK "I'll take care of the golden straw!"
+@ NEW_OBJECT 10 47 41 3 67 11
+@ IF ORDER_SPACE NOTHAVE THEN GO_DOWN NO_SPACE
+@ ORDER 9 "Slay the Eastern demon"
+MENT "Kill the Eastern demon at Soul Castle and take his ears" 
+MENT "to the Doll-Maker at Spider Cave."
+ORDER_END
+
+@ CLEAR_BUFFER
+@ BOX BLUE 5
+@ FACE HERO 250 250 0
+@ COLOR 250 250 0
+@ TALK "OK, I'll kill the Eastern demon at Soul Castle and"
+@ TALK "cut off his ears..."
+@ WAIT
+@ END
+
+* 인형3-1
+@ CLEAR_BUFFER
+@ BOX RED 5
+@ FACE 7 "Doll-Maker" 250 200 0
+@ COLOR 250 200 0
+@ TALK "Why haven't you left yet?"
+@ TALK "Hurry up!"
+@ TALK ""
+@ TALK "Take advantage of his weak head!"
+@ WAIT
+@ END
+
+* 인형4-1
+@ CLEAR_BUFFER
+@ BOX RED 5
+@ FACE 7 "Doll-Maker" 250 200 0
+@ COLOR 250 200 0
+@ TALK "Ah! You have returned!"
+@ TALK "I've been waiting for you to come back with"
+@ TALK "the Eastern demon's ears." 
+@ TALK "Give me the ears to make a doll..."
+@ REMOVE ITEM 207
+@ REMOVE_ORDER 9
+@ WAIT
+@ CLEAR_BUFFER
+@ FACE HERO 250 250 0
+@ COLOR 250 250 0
+@ BOX BLUE 5
+@ TALK "Here, please make an incantation doll!"
+@ WAIT
+@ CLEAR_BUFFER
+@ TALK "and please...!"
+@ TALK "Make it fast..."
+@ WAIT
+@ TALK "Please..."
+@ WAIT
+
+@ CLEAR_BUFFER
+@ BOX RED 5
+@ FACE 7 "Doll-Maker" 250 200 0
+@ COLOR 250 200 0
+@ TALK "What? Make an incantation doll? Ha ha ha...."
+@ TALK "Do I look like the sort of man who'd break a spell."
+@ TALK "How do I look...?"
+@ WAIT
+@ CLEAR_BUFFER
+@ BOX BLUE 5
+@ FACE HERO 250 250 0
+@ COLOR 250 250 0
+@ TALK "Who...are you?"
+@ WAIT
+@ TALK "Are you sure you're the Doll-Maker?"
+@ WAIT
+
+@ CLEAR_BUFFER
+@ TALK "Who are you?"
+@ WAIT
+@ CLEAR_BUFFER
+@ BOX RED 5
+@ FACE 7 "Doll-Maker" 250 200 0
+@ COLOR 250 200 0
+@ TALK "Do you want to know who I am?"
+@ WAIT
+@ TALK "I'm only one in all of the underworld "
+@ TALK "who can make an incantation doll."
+@ WAIT
+
+@ CLEAR_BUFFER
+@ TALK "You know why? I've killed everyone else"
+@ TALK "who could make one."
+@ WAIT
+
+@ CLEAR_BUFFER
+@ BOX BLUE 5
+@ FACE HERO 250 250 0
+@ COLOR 250 250 0
+@ TALK "You bastard.."
+@ WAIT
+@ TALK "Who are you apart from being a Doll-Maker?"
+@ WAIT
+
+@ CLEAR_BUFFER
+@ BOX RED 5
+@ FACE 7 "Doll-Maker" 250 200 0
+@ COLOR 250 200 0
+@ TALK "I'm a Doll-Maker but..."
+@ TALK "I have another name..."
+@ WAIT
+@ TALK "It's Satan..."
+@ WAIT
+
+@ CLEAR_BUFFER
+@ BOX BLUE 5
+@ FACE HERO 250 250 0
+@ COLOR 250 250 0
+@ TALK "You're Satan?"
+@ WAIT
+
+@ CLEAR_BUFFER
+@ BOX RED 5
+@ FACE 7 "Doll-Maker" 250 200 0
+@ COLOR 250 200 0
+@ PLAY MA-1.WAV
+@ TALK "Ha ha ha ha..."
+@ WAIT
+@ TALK "Now I'll show you my true colors!"
+@ WAIT
+@ CHANGE_GOS 64
+&&&&&&&&&&&&&&&&
+/ 천귀사신으로 모습이 바뀜.
+
+@ CLEAR_BUFFER
+@ BOX BLUE 5
+@ FACE HERO 250 250 0
+@ COLOR 250 250 0
+@ TALK "How on earth... what's happening ...?"
+@ WAIT
+@ TALK "Why did you do such a thing?"
+@ WAIT
+
+@ CLEAR_BUFFER
+@ BOX RED 5
+@ FACE 14 "Satan" 131 131 131
+&&&&&&&&&&&&&&7
+/천귀사의 얼굴로 바뀜
+@ COLOR 131 131 131
+@ TALK "Why did I do it?"
+@ TALK "I did it to recover my power!"
+@ TALK "That's why."
+@ WAIT
+@ CLEAR_BUFFER
+@ BOX BLUE 5
+@ FACE HERO 250 250 0
+@ COLOR 250 250 0
+@ TALK "Your power...?"
+@ WAIT
+@ CLEAR_BUFFER
+@ BOX RED 5
+@ FACE 14 "Satan" 131 131 131
+@ COLOR 131 131 131
+@ TALK "I'd delegated my power to my war-lords before"
+@ TALK "I got trapped during the fighting with the humans."
+@ TALK "I made myself a sacrifice"
+@ TALK "for the peace of the world."
+@ WAIT
+@ CLEAR_BUFFER
+@ TALK "Then would you like to know what happened?"
+@ WAIT
+@ CLEAR_BUFFER
+@ TALK "Everyone tried to be King of the underworld..."
+@ TALK "while they were busy fighting..."
+@ TALK "I got the Blood Sword."
+@ WAIT
+@ CLEAR_BUFFER
+@ TALK "Your Blood Trinity has helped me a lot in recovering"
+@ TALK "my power."   
+@ TALK "Now the Eastern demon's ears and"
+@ TALK "the Western demon's eyes are mine again..."
+@ TALK "I'm in control once more."
+@ WAIT
+@ CLEAR_BUFFER
+@ TALK "Anyway now I've got the Blood Sword..."
+@ TALK "and recovered my power. I won't kill you..."
+@ TALK "Just go on your way."
+@ TALK ""
+@ TALK "While I occupy the world..."
+@ WAIT
+@ CLEAR_BUFFER
+@ BOX BLUE 5
+@ FACE HERO 250 250 0
+@ COLOR 250 250 0
+@ TALK "What are you talking about!"
+@ TALK "I can't let you do that!!"
+@ WAIT
+@ CLEAR_BUFFER
+@ BOX RED 5
+@ FACE 14 "Satan" 131 131 131
+@ COLOR 131 131 131
+@ TALK "Ha ha ha... you can't even touch my fingertips."
+@ TALK "How could you have the nerve to say you'll stop me?"
+@ WAIT
+@ CLEAR_BUFFER
+@ TALK "Anyway... I won't kill you for a while."
+@ TALK ""
+@ TALK "I have nothing to worry about even with"
+@ TALK "Raegios's family free."
+@ TALK "It'd be better to go and attack the world."
+@ WAIT
+@ CLEAR_BUFFER
+@ TALK "I say once more... give up."
+@ TALK "I know everything about you."
+@ TALK "You are no match for me."
+@ WAIT
+@ CLEAR_BUFFER
+@ FACE HERO 250 250 0
+@ COLOR 250 250 0
+@ BOX BLUE 5
+@ TALK "What...!"                       
+@ TALK "Why didn't he kill me?"
+@ WAIT
+@ CLEAR_BUFFER
+@ BOX RED 5
+@ FACE 14 "Satan" 131 131 131
+@ COLOR 131 131 131
+@ TALK "Are you anxious to know why I didn't?"
+@ TALK "You don't have to know that..."
+@ WAIT
+@ CLEAR_BUFFER
+@ TALK "Oh... I talk too much."
+@ TALK "Now I've recovered my lost power"
+@ TALK "I'll go back and live in Soul Castle."
+@ WAIT
+@ PLAY MA-1.WAV
+@ WAIT
+@ PLAY MASO4.WAV
+@ CHANGE_GOS 19
+@ WAIT
+@ CLEAR_BUFFER
+@ BOX BLUE 5
+@ FACE HERO 250 250 0
+@ COLOR 250 250 0
+@ TALK "Ah! Hang on a minute."
+
+@ WAIT
+@ TALK "Damn it..."
+@ WAIT
+@ TALK "What did you do...?"
+@ TALK "How can I save the situation?"
+@ WAIT
+@ CLEAR_BUFFER
+@ TALK "Now I know what Satan has in mind..."
+@ TALK "I'd better go to Raegios's..."
+@ TALK "maybe he'll know what to do."
+@ REMOVE_OBJECT 9 11
+@ GIVE NUM_TO_ALL 26
+@ WAIT
+@ REMOVE NUM_TO_ALL 25
+@ REMOVE NUM_TO_ALL 22
+@ REMOVE NUM_TO_ALL 21
+@ REMOVE_OBJECT THIS
+@ END
+
+/--------------------------------------------------------
+/마신 성굴의 입구, 마물들의 시체가 널려 있고
+# 9
+# 11
+# 1
+# "Cave keeper"
+# FLOW
+# 100
+@ CLEAR_BUFFER
+@ BOX RED 5
+@ FACE 19 "Cave keeper" 131 131 131 
+@ COLOR 131 131 131
+@ TALK "Ok! who are you? You must be from the other place..."
+@ WAIT
+@ CLEAR_BUFFER
+@ BOX BLUE 5
+@ FACE HERO 250 250 0
+@ COLOR 250 250 0
+@ TALK "Yes... We are here to kill the Western demon living"
+@ TALK "in Silla."
+@ WAIT
+@ CLEAR_BUFFER
+@ BOX RED 5
+@ FACE 19 "Cave keeper" 131 131 131 
+@ COLOR 131 131 131
+@ TALK "Ulp!... you are here to kill the Western demon that"
+@ TALK "lives here?"
+@ TALK "Well... I suppose you are our enemies..."
+@ WAIT
+
+@ CLEAR_BUFFER
+@ BOX BLUE 5
+@ FACE HERO 250 250 0
+@ COLOR 250 250 0
+@ TALK "Who attacked the Western demon?"
+@ TALK "The Lizard demon? or the Eastern demon?"
+@ WAIT
+
+@ CLEAR_BUFFER
+@ BOX RED 5
+@ FACE 19 "Cave keeper" 131 131 131 
+@ COLOR 131 131 131
+@ TALK "I not sure... everyone believes the Eastern demon"   
+@ TALK "did it. But... he's not cunning enough."
+@ WAIT
+
+@ CLEAR_BUFFER
+@ TALK "Some say it's a conspiracy between the Lizard demon" 
+@ TALK "and the Eastern demon..."
+@ TALK " "
+@ WAIT
+
+@ CLEAR_BUFFER
+@ BOX BLUE 5
+@ FACE HERO 250 250 0
+@ COLOR 250 250 0
+@ TALK "I must kill the Western demon!"
+@ WAIT
+
+@ CLEAR_BUFFER
+@ BOX RED 5
+@ FACE 19 "Cave keeper" 131 131 131 
+@ COLOR 131 131 131
+@ TALK "That's what you intend to do...?"
+@ TALK "Maybe you'll succeed... You look strong,"
+@ TALK "I'm not dying to attack you..."
+@ WAIT
+
+@ CLEAR_BUFFER
+@ TALK "If you have to kill him..."
+@ WAIT
+@ TALK "Please let him escape a shameful death..."
+@ WAIT
+@ TALK "U...K...!"
+@ WAIT
+@ PLAY FIRE.WAV
+@ CHANGE_GOS 52  
+@ REMOVE_OBJECT THIS
+@ END
+/--------------------------------------------------------
+/ 이두마신이 가운데 서있고 마물들의 시체가 온통 널려있다.
+# 10
+# 11
+# 2
+# "Western demon"
+# FLOW
+# 100
+@ CLEAR_BUFFER
+@ BOX RED 5
+@ FACE 15 "Western demon" 131 131 131
+@ COLOR 131 131 131
+@ TALK "Who are you?"
+@ TALK "How did you get here?"
+@ REMOVE_ORDER 8
+@ WAIT
+@ CLEAR_BUFFER
+@ BOX BLUE 5
+@ FACE HERO 250 250 0
+@ COLOR 250 250 0
+@ TALK "We are here to fight against you"
+@ TALK "and save a Doll-Maker you are holding prisoner."
+@ WAIT
+@ CLEAR_BUFFER
+@ BOX RED 5
+@ FACE 15 "Western demon" 131 131 131 
+@ COLOR 131 131 131
+@ TALK "Hmm... I don't care if you save him or not."
+@ TALK "Satan is my enemy..." 
+@ TALK "not Raegios's family."
+@ WAIT
+
+@ CLEAR_BUFFER
+@ TALK "Satan created dissension between"
+@ TALK "the Western demon and me..."
+@ WAIT
+
+@ CLEAR_BUFFER
+@ BOX BLUE 5
+@ FACE HERO 250 250 0
+@ COLOR 250 250 0
+@ TALK "Why did Satan do that?"
+@ WAIT
+
+@ CLEAR_BUFFER
+@ BOX RED 5
+@ FACE 15 "Western demon" 131 131 131 
+@ COLOR 131 131 131
+@ TALK "When he was trapped the Eastern Demon and I inherited"
+@ TALK "his power but"
+@ TALK "we couldn't use it fully. That was one of his tricks."
+@ WAIT
+
+@ CLEAR_BUFFER
+@ TALK "He set us up knowing we would hold each other in check."
+@ TALK "We'd be too busy fighting each other to take over"
+@ TALK "the world."
+@ WAIT
+@ CLEAR_BUFFER
+@ TALK "We knew that but... we were alienated from Satan"
+@ TALK "and made weak by our greed for total power."
+@ WAIT
+
+@ CLEAR_BUFFER
+@ BOX BLUE 5
+@ FACE HERO 250 250 0
+@ COLOR 250 250 0
+@ TALK "Why don't you war-lords join your powers together"
+@ TALK "to fight against him?"
+@ WAIT
+
+@ CLEAR_BUFFER
+@ BOX RED 5
+@ FACE 15 "Western demon" 131 131 131 
+@ COLOR 131 131 131
+@ TALK "We did try to."
+@ TALK "The Eastern demon and I cast a heavy sealing spell on"
+@ TALK "Raegios's family to stop them interfering." 
+@ WAIT
+
+@ CLEAR_BUFFER
+@ BOX BLUE 5
+@ FACE HERO 250 250 0
+@ COLOR 250 250 0
+@ TALK "What do you mean by a heavy spell?"
+@ WAIT
+
+@ CLEAR_BUFFER
+@ BOX RED 5
+@ FACE 15 "Western demon" 131 131 131 
+@ COLOR 131 131 131
+@ TALK "It's a heavy spell because"
+@ TALK "we did it at risk of our own lives..."
+@ TALK "So that it's hard to break the spell"
+@ TALK "even with an incantation doll."
+@ WAIT
+@ CLEAR_BUFFER
+@ TALK "It needs the life of Eastern and me to break it."
+@ TALK "And I know all of you are here to break the spell."
+@ TALK "aren't you?"
+@ TALK ""
+@ WAIT
+@ CLEAR_BUFFER
+@ TALK "The time has come - take my life!"
+@ TALK "I've lost everything and there's no where to go..."
+@ TALK "I really would like to die a glorious death..."
+@ WAIT
+@ CLEAR_BUFFER
+@ TALK "Kill me now!!!"
+@ PLAY D1.WAV
+@ WAIT 
+@ CHANGE_GOS 19
+@ LOCATE_ENEMY 11 35 17 15 60 208
+@ CLEAR_BUFFER
+@ BOX BLUE 5
+@ FACE HERO 250 250 0
+@ COLOR 250 250 0
+@ TALK "Ah! Wait a minute!"
+@ WAIT
+@ REMOVE_OBJECT THIS
+@ END
+/--------------------------------------------------------
+* 천귀성
+/천귀성에 도착하면 모든 마물들이 시체로 널려 있다.
+# 11 
+# 10
+# 3
+# "Eastern demon"
+# FLOW 
+# 100
+@ CLEAR_BUFFER
+@ BOX RED 5
+@ FACE 17 "Eastern demon" 131 131 131
+@ COLOR 131 131 131
+@ TALK "I didn't know that I'll die a shameful death!!"
+@ TALK "I ruined my life due to my greed for power!!!"
+@ REMOVE NUM_TO_ALL 25
+@ WAIT
+@ CLEAR_BUFFER
+@ BOX BLUE 5
+@ FACE HERO 250 250 0
+@ COLOR 250 250 0
+@ TALK "Are you the Eastern demon?"
+@ WAIT
+@ CLEAR_BUFFER
+@ BOX RED 5
+@ FACE 17 "Eastern demon" 131 131 131
+@ COLOR 131 131 131
+@ TALK "Who are you?"
+@ TALK "Are you a spy of Satan's?"
+@ WAIT
+@ TALK "or a spy of the Western demon?"
+@ TALK "Ha ha ha ha!! I'll kill everyone!!!"
+@ WAIT
+@ CLEAR_BUFFER
+@ BOX BLUE 5
+@ FACE HERO 250 250 0
+@ COLOR 250 250 0
+@ TALK "I'm not a spy for either side!"
+@ WAIT
+@ TALK "I just came here to break your spell"
+@ TALK "on Raegios's family"
+@ WAIT
+@ CLEAR_BUFFER
+@ BOX RED 5
+@ FACE 17 "Eastern demon" 131 131 131
+@ COLOR 131 131 131
+@ TALK "Huh!! Indeed?"
+@ TALK "and you are...?"
+@ WAIT
+
+@ CLEAR_BUFFER
+@ BOX BLUE 5
+@ FACE HERO 250 250 0
+@ COLOR 250 250 0
+@ TALK "What happened to you...?"
+@ TALK "You were fine just a moment ago..."
+@ WAIT
+@ TALK "I just tried to break the spell..."
+@ WAIT
+
+@ CLEAR_BUFFER
+@ BOX RED 5
+@ FACE 17 "Eastern demon" 131 131 131
+@ COLOR 131 131 131
+@ TALK "The spell...?"
+@ TALK "That's the starting point of the whole affair..."
+@ TALK "U...k... if it were not for that spell..."
+@ WAIT
+@ CLEAR_BUFFER
+@ TALK "I wouldn't have had my soul taken away..."
+@ WAIT
+@ CLEAR_BUFFER
+@ TALK "I was caught in a trap and used the spell."
+@ TALK "Now I've lost my soul and in a few days"
+@ TALK "I'll become just a reasonless monster..."
+@ WAIT
+@ CLEAR_BUFFER
+@ TALK "If I give you an incantation you can get"
+@ TALK "the Blood Sword!..."
+@ WAIT
+
+@ CLEAR_BUFFER
+@ BOX BLUE 5
+@ FACE HERO 250 250 0
+@ COLOR 250 250 0
+@ TALK "The Blood Sword?!"
+@ TALK "Has Satan got that sword?"
+@ WAIT
+
+@ CLEAR_BUFFER
+@ BOX RED 5
+@ FACE 17 "Eastern demon" 131 131 131
+@ COLOR 131 131 131
+@ TALK "No! That's nothing but an another half of the"
+@ TALK "Blood Sword. It's called Shadow Sword.."
+@ TALK "But we are under his control because of it."
+@ WAIT
+@ TALK "We fell into one of Satan's traps!"
+@ WAIT
+
+@ CLEAR_BUFFER
+@ BOX BLUE 5
+@ FACE HERO 250 250 0
+@ COLOR 250 250 0
+@ TALK "What does it mean?"
+@ TALK "Where is Satan...?"
+@ TALK "I've heard that he was sealed, trapped and"
+@ TALK "powerless..."
+@ WAIT
+
+@ CLEAR_BUFFER
+@ BOX RED 5
+@ FACE 17 "Eastern demon" 131 131 131
+@ COLOR 131 131 131
+@ TALK "Yes! He was sealed away, then the Western demon and"
+@ TALK "I tried to control the unreal word."
+@ TALK "But he tricked us into casting a spell"
+@ TALK "on Raegios's family."
+@ WAIT
+@ CLEAR_BUFFER
+@ TALK "And we were ostracized from the underworld."
+@ WAIT
+@ TALK "Nobody can be a match for Satan while he's got"
+@ TALK "Shadow Sword."
+@ WAIT
+@ CLEAR_BUFFER
+@ TALK "U...a...K...!!"
+@ TALK "It's tantalizing to see it but not to touch it"
+@ TALK "when its right in front of me..."
+@ WAIT
+
+@ CLEAR_BUFFER
+@ BOX BLUE 5
+@ FACE HERO 250 250 0
+@ COLOR 250 250 0
+@ TALK "Right in front of me...?"
+@ TALK "What does he mean?"
+@ WAIT
+
+@ CLEAR_BUFFER
+@ BOX RED 5
+@ FACE 17 "Eastern demon" 131 131 131
+@ COLOR 131 131 131
+@ TALK "Can you see a sword over there sealed by magic?"
+@ NEW_OBJECT 10 41 41 8 41 45
+@ WAIT
+
+@ CLEAR_BUFFER
+@ BOX BLUE 5
+@ FACE HERO 250 250 0
+@ COLOR 250 250 0
+@ TALK "Ah... That is the sword...!"
+@ WAIT
+
+@ CLEAR_BUFFER
+@ BOX RED 5
+@ FACE 17 "Eastern demon" 131 131 131
+@ COLOR 131 131 131
+@ TALK "Yes..."
+@ TALK "That is... "
+@ TALK "Nobody knows but me..."
+@ TALK "that is the real Blood Sword."
+@ TALK "The sword Satan has got is nothing but a piece of it"
+@ TALK "made when it was broken."
+@ WAIT
+
+@ CLEAR_BUFFER
+@ BOX BLUE 5
+@ FACE HERO 250 250 0
+@ COLOR 250 250 0
+@ TALK "Why didn't you try to unseal it before?"
+@ WAIT
+
+@ CLEAR_BUFFER
+@ BOX RED 5
+@ FACE 17 "Eastern demon" 131 131 131
+@ COLOR 131 131 131
+@ TALK "Why didn't I try to get it unsealed?"
+@ TALK "It's impossible, it's perfectly sealed... "
+@ TALK "nobody could break the seal..."
+@ TALK "That's one reason Satan only has a piece of it."
+@ WAIT
+@ CLEAR_BUFFER
+@ TALK "In few moment I'll lose my soul..."
+@ TALK "You can take my ears and break the spell on"
+@ TALK "Raegios's family... That's the last thing I can do!"
+@ WAIT
+@ PLAY D3.WAV
+@ TALK "U... A... K...!!!~~"
+@ WAIT
+@ CLEAR_BUFFER
+@ WAIT
+
+@ CLEAR_BUFFER
+@ BOX BLUE 5
+@ FACE HERO 250 250 0
+@ COLOR 250 250 0
+@ TALK "Ah!!!... his soul has totally gone!"
+@ TALK "Why did it happen?"
+@ TALK "I don't know what in the world is going on!!"
+@ TALK "I must kill his body and take the ears first,"
+@ TALK "then look at the sword."
+@ WAIT
+@ CLEAR_BUFFER
+@ TALK "The Eastern demon wanted us to kill him...!"
+@ CHANGE_GOS 19
+@ LOCATE_ENEMY 10 47 41 18 80 207
+@ WAIT
+@ REMOVE_OBJECT THIS
+/-------------------------------------------------------
+# 45 
+# 10
+# 8
+# "Blood Sword"
+# FLOW 
+# 100
+@ CLEAR_BUFFER
+@ BOX BLUE 5
+@ FACE HERO 250 250 0
+@ COLOR 250 250 0
+@ IF NUM HAVE 111 THEN GO_DOWN 진검2
+@ IF NUM HAVE 110 THEN GO_DOWN 진검1
+@ TALK "What is it...?"
+@ WAIT
+@ TALK "Is it the Blood Sword...?"
+@ WAIT
+@ TALK "Do we need an incantation to break the seal?"
+@ TALK "How could I break it...?"
+@ TALK "Let's ask the wizard, Raegios."
+@ GIVE NUM_TO_ALL 71
+@ WAIT
+@ END
+
+* 진검1
+@ CLEAR_BUFFER
+@ BOX BLUE 5
+@ FACE HERO 250 250 0
+@ COLOR 250 250 0
+@ TALK "Ok... It's time to release the Blood Sword...!"
+@ TALK "Let's say the incantation..."
+@ WAIT
+@ CLEAR_BUFFER
+@ TALK "Blood wants a master...who must know"
+@ TALK "exasperation, sorrow and resentment."
+@ TALK "I know that darkness and Blood " 
+@ TALK "will be united forever by a master."
+@ WAIT
+@ CLEAR_BUFFER
+@ TALK "Ah! What is it! Is it the soul of the Blood Sword?"
+@ GIVE NUM_TO_ALL 111
+@ WAIT
+@ LOCATE_ENEMY 10 47 48 42 56 0
+@ LOCATE_ENEMY 10 51 49 42 50 0
+@ LOCATE_ENEMY 10 100 112 42 56 0
+@ LOCATE_ENEMY 10 45 53 42 60 0
+@ LOCATE_ENEMY 10 49 55 42 47 0
+@ LOCATE_ENEMY 10 45 47 42 53 0
+@ WARP 10 48 49
+@ END
+
+* 진검2
+@ CLEAR_BUFFER
+@ BOX BLUE 5
+@ FACE HERO 250 250 0
+@ COLOR 250 250 0
+@ TALK "It's...?"
+@ WAIT
+@ CHANGE_GOS 43 
+@ GIVE ITEM 33 1
+@ TALK "It's the Blood Sword!!!"
+@ TALK "How wonderful... to unseal the Blood Sword...!!!"
+@ WAIT
+@ CLEAR_BUFFER
+@ TALK "I've got the Blood Sword!!"
+@ TALK "Let's go fight against Satan!"
+@ TALK "Hmm...The wizard, Raegios may know where Satan is..."
+@ TALK "It'd be a good idea to ask him at Pandemonium Cave."
+@ TALK "OK! let's go now."
+@ WAIT
+@ REMOVE_OBJECT THIS
+@ END
+
+/--------------------------------------------------------
+# 12
+# 18
+# 1
+# "Wizard Raegios"
+# FLOW
+# 100
+@ IF NUM HAVE 72 THEN GO_DOWN 수정열쇠
+@ IF ITEM HAVE 33 THEN GO_DOWN 마지막전투
+@ IF NUM HAVE 110 THEN GO_DOWN 천귀성다시
+@ IF NUM HAVE 27 THEN GO_DOWN 천귀성-1
+@ CLEAR_BUFFER
+@ BOX BLUE 5
+@ FACE 11 "Wizard Raegios" 160 160 200
+@ COLOR 160 160 200
+@ TALK "Hmm..."
+@ WAIT
+@ TALK "What are you doing here?"
+@ TALK "I don't know when Satan will come out..."
+@ WAIT
+@ CLEAR_BUFFER
+@ IF NUM HAVE 71 THEN GO_DOWN 통곡1
+@ END
+
+* 수정열쇠
+@ CLEAR_BUFFER
+@ BOX BLUE 5
+@ FACE 11 "Wizard Raegios" 160 160 200
+@ COLOR 160 160 200
+@ TALK "Why are you here again?"
+@ TALK "You can kill Satan now if you want."
+@ TALK "Take this crystal key to a place south of Soul Castle."
+@ TALK "There is a door which leads to Endless Cave." 
+@ TALK "Satan will be in there.. Be careful..."
+@ WAIT
+@ END
+
+* 천귀성-1
+@ CLEAR_BUFFER
+@ BOX BLUE 5
+@ FACE HERO 250 250 0
+@ COLOR 250 250 0
+@ REMOVE NUM_TO_ALL 27
+@ TALK "Raegios!"
+@ WAIT
+@ TALK "What happened to you?"
+@ WAIT
+@ CLEAR_BUFFER
+@ BOX BLUE 5
+@ FACE 11 "Wizard Raegios" 160 160 200
+@ COLOR 160 160 200
+@ TALK "Damn it. It's a pity to have to show youngsters"
+@ TALK "my weak points..."
+@ WAIT
+@ CLEAR_BUFFER
+@ TALK "I was attacked by Satan..."
+@ WAIT
+@ CLEAR_BUFFER
+@ TALK "Why don't you go back to the world?"
+@ TALK "You could live a little longer up there."
+@ WAIT
+@ CLEAR_BUFFER
+@ BOX BLUE 5
+@ FACE HERO 250 250 0
+@ COLOR 250 250 0
+@ TALK "Where is Satan?"
+@ WAIT
+@ TALK "And where is Raedina...?!"
+@ WAIT
+@ CLEAR_BUFFER
+@ BOX BLUE 5
+@ FACE 11 "Wizard Raegios" 160 160 200
+@ COLOR 160 160 200
+@ TALK "She was killed by Satan..."
+@ TALK "It was all I could do to survive myself."
+@ WAIT
+@ CLEAR_BUFFER
+@ TALK "I'm OK but my strength is very poor."
+@ TALK "I need time to recover my strength..."
+@ WAIT
+@ CLEAR_BUFFER
+@ BOX BLUE 5
+@ FACE HERO 250 250 0
+@ COLOR 250 250 0
+@ TALK "If you were defeated how can we win?!"
+@ WAIT
+@ TALK "How could we kill Satan? There's no way we'd win!"
+@ WAIT
+@ CLEAR_BUFFER
+@ BOX BLUE 5
+@ FACE 11 "Wizard Raegios" 160 160 200
+@ COLOR 160 160 200
+@ TALK "Forget about everything"
+@ TALK "Thank you for your help..."
+@ TALK "Uk...."
+@ WAIT
+@ TALK "But... give it up..."
+@ TALK "Without the Blood Sword..." 
+@ TALK "nobody could be a match for Satan."
+@ WAIT
+@ TALK "We'll never kill him."
+@ TALK "Go back to your home..."
+@ WAIT
+@ REMOVE NUM_TO_ALL 27
+@ END
+
+* 통곡1
+@ CLEAR_BUFFER
+@ BOX BLUE 5
+@ FACE 11 "Wizard Raegios" 160 160 200
+@ COLOR 160 160 200
+@ IF ITEM NOTHAVE 220 THEN GO_DOWN 검마주술
+@ TALK "Ah!! Have you seen the Blood Sword?"
+@ TALK "In the past I had a vision of a warrior"
+@ TALK "and Satan fighting."
+@ WAIT
+@ CLEAR_BUFFER
+@ TALK "What Satan thinks is the Blood Sword is nothing but"
+@ TALK "a sword."
+@ TALK "But what you have had is the true Blood Sword..."
+@ WAIT
+@ CLEAR_BUFFER
+@ TALK "Ah... heaven help us, we risk so much!"
+@ WAIT
+* 검마주술
+@ CLEAR_BUFFER
+@ TALK "I'll tell you how to unseal the Blood Sword!"
+@ TALK "If you make this incantation over the sword"
+@ TALK "at Soul Castle, you can release the Blood Sword."
+@ WAIT
+@ CLEAR_BUFFER
+@ TALK "Blood wants a master...who must know"
+@ TALK "exasperation, sorrow and resentment."
+@ TALK "I know that darkness and Blood " 
+@ TALK "will be united forever by a master." 
+@ GIVE NUM_TO_ALL 110
+@ WAIT
+@ CLEAR_BUFFER
+@ TALK "Ok... leave now..."
+@ TALK "You bear the responsibility of saving the world."
+@ TALK "on your shoulders..."
+@ WAIT
+@ TALK "Please save it...!"
+@ WAIT
+@ CLEAR_BUFFER
+@ BOX BLUE 5
+@ FACE HERO 250 250 0
+@ COLOR 250 250 0
+@ TALK "Don't worry too much!"
+@ TALK "I'll release the Blood Sword and kill Satan..."
+@ WAIT
+@ END
+
+* 천귀성다시
+@ CLEAR_BUFFER
+@ BOX BLUE 5
+@ FACE 11 "Wizard Raegios" 160 160 200
+@ COLOR 160 160 200
+@ TALK "I'm sorry to lay the responsibility for"
+@ TALK "saving the world on your shoulders..."
+@ TALK "The spell of the sword is broken. Go and take it."
+@ WAIT
+@ TALK "It'll be more difficult if you give Satan time"
+@ TALK "to recover his power..."
+@ WAIT
+@ END
+
+* 마지막전투
+@ CLEAR_BUFFER
+@ BOX BLUE 5
+@ FACE 11 "Wizard Raegios" 160 160 200
+@ COLOR 160 160 200
+@ TALK "Ah!! You came back!!"
+@ TALK "Did you bring the Blood Sword?"
+@ WAIT
+@ CLEAR_BUFFER
+@ BOX BLUE 5
+@ FACE HERO 250 250 0
+@ COLOR 250 250 0
+@ TALK "Yes... We were lucky to get it!"
+@ WAIT
+@ CLEAR_BUFFER
+@ BOX BLUE 5
+@ FACE 11 "Wizard Raegios" 160 160 200
+@ COLOR 160 160 200
+@ TALK "That's good!!!!"
+@ WAIT
+@ CLEAR_BUFFER
+@ BOX BLUE 5
+@ FACE HERO 250 250 0
+@ COLOR 250 250 0
+@ TALK "But Satan wasn't there..."
+@ WAIT
+@ CLEAR_BUFFER
+@ BOX BLUE 5
+@ FACE 11 "Wizard Raegios" 160 160 200
+@ COLOR 160 160 200
+@ TALK "Maybe he is intoxicated with his victory..."
+@ TALK "He is very cautious..."
+@ TALK "and he lives alone somewhere nobody knows!"
+@ WAIT
+@ CLEAR_BUFFER
+@ TALK "But... I know where!"
+@ TALK "I'll give you a crystal key take it to" 
+@ TALK "south of Soul Castle.."
+@ TALK "there is a door leads to Endless Cave."
+@ WAIT
+@ CLEAR_BUFFER
+@ BOX BLUE 5
+@ FACE HERO 250 250 0
+@ COLOR 250 250 0
+@ TALK "Thank you!!"
+@ GIVE ITEM 241 1
+@ WAIT
+@ GIVE NUM_TO_ALL 72
+@ NEW_OBJECT 19 46 46 1 64 44
+/천귀사신을 생성시킨다.
+@ END
+
+
+
+80 : 수정 열쇠를 확인하고 석상을 없앰.
+# 80
+# 10
+# 21
+# "Hellfire statue"
+# FLOW
+# 100
+@ CLEAR_BUFFER
+@ FACE NO
+@ BOX RED 5
+@ COLOR 255 60 60
+@ IF ITEM HAVE 241 THEN GO_DOWN SUC1
+@ TALK "I protect this castle under orders from Satan."
+@ WAIT
+@ LOCATE_ENEMY CURMAP 27 79 37 60 0
+@ LOCATE_ENEMY CURMAP 28 79 37 60 0
+@ LOCATE_ENEMY CURMAP 29 79 37 60 0
+@ LOCATE_ENEMY CURMAP 30 79 37 60 0
+@ LOCATE_ENEMY CURMAP 31 79 37 60 0
+@ END
+* SUC1
+@ TALK "You are the chosen man so open the way."
+@ WAIT
+@ REMOVE_OBJECT CURMAP 41 
+@ REMOVE_OBJECT CURMAP 42
+@ REMOVE_OBJECT THIS
+@ END
+
+81 : 수정 열쇠를 확인하고 석상을 없앰.
+# 81
+# 10
+# 22
+# "Hellfire statue"
+# FLOW
+# 100
+@ CLEAR_BUFFER
+@ FACE NO
+@ BOX RED 5
+@ COLOR 255 60 60
+@ IF ITEM HAVE 241 THEN GO_DOWN SUC1
+@ TALK "I protect this castle under orders from Satan."
+@ WAIT
+@ LOCATE_ENEMY CURMAP 67 77 38 60 0
+@ LOCATE_ENEMY CURMAP 68 77 38 60 0
+@ LOCATE_ENEMY CURMAP 69 77 38 60 0
+@ LOCATE_ENEMY CURMAP 66 77 38 60 0
+@ LOCATE_ENEMY CURMAP 65 77 38 60 0
+@ END
+* SUC1
+@ TALK "You are selected so open the way."
+@ WAIT
+@ REMOVE_OBJECT CURMAP 43 
+@ REMOVE_OBJECT CURMAP 44
+@ REMOVE_OBJECT THIS
+@ END
+
+82 : 천귀성 입구. 들어갈 때 돈을 받고.
+# 82
+# 7
+# 10
+# "Entrance of Soul Castle"
+# FLOW
+# 100
+@ CLEAR_BUFFER
+@ BOX BLUE 5
+@ FACE HERO 250 250 0
+@ COLOR 250 250 0
+@ TALK "It's closed..."
+@ TALK "What shall I do?"
+@ WAIT
+@ CLEAR_BUFFER
+@ FACE 4 "Door keeper" 160 160 200
+@ COLOR 160 160 200
+@ TALK "Hey!"
+@ TALK "Be quite. I'll let you in"
+@ TALK "if you pay me 500 gold pieces."
+@ TALK "Do you have the money?"
+@ WAIT
+@ CLEAR_BUFFER
+@ FACE HERO 250 250 0
+@ COLOR 250 250 0
+@ SELECT 255 255 255
+CASE "<Yes>" GO_DOWN OK1
+CASE "<No>" GO_DOWN END
+SELECT_END
+* OK1
+@ IF MONEY LE 499 THEN GO_DOWN NO1
+@ CLEAR_BUFFER
+@ FACE 4 "Door keeper" 160 160 200
+@ COLOR 160 160 200
+@ TALK "OK.. I'll let you in."
+@ TALK "Be careful... The way out is in the northeast corner"
+@ TALK "of Soul Castle."
+@ WAIT
+@ REMOVE MONEY 500
+@ WARP 10 1 17
+@ END
+* NO1
+@ CLEAR_BUFFER
+@ FACE 4 "Door keeper" 160 160 200
+@ COLOR 160 160 200
+@ TALK "What? you have no money!"
+@ TALK "Wait until you have money before disturbing me again."
+@ WAIT
+@ END
+
+
+
+
+
+
+/-------------------------------------------------
+# 44
+# 19
+# 1
+# "Satan"
+# FLOW
+# 100
+@ CLEAR_BUFFER
+@ BOX RED 5
+@ FACE 14 "Satan" 131 131 131
+@ COLOR 131 131 131
+@ TALK "Who are you...?"
+@ TALK "How dare you come into my private domain..."
+@ TALK "Do you want to die? Tell me how did you get here?"
+@ WAIT
+@ CLEAR_BUFFER
+@ BOX BLUE 5
+@ FACE HERO 250 250 0
+@ COLOR 250 250 0
+@ TALK "Satan!!"
+@ TALK "I'm here to kill you!"
+@ WAIT
+@ CLEAR_BUFFER
+@ PLAY MA-1.WAV
+@ TALK "Ha ha ha... such a silly human..."
+@ TALK "Do you think you could be a match for me?"
+@ WAIT
+@ CLEAR_BUFFER
+@ BOX BLUE 5
+@ FACE HERO 250 250 0
+@ COLOR 250 250 0
+@ CLEAR_BUFFER
+@ FACE HERO 31 164 235
+@ COLOR 31 164 235
+@ BOX BLUE 5
+@ TALK "The Blood Sword...! It's not for you..."
+@ WAIT
+@ CLEAR_BUFFER
+@ BOX RED 5
+@ FACE 14 "Satan" 131 131 131
+@ COLOR 131 131 131
+@ PLAY MA-1.WAV
+@ TALK "I have got the Shadow Sword while you wander"
+@ TALK "about the world looking for it."
+@ TALK "I found it for revenge and honour..."
+@ WAIT
+@ CLEAR_BUFER
+@ TALK "I found it to restore lost honour..."
+@ TALK "and it's in my hand..."
+@ WAIT
+@ CLEAR_BUFFER
+@ BOX BLUE 5
+@ FACE HERO 250 250 0
+@ COLOR 250 250 0
+@ TALK "How could you..."
+@ TALK "get Blood Sword?"
+@ WAIT
+@ TALK "Only one who knows exasperation, sorrow, and resentment"
+@ TALK "could get it."
+@ WAIT
+@ CLEAR_BUFFER
+@ BOX RED 5
+@ FACE 14 "Satan" 131 131 131
+@ COLOR 131 131 131
+@ TALK "Sorrow and resentment!"
+@ TALK "Are you talking about sorrow and resentment?"
+@ WAIT
+@ CLEAR_BUFFER
+@ TALK "How dare you say that you know about"
+@ TALK "sorrow and resentment and I don't!"
+@ WAIT
+@ TALK "What do you know about my sorrow and resentment?"
+@ TALK "Nothing."
+@ WAIT
+
+@ CLEAR_BUFFER
+@ TALK "I don't want to talk to you!"
+@ TALK "Drop dead!!!"
+
+@ CLEAR_BUFFER
+@ BOX RED 5
+@ FACE 14 "Satan" 131 131 131
+@ COLOR 131 131 131
+@ TALK "What is it!!"
+@ WAIT
+@ CLEAR_BUFFER
+@ TALK "How could this have happened...?"
+@ WAIT
+@ TALK "How did you get the Blood Sword?"
+@ WAIT
+@ CLEAR_BUFFER
+@ BOX BLUE 5
+@ FACE HERO 250 250 0
+@ COLOR 250 250 0
+@ TALK "Satan..."
+@ TALK "Heaven will punish you for the evil you have done..."
+@ WAIT
+@ TALK "and heaven will allow me to kill you with"
+@ TALK "the Blood Sword."
+@ WAIT
+@ CLEAR_BUFFER
+@ BOX RED 5
+@ FACE 14 "Satan" 131 131 131
+@ COLOR 131 131 131
+@ TALK "What?"
+@ TALK "You are threatening me...?!!!"
+@ WAIT
+@ TALK "I have got a Shadow Sword too!!"
+@ TALK "Even though you have the Blood Sword"
+@ TALK "You still cannot defeat me!!"
+@ WAIT
+@ CLEAR_BUFFER
+@ BOX BLUE 5
+@ FACE HERO 250 250 0
+@ COLOR 250 250 0
+@ TALK "Your sword can never defeat the Blood Sword."
+@ WAIT 
+@ CLEAR_BUFFER
+@ BOX RED 5
+@ FACE 14 "Satan" 131 131 131
+@ COLOR 131 131 131
+@ TALK "The Blood Sword? It disappeared a long time ago..."
+@ WAIT
+@ CLEAR_BUFFER
+@ TALK "I can't believe it!!"
+@ TALK "I'll kill everyone!!"
+@ CHANGE_GOS 19 
+@ WAIT
+@ PLAY D5.WAV
+@ LOCATE_ENEMY 19 66 48 44 210 35
+@ LOCATE_ENEMY 19 50 44 37 90 0
+@ PLAY A3.WAV
+@ LOCATE_ENEMY 19 51 44 37 90 0
+@ LOCATE_ENEMY 19 52 44 37 90 0
+@ PLAY C3.WAV
+@ LOCATE_ENEMY 19 54 52 38 95 0
+@ LOCATE_ENEMY 19 55 53 38 70 0
+@ LOCATE_ENEMY 19 56 54 38 80 0
+@ PLAY E5.WAV
+@ LOCATE_ENEMY 19 61 48 42 40 0
+@ LOCATE_ENEMY 19 61 50 42 42 0
+@ PLAY A3.WAV
+@ LOCATE_ENEMY 19 42 45 41 40 0
+@ PLAY B3.WAV
+@ LOCATE_ENEMY 19 42 50 41 40 0
+@ REMOVE_OBJECT THIS
+@ END
+
+# 35
+# 10
+# 5
+# "Satan"
+# FLOW
+# 100
+@ CLEAR_BUFFER
+@ BOX RED 5
+@ FACE 14 "Satan" 131 131 131
+@ COLOR 131 131 131
+@ TALK "Oh!... warrior..."
+@ TALK "don't get on my nerves..."
+@ TALK "Get out of my way!"
+@ WAIT
+@ CLEAR_BUFFER
+@ BOX BLUE 5
+@ FACE HERO 250 250 0
+@ COLOR 250 250 0
+@ TALK "Too much ambition will ruin you."
+@ WAIT
+@ CLEAR_BUFFER
+@ BOX RED 5
+@ FACE 14 "Satan" 131 131 131
+@ COLOR 131 131 131
+@ TALK "We demons have had a hard time our whole life under God"
+@ TALK "Isn't it enough?"
+@ TALK ""
+@ TALK "We feel we were abandoned by God..."
+@ WAIT
+@ CLEAR_BUFFER
+@ BOX BLUE 5
+@ FACE HERO 250 250 0
+@ COLOR 250 250 0
+@ TALK "Satan! It's of course your right to try "
+@ TALK "to make a new world for your race."
+@ TALK "But you don't have the right to harass the weak!..."
+@ WAIT
+@ CLEAR_BUFFER
+@ TALK "And heaven has allowed their right to life and"
+@ TALK "happiness."
+@ WAIT
+@ CLEAR_BUFFER
+@ BOX RED 5
+@ FACE 14 "Satan" 131 131 131
+@ COLOR 131 131 131
+@ TALK "Ugh!"
+@ WAIT
+@ TALK "Don't say such things!!!"
+@ WAIT
+@ CLEAR_BUFFER
+@ TALK "Shut up!!!"
+@ TALK "Ha ha ha..."
+@ PLAY FIRE.WAV
+@ WAIT
+@ GO_END2
+@ END
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+============================================================
+ 건물 명령
+============================================================
+* MAGIC_STOP
+@ CLEAR_BUFFER
+@ BOX BLUE 4
+@ FACE 6 "A witch at her magical encampment" 240 20 190
+@ COLOR 240 20 190
+@ FACE 6 "A witch at her magical encampment" 240 20 190
+@ TALK "Why have you given up training in magic?"
+@ TALK " "
+@ COLOR 250 250 0
+@ SELECT 250 250 250
+CASE "Give up" CANCEL_MAGIC
+CASE "Continue" GO_DOWN 끝
+SELECT_END
+@ END
+
+* 마법훈련1
+@ BOX BLUE 7
+@ FACE 6 "A witch at her magical encampment" 240 20 190
+@ COLOR 240 20 190
+@ CLEAR_BUFFER
+@ LEARN_MAGIC "What do you want to know?"
+200 0 150 255 0 0 255 200 0 255 255 220
+LIST 1
+LIST 2
+LIST 3
+LIST 4
+LIST 5
+LIST 6
+LIST 7
+LIST 8
+LIST 10
+LIST 11
+LIST 12
+LEARN_MAGIC_END
+@ END
+
+* 마법훈련2
+@ BOX BLUE 7
+@ FACE 6 "A witch at her magical encampment" 240 20 190
+@ COLOR 240 20 190
+@ CLEAR_BUFFER
+@ LEARN_MAGIC "What do you want to know?"
+200 0 150 255 0 0 255 200 0 255 255 220
+LIST 2
+LIST 3
+LIST 4
+LIST 5
+LIST 7
+LIST 9
+LIST 10
+LIST 11
+LIST 12
+LEARN_MAGIC_END
+@ END
+
+* 장비고르기1
+@ IF LEVEL GE 48 && STRENGTH GE 85 THEN GO_DOWN 장비사기22
+@ IF LEVEL GE 44 && STRENGTH GE 80 THEN GO_DOWN 장비사기21
+@ IF LEVEL GE 40 && STRENGTH GE 74 THEN GO_DOWN 장비사기20
+@ IF LEVEL GE 36 && STRENGTH GE 65 THEN GO_DOWN 장비사기10
+@ IF LEVEL GE 32 && STRENGTH GE 59 THEN GO_DOWN 장비사기9
+@ IF LEVEL GE 28 && STRENGTH GE 53 THEN GO_DOWN 장비사기8
+@ IF LEVEL GE 24 && STRENGTH GE 48 THEN GO_DOWN 장비사기7
+@ IF LEVEL GE 19 && STRENGTH GE 44 THEN GO_DOWN 장비사기6
+@ IF LEVEL GE 15 && STRENGTH GE 40 THEN GO_DOWN 장비사기5
+@ IF LEVEL GE 11 && STRENGTH GE 36 THEN GO_DOWN 장비사기4
+@ IF LEVEL GE 7 && STRENGTH GE 28 THEN GO_DOWN 장비사기3
+@ IF LEVEL GE 3 && STRENGTH GE 22 THEN GO_DOWN 장비사기2
+@ GO_DOWN 장비사기1
+
+* 장비고르기2
+@ IF LEVEL GE 45 && SKILL GE 62 THEN GO_DOWN 장비사기23
+@ IF LEVEL GE 34 && SKILL GE 52 THEN GO_DOWN 장비사기16
+@ IF LEVEL GE 25 && STRENGTH GE 50 THEN GO_DOWN 장비사기15
+@ IF LEVEL GE 16 && HEALTH GE 40 THEN GO_DOWN 장비사기14
+@ IF LEVEL GE 11 && DEXTERITY GE 32 THEN GO_DOWN 장비사기13
+@ IF LEVEL GE 5 && STRENGTH GE 27 THEN GO_DOWN 장비사기12
+@ GO_DOWN 장비사기11
+
+* 장비사기1
+@ BOX BLUE 7
+@ FACE HERO 250 220 0
+@ CLEAR_BUFFER
+@ BUY_WEAPON "What shall I buy?"
+200 0 150 255 0 0 255 200 0 255 255 220
+LIST 1
+LIST 2
+LIST 3
+LIST 4
+LIST 41
+LIST 42
+LIST 43
+LIST 61
+LIST 62
+LIST 71
+LIST 72
+LIST 81
+LIST 82
+LIST 101
+LIST 111
+LIST 112
+LIST 131
+BUY_WEAPON_END
+@ GO_DOWN 끝
+
+* 장비사기2
+@ BOX BLUE 7
+@ FACE HERO 250 220 0
+@ CLEAR_BUFFER
+@ BUY_WEAPON "What shall I buy?"
+200 0 150 255 0 0 255 200 0 255 255 220
+LIST 2
+LIST 3
+LIST 4
+LIST 5
+LIST 6
+LIST 42
+LIST 43
+LIST 44
+LIST 61
+LIST 62
+LIST 71
+LIST 72
+LIST 81
+LIST 82
+LIST 83
+LIST 101
+LIST 111
+LIST 131
+LIST 138
+BUY_WEAPON_END
+@ GO_DOWN 끝
+
+* 장비사기3
+@ BOX BLUE 7
+@ FACE HERO 250 220 0
+@ CLEAR_BUFFER
+@ BUY_WEAPON "What shall I buy?"
+200 0 150 255 0 0 255 200 0 255 255 220
+LIST 3
+LIST 5
+LIST 6
+LIST 7
+LIST 8
+LIST 42
+LIST 43
+LIST 44
+LIST 45
+LIST 62
+LIST 63
+LIST 71
+LIST 72
+LIST 73
+LIST 82
+LIST 83
+LIST 84
+LIST 101
+LIST 102
+LIST 113
+LIST 117
+LIST 136
+LIST 137
+BUY_WEAPON_END
+@ GO_DOWN 끝
+
+* 장비사기4
+@ BOX BLUE 7
+@ FACE HERO 250 220 0
+@ CLEAR_BUFFER
+@ BUY_WEAPON "What shall I buy?"
+200 0 150 255 0 0 255 200 0 255 255 220
+LIST 3
+LIST 5
+LIST 6
+LIST 7
+LIST 8
+LIST 9
+LIST 42
+LIST 44
+LIST 45
+LIST 46
+LIST 62
+LIST 63
+LIST 71
+LIST 72
+LIST 73
+LIST 82
+LIST 83
+LIST 84
+LIST 85
+LIST 101
+LIST 102
+LIST 103
+LIST 111
+LIST 118
+LIST 138
+BUY_WEAPON_END
+@ GO_DOWN 끝
+
+* 장비사기5
+@ BOX BLUE 7
+@ FACE HERO 250 220 0
+@ CLEAR_BUFFER
+@ BUY_WEAPON "What shall I buy?"
+200 0 150 255 0 0 255 200 0 255 255 220
+LIST 4
+LIST 7
+LIST 8
+LIST 9
+LIST 10
+LIST 11
+LIST 42
+LIST 44
+LIST 45
+LIST 46
+LIST 47
+LIST 62
+LIST 63
+LIST 64
+LIST 72
+LIST 73
+LIST 74
+LIST 82
+LIST 83
+LIST 84
+LIST 85
+LIST 102
+LIST 103
+LIST 104
+LIST 112
+LIST 114
+LIST 123
+LIST 137
+BUY_WEAPON_END
+@ GO_DOWN 끝
+
+* 장비사기6
+@ BOX BLUE 7
+@ FACE HERO 250 220 0
+@ CLEAR_BUFFER
+@ BUY_WEAPON "What shall I buy?"
+200 0 150 255 0 0 255 200 0 255 255 220
+LIST 3
+LIST 5
+LIST 7
+LIST 8
+LIST 9
+LIST 11
+LIST 12
+LIST 13
+LIST 43
+LIST 44
+LIST 46
+LIST 47
+LIST 48
+LIST 62
+LIST 63
+LIST 64
+LIST 72
+LIST 73
+LIST 74
+LIST 83
+LIST 84
+LIST 85
+LIST 86
+LIST 102
+LIST 103
+LIST 104
+LIST 111
+LIST 114
+LIST 116
+BUY_WEAPON_END
+@ GO_DOWN 끝
+
+* 장비사기7
+@ BOX BLUE 7
+@ FACE HERO 250 220 0
+@ CLEAR_BUFFER
+@ BUY_WEAPON "What shall I buy?"
+200 0 150 255 0 0 255 200 0 255 255 220
+LIST 5
+LIST 7
+LIST 8
+LIST 10
+LIST 11
+LIST 13
+LIST 14
+LIST 15
+LIST 43
+LIST 45
+LIST 46
+LIST 48
+LIST 49
+LIST 62
+LIST 64
+LIST 65
+LIST 72
+LIST 73
+LIST 74
+LIST 82
+LIST 84
+LIST 85
+LIST 86
+LIST 87
+LIST 102
+LIST 103
+LIST 104
+LIST 105
+LIST 114
+LIST 132
+BUY_WEAPON_END
+@ GO_DOWN 끝
+
+* 장비사기8
+@ BOX BLUE 7
+@ FACE HERO 250 220 0
+@ CLEAR_BUFFER
+@ BUY_WEAPON "What shall I buy?"
+200 0 150 255 0 0 255 200 0 255 255 220
+LIST 3
+LIST 5
+LIST 9
+LIST 10
+LIST 11
+LIST 12
+LIST 14
+LIST 15
+LIST 16
+LIST 44
+LIST 45
+LIST 47
+LIST 48
+LIST 49
+LIST 50
+LIST 62
+LIST 63
+LIST 64
+LIST 65
+LIST 72
+LIST 74
+LIST 75
+LIST 82
+LIST 84
+LIST 86
+LIST 87
+LIST 102
+LIST 104
+LIST 105
+LIST 106
+LIST 112
+LIST 117
+LIST 131
+LIST 135
+BUY_WEAPON_END
+@ GO_DOWN 끝
+
+* 장비사기9
+@ BOX BLUE 7
+@ FACE HERO 250 220 0
+@ CLEAR_BUFFER
+@ BUY_WEAPON "What shall I buy?"
+200 0 150 255 0 0 255 200 0 255 255 220
+LIST 5
+LIST 9
+LIST 10
+LIST 12
+LIST 13
+LIST 14
+LIST 16
+LIST 17
+LIST 18
+LIST 44
+LIST 45
+LIST 47
+LIST 48
+LIST 49
+LIST 50
+LIST 51
+LIST 63
+LIST 64
+LIST 65
+LIST 66
+LIST 72
+LIST 73
+LIST 74
+LIST 75
+LIST 84
+LIST 86
+LIST 87
+LIST 88
+LIST 103
+LIST 104
+LIST 105
+LIST 106
+LIST 115
+LIST 116
+LIST 117
+LIST 123
+LIST 139
+BUY_WEAPON_END
+@ GO_DOWN 끝
+
+* 장비사기10
+@ BOX BLUE 7
+@ FACE HERO 250 220 0
+@ CLEAR_BUFFER
+@ BUY_WEAPON "What shall I buy?"
+200 0 150 255 0 0 255 200 0 255 255 220
+LIST 9
+LIST 11
+LIST 12
+LIST 15
+LIST 16
+LIST 18
+LIST 19
+LIST 20
+LIST 44
+LIST 46
+LIST 48
+LIST 50
+LIST 51
+LIST 63
+LIST 65
+LIST 66
+LIST 73
+LIST 74
+LIST 75
+LIST 84
+LIST 86
+LIST 87
+LIST 88
+LIST 104
+LIST 105
+LIST 106
+LIST 107
+LIST 113
+LIST 118
+LIST 133
+LIST 137
+BUY_WEAPON_END
+@ GO_DOWN 끝
+
+* 장비사기11
+@ BOX BLUE 7
+@ FACE HERO 250 220 0
+@ CLEAR_BUFFER
+@ BUY_WEAPON "What shall I buy?"
+200 0 150 255 0 0 255 200 0 255 255 220
+LIST 5
+LIST 7
+LIST 43
+LIST 44
+LIST 62
+LIST 72
+LIST 83
+LIST 101
+BUY_WEAPON_END
+@ GO_DOWN 끝
+
+* 장비사기12
+@ BOX BLUE 7
+@ FACE HERO 250 220 0
+@ CLEAR_BUFFER
+@ BUY_WEAPON "What shall I buy?"
+200 0 150 255 0 0 255 200 0 255 255 220
+LIST 6
+LIST 8
+LIST 9
+LIST 44
+LIST 46
+LIST 64
+LIST 71
+LIST 84
+LIST 104
+BUY_WEAPON_END
+@ GO_DOWN 끝
+
+* 장비사기13
+@ BOX BLUE 7
+@ FACE HERO 250 220 0
+@ CLEAR_BUFFER
+@ BUY_WEAPON "What shall I buy?"
+200 0 150 255 0 0 255 200 0 255 255 220
+LIST 7
+LIST 10
+LIST 12
+LIST 45
+LIST 47
+LIST 63
+LIST 65
+LIST 74
+LIST 84
+LIST 86
+LIST 105
+BUY_WEAPON_END
+@ GO_DOWN 끝
+
+* 장비사기14
+@ BOX BLUE 7
+@ FACE HERO 250 220 0
+@ CLEAR_BUFFER
+@ BUY_WEAPON "What shall I buy?"
+200 0 150 255 0 0 255 200 0 255 255 220
+LIST 10
+LIST 13
+LIST 15
+LIST 16
+LIST 46
+LIST 48
+LIST 49
+LIST 66
+LIST 75
+LIST 87
+LIST 106
+BUY_WEAPON_END
+@ GO_DOWN 끝
+
+* 장비사기15
+@ BOX BLUE 7
+@ FACE HERO 250 220 0
+@ CLEAR_BUFFER
+@ BUY_WEAPON "What shall I buy?"
+200 0 150 255 0 0 255 200 0 255 255 220
+LIST 26
+LIST 18
+LIST 19
+LIST 52
+LIST 53
+LIST 51
+LIST 68
+LIST 66
+LIST 75
+LIST 88
+LIST 107
+BUY_WEAPON_END
+@ GO_DOWN 끝
+
+* 장비사기16
+@ FACE HERO 250 220 0
+@ BOX BLUE 7
+@ CLEAR_BUFFER
+@ BUY_WEAPON "What shall I buy?"
+200 0 150 255 0 0 255 200 0 255 255 220
+LIST 25
+LIST 17
+LIST 20
+LIST 31
+LIST 44
+LIST 46
+LIST 48
+LIST 51
+LIST 54
+LIST 66
+LIST 68
+LIST 75
+LIST 76
+LIST 87
+LIST 89
+LIST 109
+LIST 107
+BUY_WEAPON_END
+@ GO_DOWN 끝
+
+* 장비사기20
+@ BOX BLUE 7
+@ FACE HERO 250 220 0
+@ CLEAR_BUFFER
+@ BUY_WEAPON "What shall I buy?"
+200 0 150 255 0 0 255 200 0 255 255 220
+LIST 11
+LIST 15
+LIST 16
+LIST 18
+LIST 19
+LIST 20
+LIST 21
+LIST 22
+LIST 24
+LIST 44
+LIST 46
+LIST 48
+LIST 50
+LIST 51
+LIST 52
+LIST 63
+LIST 65
+LIST 66
+LIST 67
+LIST 73
+LIST 74
+LIST 75
+LIST 76
+LIST 84
+LIST 86
+LIST 87
+LIST 88
+LIST 89
+LIST 104
+LIST 105
+LIST 106
+LIST 107
+LIST 108
+LIST 113
+LIST 118
+LIST 133
+LIST 137
+BUY_WEAPON_END
+@ GO_DOWN 끝
+
+* 장비사기21
+@ BOX BLUE 7
+@ FACE HERO 250 220 0
+@ CLEAR_BUFFER
+@ BUY_WEAPON "What shall I buy?"
+200 0 150 255 0 0 255 200 0 255 255 220
+LIST 15
+LIST 16
+LIST 18
+LIST 19
+LIST 20
+LIST 21
+LIST 22
+LIST 24
+LIST 23
+LIST 25
+LIST 26
+LIST 27
+LIST 44
+LIST 46
+LIST 48
+LIST 50
+LIST 51
+LIST 52
+LIST 54
+LIST 55
+LIST 63
+LIST 65
+LIST 66
+LIST 67
+LIST 68
+LIST 73
+LIST 74
+LIST 75
+LIST 76
+LIST 77
+LIST 84
+LIST 86
+LIST 87
+LIST 88
+LIST 89
+LIST 90
+LIST 104
+LIST 105
+LIST 106
+LIST 107
+LIST 108
+LIST 109
+LIST 114
+LIST 117
+LIST 135
+LIST 138
+BUY_WEAPON_END
+@ GO_DOWN 끝
+
+* 장비사기22
+@ BOX BLUE 7
+@ FACE HERO 250 220 0
+@ CLEAR_BUFFER
+@ BUY_WEAPON "What shall I buy?"
+200 0 150 255 0 0 255 200 0 255 255 220
+LIST 18
+LIST 20
+LIST 21
+LIST 24
+LIST 23
+LIST 25
+LIST 26
+LIST 27
+LIST 29
+LIST 30
+LIST 31
+LIST 44
+LIST 46
+LIST 48
+LIST 50
+LIST 51
+LIST 52
+LIST 54
+LIST 55
+LIST 56
+LIST 65
+LIST 66
+LIST 67
+LIST 68
+LIST 69
+LIST 74
+LIST 75
+LIST 76
+LIST 77
+LIST 86
+LIST 87
+LIST 88
+LIST 89
+LIST 90
+LIST 91
+LIST 105
+LIST 106
+LIST 107
+LIST 108
+LIST 109
+LIST 110
+LIST 116
+LIST 124
+LIST 140
+LIST 141
+BUY_WEAPON_END
+@ GO_DOWN 끝
+
+* 장비사기23
+@ BOX BLUE 7
+@ FACE HERO 250 220 0
+@ CLEAR_BUFFER
+@ BUY_WEAPON "What shall I buy?"
+200 0 150 255 0 0 255 200 0 255 255 220
+LIST 20
+LIST 24
+LIST 23
+LIST 25
+LIST 27
+LIST 29
+LIST 30
+LIST 46
+LIST 48
+LIST 50
+LIST 52
+LIST 54
+LIST 55
+LIST 56
+LIST 65
+LIST 66
+LIST 68
+LIST 69
+LIST 74
+LIST 76
+LIST 86
+LIST 87
+LIST 88
+LIST 90
+LIST 105
+LIST 106
+LIST 108
+LIST 110
+BUY_WEAPON_END
+@ GO_DOWN 끝
+
+
+* 장비팔기
+@ BOX BLUE 7
+@ FACE HERO 250 220 0
+@ CLEAR_BUFFER
+@ SELL_WEAPON "What shall I sell?"
+255 200 0 255 255 220
+@ GO_DOWN 끝
+
+* 장비수리
+@ BOX BLUE 7
+@ FACE HERO 250 220 0
+@ CLEAR_BUFFER
+@ REPAIR_WEAPON "What shall I repair?"
+255 0 0 230 0 180 255 200 0 255 255 220
+@ GO_DOWN 끝
+
+* 장신구사기1
+/싼 물건들만 
+@ BOX BLUE 7
+@ FACE HERO 250 220 0
+@ CLEAR_BUFFER
+@ BUY_WEAPON "Which jewelry shall I buy?"
+200 0 150 255 0 0 255 200 0 255 255 220
+LIST 111
+LIST 112
+LIST 113
+LIST 114
+LIST 115
+LIST 116
+LIST 117
+LIST 118
+LIST 119
+LIST 123
+LIST 131
+LIST 135
+LIST 136
+LIST 137
+LIST 138
+LIST 139
+BUY_WEAPON_END
+@ GO_DOWN END
+
+* 장신구사기2
+/골고루 많은양 (비싼것은 없음)
+@ BOX BLUE 7
+@ FACE HERO 250 220 0
+@ CLEAR_BUFFER
+@ BUY_WEAPON "Which jewelry shall I buy?"
+200 0 150 255 0 0 255 200 0 255 255 220
+LIST 111
+LIST 112
+LIST 114
+LIST 115
+LIST 116
+LIST 118
+LIST 119
+LIST 120
+LIST 123
+LIST 124
+LIST 131
+LIST 132
+LIST 134
+LIST 135
+LIST 136
+LIST 138
+LIST 139
+BUY_WEAPON_END
+@ GO_DOWN END
+
+* 장신구사기3
+/골고루 적은 개수
+@ BOX BLUE 7
+@ FACE HERO 250 220 0
+@ CLEAR_BUFFER
+@ BUY_WEAPON "Which jewelry shall I buy?"
+200 0 150 255 0 0 255 200 0 255 255 220
+LIST 113
+LIST 117
+LIST 120
+LIST 121
+LIST 122
+LIST 124
+LIST 132
+LIST 133
+LIST 134
+LIST 140
+LIST 141
+LIST 142
+BUY_WEAPON_END
+@ GO_DOWN END
+
+* 아이템사기1
+/초기적 아이템 
+@ BOX BLUE 7
+@ FACE HERO 250 220 0
+@ CLEAR_BUFFER
+@ BUY_ITEM "Which item shall I buy?"
+200 0 150 255 0 0 255 200 0 255 255 220
+LIST 161
+LIST 162
+LIST 163
+LIST 164
+LIST 165
+LIST 151
+LIST 152
+LIST 153
+LIST 155
+LIST 156
+LIST 157
+LIST 158
+LIST 159
+LIST 176
+LIST 191
+LIST 192
+BUY_ITEM_END
+@ GO_DOWN 끝
+
+* 아이템사기2
+/좋은 아이템 종류
+@ BOX BLUE 7
+@ FACE HERO 250 220 0
+@ CLEAR_BUFFER
+@ BUY_ITEM "Which item shall I buy?"
+200 0 150 255 0 0 255 200 0 255 255 220
+LIST 162
+LIST 164
+LIST 165
+LIST 166
+LIST 167
+LIST 176
+LIST 177
+LIST 151
+LIST 152
+LIST 153
+LIST 154
+LIST 155
+LIST 156
+LIST 157
+LIST 158
+LIST 159
+LIST 160
+LIST 191
+LIST 192
+BUY_ITEM_END
+@ GO_DOWN 끝
+
+* 아이템사기3
+/상점에서 아이템 몇가지만 사기
+@ FACE HERO 250 220 0
+@ BOX BLUE 7
+@ CLEAR_BUFFER
+@ BUY_ITEM "Which item shall I buy?"
+200 0 150 255 0 0 255 200 0 255 255 220
+LIST 161
+LIST 162
+LIST 163
+LIST 164
+LIST 165
+BUY_ITEM_END
+@ GO_DOWN 끝
+
+* 아이템팔기
+/상점에서 아이템 팔기
+@ BOX BLUE 7
+@ FACE HERO 250 220 0
+@ CLEAR_BUFFER
+@ SELL_ITEM "What shall I sell?"
+255 200 0 255 255 220
+BUY_ITEM_END
+@ GO_DOWN 끝
+
+
+
+
+
+
+========================================================
+                     순간 이벤트
+========================================================
+
+151 : 석상을 보니 현재 맵의 봉인이 풀린다.
+# 151
+# 17
+# 5
+# "Stone statue"
+# FLOW
+# 100
+@ CLEAR_BUFFER
+@ FACE NO
+@ BOX BLUE 5
+@ COLOR 255 60 60
+@ TALK "The power and light return to their former state!"
+@ TALK "All devils are here and now resurrected!"
+@ WAIT
+@ UNSEAL CURMAP
+@ CHANGE 0
+@ END
+
+152 : 석상을 보니 현재 맵의 모든 적이 돌로 변한다. 300프레임
+# 152
+# 17
+# 5
+# "Stone statue"
+# FLOW
+# 100
+@ CLEAR_BUFFER
+@ FACE NO
+@ BOX BLUE 5
+@ COLOR 255 60 60
+@ TALK "The punishment, ordered by the emperor of heaven," 
+@ TALK "for the devils who have led the world into confusion"
+@ TALK "is that they be turned to stone for eternity!"
+@ WAIT
+@ STONE CURMAP 300
+@ CHANGE 0
+@ END
+
+153 : 석상을 보니 현재 맵의 모든 적이 돌로 변한다. 500프레임
+# 153
+# 17
+# 5
+# "Stone statue"
+# FLOW
+# 100
+@ CLEAR_BUFFER
+@ FACE NO
+@ BOX BLUE 5
+@ COLOR 255 60 60
+@ TALK "The punishment, ordered by the emperor of heaven," 
+@ TALK "for the devils who have led the world into confusion"
+@ TALK "is that they be turned to stone for eternity!"
+@ WAIT
+@ STONE CURMAP 500
+@ CHANGE 0
+@ END
+
+154 : 석상을 보니 현재 맵의 모든 적이 돌로 변한다. 700프레임
+# 154
+# 17
+# 5
+# "Stone statue"
+# FLOW
+# 100
+@ CLEAR_BUFFER
+@ FACE NO
+@ BOX BLUE 5
+@ COLOR 255 60 60
+@ TALK "The punishment, ordered by the emperor of heaven,"
+@ TALK "for the devils who have led the world into confusion"
+@ TALK "is that they be turned to stone for eternity!"
+@ WAIT
+@ STONE CURMAP 700
+@ CHANGE 0
+@ END
+
+155 : 탁자를 보니 수정아이템이 생김
+# 155
+# 17
+# 5
+# "Table"
+# FLOW
+# 100
+@ GIVE ITEM 195 1
+@ CHANGE 0
+@ END
+
+156 : 탁자를 보니 산삼아이템이 생김
+# 156
+# 17
+# 5
+# "Table"
+# FLOW
+# 100
+@ GIVE ITEM 168 1
+@ CHANGE 0
+@ END
+
+157 : 석상을 보니 지능이 1상승
+# 157
+# 17
+# 5
+# "Stone statue"
+# FLOW
+# 100
+@ CLEAR_BUFFER
+@ FACE NO
+@ BOX BLUE 5
+@ COLOR 255 60 60
+@ TALK "If you can know what is truly right that will be"
+@ TALK "your strongest power!"
+@ TALK "What you believe is what you think!."
+@ TALK ""
+@ WAIT
+@ COLOR 255 250 250
+@ TALK "*** Increase brain 1 ***"
+@ INCREASE BRAIN 1
+@ CHANGE 0
+@ END
+
+158 : 석상을 보니 민첩이 1상승
+# 158
+# 17
+# 5
+# "Stone statue"
+# FLOW
+# 100
+@ CLEAR_BUFFER
+@ FACE NO
+@ BOX BLUE 5
+@ COLOR 255 60 60
+@ TALK "You must know yourself and become"
+@ TALK "aware of your inner power."
+@ TALK ""
+@ WAIT
+@ COLOR 255 250 250
+@ TALK "*** Increase dexterity 1 ***"
+@ INCREASE DEXTERITY 1
+@ CHANGE 0
+@ END
+
+159 : 석상을 보니 근력이 1상승
+# 159
+# 17
+# 5
+# "Stone statue"
+# FLOW
+# 100
+@ CLEAR_BUFFER
+@ FACE NO
+@ BOX BLUE 5
+@ COLOR 255 60 60
+@ TALK "Unite your mind and body."
+@ TALK " "
+@ WAIT
+@ COLOR 255 250 250
+@ TALK "*** Increase strength 1 ***"
+@ INCREASE STRENGTH 1
+@ CHANGE 0
+@ END
+
+160 : 석상을 보니 체력이 1상승
+# 160
+# 17
+# 5
+# "Stone statue"
+# FLOW
+# 100
+@ CLEAR_BUFFER
+@ FACE NO
+@ BOX BLUE 5
+@ COLOR 255 60 60
+@ TALK "The body and mind are linked."
+@ TALK "When you realize your pure heart"
+@ TALK "you will grow into your true stature!"
+@ TALK ""
+@ WAIT
+@ COLOR 255 250 250
+@ TALK "*** Increase health 1 ***"
+@ INCREASE HEALTH 1
+@ CHANGE 0
+@ END
+
+161 :  석상을 보니 마법이 1상승
+# 161
+# 17
+# 5
+# "Stone statue"
+# FLOW
+# 100
+@ CLEAR_BUFFER
+@ FACE NO
+@ BOX BLUE 5
+@ COLOR 255 60 60
+@ TALK "Let yourself become one with nature."
+@ TALK "As you're part of nature you can feel"
+@ TALK "the power of magic!"
+@ TALK ""
+@ WAIT
+@ COLOR 255 250 250
+@ TALK "*** Increase magic 1 ***"
+@ INCREASE MAGIC 1
+@ CHANGE 0
+@ END
+
+162 : 탁자를 보니 학업진취부아이템이 생김
+# 162
+# 17
+# 5
+# "Table"
+# FLOW
+# 100
+@ GIVE ITEM 178 1
+@ CHANGE 0
+@ END
+
+163 : 탁자를 보니 적감부아이템이 생김
+# 163
+# 17
+# 5
+# "Table"
+# FLOW
+# 100
+@ GIVE ITEM 179 1
+@ CHANGE 0
+@ END
+
+164 : 탁자를 보니 금은자래부아이템이 생김
+# 164
+# 17
+# 5
+# "Table"
+# FLOW
+# 100
+@ GIVE ITEM 180 1
+@ CHANGE 0
+@ END
+
+165 : 탁자를 보니 질병소면부아이템이 생김
+# 165
+# 17
+# 5
+# "Table"
+# FLOW
+# 100
+@ GIVE ITEM 181 1
+@ CHANGE 0
+@ END
+
+166 : 탁자를 보니 퇴마부아이템이 생김
+# 166
+# 17
+# 5
+# "Table"
+# FLOW
+# 100
+@ GIVE ITEM 176 1
+@ CHANGE 0
+@ END
+
+167 : 탁자를 보니 남녀화합부아이템이 생김
+# 167
+# 17
+# 5
+# "Table"
+# FLOW
+# 100
+@ GIVE ITEM 177 1
+@ CHANGE 0
+@ END
+
+168 : 탁자를 보니 천리안아이템이 생김
+# 168
+# 17
+# 5
+# "Table"
+# FLOW
+# 100
+@ GIVE ITEM 196 1
+@ CHANGE 0
+@ END
+
+169 : 탁자를 보니 인삼아이템이 생김
+# 169
+# 17
+# 5
+# "Table"
+# FLOW
+# 100
+@ GIVE ITEM 167 1
+@ CHANGE 0
+@ END
+
+170 : 석상을 보니 생명력이 꽉찬다.
+# 170
+# 17
+# 5
+# " "
+# FLOW
+# 100
+@ CLEAR_BUFFER
+@ FACE NO
+@ BOX BLUE 5
+@ COLOR 255 60 60
+@ TALK "Recover from your fatigue."              
+@ WAIT
+@ FULL_LIFE
+@ CHANGE 0
+@ END
+
+171 : 석상을 보니 기력이 꽉찬다.
+# 171
+# 17
+# 5
+# " "
+# FLOW
+# 100
+@ CLEAR_BUFFER
+@ FACE NO
+@ BOX BLUE 5
+@ COLOR 255 60 60
+@ TALK "Recover from your mental fatigue."
+@ WAIT
+@ FULL_MANA
+@ CHANGE 0
+@ END
+
+172 : 석상을 보니 생명력과 기력이 꽉찬다.
+# 172
+# 17
+# 5
+# " "
+# FLOW
+# 100
+@ CLEAR_BUFFER
+@ FACE NO
+@ BOX BLUE 5
+@ COLOR 255 60 60
+@ TALK "Recover from your mental and physical fatigue."
+@ WAIT
+@ FULL_LIFE
+@ FULL_MANA
+@ CHANGE 0
+@ END
+
+
+
+ 석상을 보니 문을 열어준다.
+# 180
+# 17
+# 5
+# "Stone statue"
+# FLOW
+# 100
+@ CLEAR_BUFFER
+@ FACE NO
+@ BOX RED 5
+@ COLOR 255 60 60
+@ TALK "Open the way after checking if he is a prophet."
+@ CHANGE_GOS 19
+@ WAIT
+@ REMOVE_OBJECT CURMAP 31
+@ REMOVE_OBJECT CURMAP 32
+@ REMOVE_OBJECT CURMAP 33
+@ REMOVE_OBJECT CURMAP 34
+@ REMOVE_OBJECT CURMAP 35
+@ REMOVE_OBJECT THIS
+@ END
+
+ 석상을 보니 문을 열어준다.
+# 181
+# 17
+# 5
+# "Stone statue"
+# FLOW
+# 100
+@ CLEAR_BUFFER
+@ FACE NO
+@ BOX RED 5
+@ COLOR 255 60 60
+@ TALK "Open the way after checking if he is a prophet." 
+@ CHANGE_GOS 19
+@ WAIT
+@ REMOVE_OBJECT CURMAP 36
+@ REMOVE_OBJECT CURMAP 37
+@ REMOVE_OBJECT CURMAP 38
+@ REMOVE_OBJECT CURMAP 39
+@ REMOVE_OBJECT CURMAP 40
+@ REMOVE_OBJECT THIS
+@ END
+
+
+
+190 : 워프 공간 (비륵굴안)
+# 190
+# 21
+# 1
+# "Walf in Endless CAve"
+# FLOW
+# 100
+@ WARP 19 25 47
+@ END
+
+191 : 워프 공간 (비륵굴 안)
+# 191
+# 21
+# 1
+# "Walf in Endless CAve"
+# BASIC
+# 100
+@ WARP 19 47 23
+@ END
+
+192 : 워프 공간 (비륵굴 안)
+# 192
+# 21
+# 1
+# "Walf in Endless CAve"
+# BASIC
+# 100
+@ WARP 19 20 10
+@ END
+
+
+
+
+* NO_SPACE
+@ CLEAR_BUFFER
+@ BOX BLUE 5
+@ FACE HERO 0 0 255
+@ COLOR 0 0 200
+@ TALK "Ah! I have something else to do first."
+@ TALK "I'm so sorry... I have many other things"
+@ TALK "to complete first."
+@ TALK "I'm not interested."
+@ WAIT
+@ CLEAR_BUFFER
+@ TALK "I must attend to important things asked of me first!"
+@ TALK "Let's leave unimportant things alone!"
+@ WAIT
+@ END
+
+
+
+
+* 끝
+@ END
+* END
+@ END
+
+
+
+* 중계끝
+@ CLEAR_BUFFER
+@ TALK "I can't help it."
+@ WAIT
+@ END
+
+* 중계다시
+@ CLEAR_BUFFER
+@ TALK "You're still here... why didn't you leave yet?"
+@ TALK "It's very urgent..."
+@ TALK "I must urge you to hasten... Please do so!"  
+@ WAIT
+@ END

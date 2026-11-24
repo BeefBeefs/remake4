@@ -1,0 +1,8 @@
+node_modules/
+dist/
+.DS_Store
+# the original disc image / extracted game data is never committed
+/original/
+*.bin
+*.cue
+*.7z
