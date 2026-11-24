@@ -13,6 +13,8 @@ export interface TilesetMeta {
   height: number;
   /** solid grey / purple editor tiles: collision + void markers, never drawn in game */
   markers: number[];
+  /** blue / red / green editor tiles (start points, triggers): hidden like markers but not solid */
+  editor?: number[];
 }
 export type TilesetTable = Record<string, TilesetMeta>;
 

@@ -29,6 +29,10 @@ Map order, tileset and name come from the EXE table in `tools/build_assets.py`
 RGB565 raster 640 px wide, 32x20 tiles, 20 per row, 4320 tiles. Black is the colour key (transition
 tiles need something underneath: **?** how the original fills the base). Solid grey `8b898b` and purple
 `83507b` tiles (also two-tone ones) are editor markers: collision / void. **?** exact semantics of each.
+Several shades exist (`8b898b`, `8b8183`, `7b507b`, `83507b`, ...) and some marker tiles are half a near-black `080808`;
+detection is by colour distance (tilesets.json `markers`). Blue `0000cd`, red `cd0000` and green `20fa20` tiles (st3 only)
+are other editor art (`editor`: hidden, not solid). About 280 art tiles per set carry bands of marker colour (4-row steps)
+painted over part of the tile; those exact marker colours are made transparent in the atlas.
 Assets are repacked to 32 tiles per row so the sheet stays under 4096 px.
 
 ## LANG.GOS - the string table (`IMG/LANG.GOS`, cp949 text, CRLF; `tools/build_assets.py --only lang` -> `text/lang.json`)

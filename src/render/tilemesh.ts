@@ -40,7 +40,7 @@ export function buildChunk(
         t = objectTile(raw);
       }
       if (!world.isTile(t)) continue;
-      if (!showMarkers && world.isMarker(t)) continue;
+      if (!showMarkers && world.isHidden(t)) continue;
       const col = t % ts.cols;
       const row = Math.floor(t / ts.cols);
       const u0 = (col * ts.tileW) / ts.width;

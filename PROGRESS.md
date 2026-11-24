@@ -113,6 +113,11 @@ Open: kind -> sheet mapping, enemy stats/AI, hero HP and damage, trailer tables,
   so the world map still lists everything), STONE map amount.
 - EVT files carry Korean design notes (cp949 comments after the scripts) that explain the quests; worth mining.
 
+## Session 1m
+- Rendering fix: grey / purple editor marker colours were still visible in the caves (c1 showed a checkerboard). Marker
+  detection is now tolerant of the other shades, blue / red / green editor tiles are hidden, and marker-coloured bands
+  inside art tiles are transparent (tiles re-exported).
+
 ## Next ideas
 - Per-hero growth / real stat formulas; monster bytes b2 b4-b7; hero base stats / level / experience, magic (12 spells with names known), real enemy stats.
 - NEW_OBJECT, BASIC event triggers (GO_BASIC_EVENT), save / load.

@@ -16,12 +16,14 @@ export const TILE_H = 20;
  */
 export class World {
   readonly markers: Set<number>;
+  private readonly editor: Set<number>;
 
   constructor(
     readonly map: MapData,
     readonly tileset: TilesetMeta,
   ) {
     this.markers = new Set(tileset.markers);
+    this.editor = new Set(tileset.editor ?? []);
   }
 
   get pixelW(): number {
@@ -44,6 +46,10 @@ export class World {
     return this.inBounds(cx, cy) ? this.map.objects[cy * this.map.w + cx] : NONE;
   }
 
+  /** editor art that must not be drawn (collision markers and the coloured trigger tiles) */
+  isHidden(tile: number): boolean {
+    return this.markers.has(tile) || this.editor.has(tile);
+  }
   isMarker(tile: number): boolean {
     return this.markers.has(tile);
   }

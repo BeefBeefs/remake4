@@ -57,6 +57,9 @@ def write_json(path, obj):
 
 # ---------------------------------------------------------------- tiles
 
+MARKER_RGB = [(0x8b, 0x89, 0x8b), (0x83, 0x50, 0x7b), (0x7b, 0x50, 0x7b), (0x8b, 0x81, 0x83), (0x83, 0x81, 0x8b)]
+
+
 def build_tiles(disc, out):
     meta = {}
     for ts in ("st1", "st2", "st3"):
@@ -65,7 +68,7 @@ def build_tiles(disc, out):
         n = af.til_tile_count(sheet)
         rows = (n + NEW_COLS - 1) // NEW_COLS
         img = np.zeros((rows * af.TILE_H, NEW_COLS * af.TILE_W, 4), np.uint8)
-        solid, markers = [], []
+        solid, markers, editor = [], [], []
         for i in range(n):
             t = af.til_get(sheet, i)
             r, c = divmod(i, NEW_COLS)
@@ -73,23 +76,33 @@ def build_tiles(disc, out):
             blk[..., :3] = t
             # pure black is the colour key: transparent for overlay tiles.
             blk[..., 3] = np.where(t.sum(-1) == 0, 0, 255)
+            # the editor's marker colours painted over part of a tile (always in bands of 4 rows) are never art: transparent
+            for mc in MARKER_RGB:
+                blk[..., 3] = np.where((t == np.array(mc, np.uint8)).all(-1), 0, blk[..., 3])
             if (t == t[0, 0]).all():
                 solid.append([i, int(t[0, 0, 0]), int(t[0, 0, 1]), int(t[0, 0, 2])])
             # grey 8b898b / purple 83507b are editor markers (collision / void), never art. Some marker
             # tiles are two-tone (marker colour + black colour key), so test every non-black pixel.
             flat = t.reshape(-1, 3)
-            live = flat[flat.sum(-1) > 0]
+            live = flat[flat.sum(-1) > 0].astype(int)
             if len(live):
-                q = live >> 3
-                is_grey = (q == np.array([0x8b >> 3, 0x89 >> 3, 0x8b >> 3])).all(-1)
-                is_purple = (q == np.array([0x83 >> 3, 0x50 >> 3, 0x7b >> 3])).all(-1)
-                if (is_grey | is_purple).all():
+                def near(c, tol=24):
+                    return np.abs(live - np.array(c)).sum(-1) <= tol
+                # several shades of the grey / purple marker exist (8b898b, 8b8183, 7b507b, 83507b ...); some marker
+                # tiles are half a near-black (8,8,8) that is not the pure-black colour key
+                mark = near((0x8b, 0x89, 0x8b)) | near((0x7f, 0x50, 0x7b))
+                dark = live.max(-1) <= 12
+                if (mark | dark).all() and mark.any():
                     markers.append(i)
+                else:
+                    ed = near((0, 0, 205), 10) | near((205, 0, 0), 10) | near((32, 250, 32), 10)
+                    if (mark | dark | ed).all() and ed.any():
+                        editor.append(i)
         os.makedirs(os.path.join(out, "tiles"), exist_ok=True)
         Image.fromarray(img).save(os.path.join(out, "tiles", ts + ".png"), optimize=True)
         meta[ts] = {"tileW": af.TILE_W, "tileH": af.TILE_H, "cols": NEW_COLS, "count": n,
-                    "width": img.shape[1], "height": img.shape[0], "solidTiles": solid, "markers": markers}
-        print("tiles", ts, n, "tiles", img.shape, "solid:", [s[0] for s in solid][:12])
+                    "width": img.shape[1], "height": img.shape[0], "solidTiles": solid, "markers": markers, "editor": editor}
+        print("tiles", ts, n, "tiles", img.shape, "solid:", [s[0] for s in solid][:12], "markers", len(markers), "editor", len(editor))
     write_json(os.path.join(out, "tiles", "tilesets.json"), meta)
 
 
