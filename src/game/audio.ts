@@ -6,6 +6,7 @@ export class AudioPlayer {
   private cache = new Map<string, Promise<AudioBuffer | null>>();
   private music = new Audio();
   private musicOn = false;
+  private sfx = true;
   private current = '';
 
   private playlist: number[] = [];
@@ -63,7 +64,7 @@ export class AudioPlayer {
   }
 
   async play(name: string, volume = 0.8): Promise<void> {
-    if (!this.ctx) return;
+    if (!this.ctx || !this.sfx) return;
     const buf = await this.load(name);
     if (!buf || !this.ctx) return;
     const src = this.ctx.createBufferSource();
@@ -82,6 +83,15 @@ export class AudioPlayer {
     this.current = url;
     this.music.src = url;
     if (this.musicOn) void this.music.play().catch(() => {});
+  }
+
+  isSfxOn(): boolean {
+    return this.sfx;
+  }
+
+  toggleSfx(): boolean {
+    this.sfx = !this.sfx;
+    return this.sfx;
   }
 
   isMusicOn(): boolean {

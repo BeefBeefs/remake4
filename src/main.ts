@@ -14,9 +14,10 @@ import { InventoryUI } from './ui/inventory';
 import { advanceYear } from './game/clock';
 import { Buff, BUFF_SECONDS } from './game/consumables';
 import { QuestLog } from './ui/quests';
+import { GameMenu } from './ui/menu';
 import { GAME_TRACKS, MoviePlayer, showSlides, showTitle, WorldMapUI } from './ui/overlays';
 import { Party } from './game/party';
-import { applyStory, makeSave, parseSave, SAVE_KEY } from './game/save';
+import { applyStory, makeSave, parseSave, SAVE_KEY, SaveData } from './game/save';
 import { TILE_H, TILE_W, World } from './game/world';
 import { loadItemStats, loadLang, loadMonsters, loadMap, loadMapIndex, loadSpriteMeta, loadText, loadTilesets } from './data/loaders';
 import { MapIndexEntry, SpriteSheetMeta, TilesetTable } from './data/types';
@@ -248,11 +249,14 @@ async function boot(): Promise<void> {
 
   // ---------------------------------------------------------------- save / load
   let restoring = false;
+  function snapshotSave(): SaveData {
+    const l = party.leader;
+    return makeSave(story, heroes, party.leaderIndex, mapEntry.id, l.x, l.y);
+  }
   function saveGame(): void {
     if (devMode || restoring || party.allDead) return;
     try {
-      const l = party.leader;
-      localStorage.setItem(SAVE_KEY, JSON.stringify(makeSave(story, heroes, party.leaderIndex, mapEntry.id, l.x, l.y)));
+      localStorage.setItem(SAVE_KEY, JSON.stringify(snapshotSave()));
     } catch {
       /* storage full or blocked: playing on without saving is better than a crash */
     }
@@ -751,13 +755,39 @@ async function boot(): Promise<void> {
   const questBtn = document.createElement('button');
   questBtn.textContent = 'Quests (J)';
   questBtn.onclick = () => quests.toggle();
+  const menu = new GameMenu(document.getElementById('menu')!, {
+    heroCount: heroes.length,
+    mapName: (id) => index.find((m) => m.id === id)?.name ?? id,
+    snapshot: () => (devMode || party.allDead ? null : snapshotSave()),
+    load(text) {
+      localStorage.setItem(SAVE_KEY, text);
+      restoring = true; // the page unload must not overwrite it with the current game
+      location.href = location.pathname;
+    },
+    musicOn: () => audio.isMusicOn(),
+    toggleMusic: () => {
+      audio.unlock();
+      musicBtn.textContent = `\u266a music: ${audio.toggleMusic() ? 'on' : 'off'}`;
+    },
+    sfxOn: () => audio.isSfxOn(),
+    toggleSfx: () => void audio.toggleSfx(),
+    exitToTitle() {
+      saveGame();
+      restoring = true;
+      location.href = location.pathname;
+    },
+    toast,
+  });
+  const menuBtn = document.createElement('button');
+  menuBtn.textContent = 'Menu (Esc)';
+  menuBtn.onclick = () => menu.toggle();
   const helpEl = document.getElementById('help')!;
   helpEl.innerHTML = `<h3>How to play</h3>
     <b>Touch</b><ul><li>Tap the ground to walk, tap a monster to attack it, tap a villager next to you to talk.</li>
     <li>Bottom buttons: change spell (the arrow), cast it, attack.</li><li>1 / 2 / 3 buttons pick who you lead.</li></ul>
     <b>Keyboard</b><ul><li>Arrows / WASD move, Space attacks, E or Enter talks, F casts, Q changes spell.</li>
-    <li>1-3 or Z / X / C pick the leader, I items, J quests, M world map.</li></ul>
-    <b>Good to know</b><ul><li>The game saves itself; Continue appears on the title screen.</li>
+    <li>1-3 or Z / X / C pick the leader, I items, J quests, M world map, Esc menu (save slots, sound).</li></ul>
+    <b>Good to know</b><ul><li>The game saves itself; Continue appears on the title screen. The menu has five extra save slots.</li>
     <li>Some places on the world map stay locked until villagers tell you about them.</li>
     <li>The gear button holds debug tools (jump to any map, spawn monsters).</li></ul>
     <button>Close</button>`;
@@ -766,7 +796,7 @@ async function boot(): Promise<void> {
   const helpBtn = document.createElement('button');
   helpBtn.textContent = '?';
   helpBtn.onclick = () => (helpEl.style.display = helpEl.style.display === 'block' ? 'none' : 'block');
-  hud.append(questBtn, helpBtn, gearBtn, devBox);
+  hud.append(questBtn, menuBtn, helpBtn, gearBtn, devBox);
   // announce quests as the scripts add / finish them
   let knownOrders = new Map(story.orders);
   function watchQuests(): void {
@@ -834,6 +864,7 @@ async function boot(): Promise<void> {
     if (e.key >= '1' && e.key <= '3' && !heroes[Number(e.key) - 1].dead) party.setLeader(Number(e.key) - 1);
     const zxc = 'zxc'.indexOf(e.key.toLowerCase());
     if (zxc >= 0 && !heroes[zxc].dead) party.setLeader(zxc); // the manual's Z / X / C hot keys
+    if (e.key === 'Escape') menu.toggle();
     if (e.key.toLowerCase() === 'i') inv.toggle();
     if (e.key.toLowerCase() === 'j') quests.toggle();
     if (e.key.toLowerCase() === 'f') castSpell();
@@ -978,7 +1009,11 @@ async function boot(): Promise<void> {
     if (world) {
       if (!dlg.open) readKeys();
       else party.leader.input.x = party.leader.input.y = 0;
-      if (!dlg.open && !running) story.year = advanceYear(story.year, dt);
+      if (!dlg.open && !running) {
+        const before = Math.floor(story.year);
+        story.year = advanceYear(story.year, dt);
+        if (Math.floor(story.year) > before && story.year < 124) toast(`Year ${Math.floor(story.year)} - people may have news`);
+      }
       if (buffT > 0 && (buffT -= dt) <= 0) {
         buff = {};
         refreshHeroStats();

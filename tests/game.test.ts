@@ -559,3 +559,14 @@ test('pickBlock follows the game year: later quest entries unlock and replace ea
   assert.equal(pickBlock(lady, -1, 110)!.block.id, 60);
   assert.equal(pickBlock([mk(46, 'FLOW', 123)], 0, 110), null); // a quest-only object stays quiet until its year
 });
+
+test('save slot summaries: empty, year / level / place, junk', async () => {
+  const { slotSummary } = await import('../src/ui/menu');
+  const story = new StoryState();
+  story.year = 105.7;
+  story.level = 12;
+  const save = makeSave(story, [{ hp: 10, mana: 5, gear: {} }, { hp: 10, mana: 5, gear: {} }, { hp: 10, mana: 5, gear: {} }], 0, 't1', 5, 5);
+  assert.equal(slotSummary(JSON.stringify(save), 3, () => 'Western Village'), 'Year 105 · Level 12 · Western Village');
+  assert.equal(slotSummary(null, 3, (x) => x), 'Empty');
+  assert.equal(slotSummary('{nope', 3, (x) => x), 'Empty');
+});

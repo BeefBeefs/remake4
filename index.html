@@ -33,6 +33,12 @@
     #help button { background: #00000055; color: inherit; border: 1px solid #ffffff44; border-radius: 4px; padding: 4px 12px; font: inherit; }
     #quests .head { display: flex; justify-content: space-between; align-items: center; font-weight: 700; margin-bottom: 6px; }
     #quests .q { padding: 6px 0; border-top: 1px solid #ffffff22; }
+    #menu { position: fixed; left: 50%; top: 50%; transform: translate(-50%, -50%); width: min(92vw, 340px); display: none; background: #101830f8; border: 2px solid #8aa0d8; border-radius: 6px; padding: 10px; z-index: 7; }
+    #menu .head { display: flex; justify-content: space-between; align-items: center; font-weight: 700; margin-bottom: 6px; }
+    #menu .q { padding: 5px 0; border-top: 1px solid #ffffff22; }
+    #menu button { width: 100%; text-align: left; background: #00000055; color: inherit; border: 1px solid #ffffff44; border-radius: 4px; padding: 8px 10px; font: inherit; }
+    #menu .head button { width: auto; padding: 3px 8px; }
+    #menu button:disabled { opacity: .45; }
     #quests .q b { color: #ffd070; }
     #quests .q div { opacity: .85; font-size: 13px; margin-top: 2px; }
     #quests button { background: #00000055; color: inherit; border: 1px solid #ffffff44; border-radius: 4px; padding: 3px 8px; font: inherit; }
@@ -81,6 +87,7 @@
   <div id="title"></div>
   <div id="inv"></div>
   <div id="quests"></div>
+  <div id="menu"></div>
   <div id="help"></div>
   <div id="toast"></div>
   <div id="party"></div>
