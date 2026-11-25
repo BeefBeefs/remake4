@@ -121,7 +121,7 @@ export const HERO_TRAITS: Record<string, HeroTrait> = {
 };
 export const traitOf = (name: string): HeroTrait => HERO_TRAITS[name] ?? NEUTRAL;
 
-export function derive(db: ItemDb, base: Record<StatName, number>, level: number, gear: Loadout, trait: HeroTrait = NEUTRAL): Derived {
+export function derive(db: ItemDb, base: Record<StatName, number>, level: number, gear: Loadout, trait: HeroTrait = NEUTRAL, permLife = 0): Derived {
   const b = emptyBonuses();
   let atk = UNARMED_ATTACK;
   let def = 0;
@@ -139,7 +139,7 @@ export function derive(db: ItemDb, base: Record<StatName, number>, level: number
   const M = total('MAGIC');
   const D = total('DEXTERITY');
   const I = total('BRAIN');
-  const maxHp = Math.round((83 + level + 1.3 * H + 0.6 * S + b.life) * (1 + (b.pct.LIFE ?? 0) / 100));
+  const maxHp = Math.round((83 + level + 1.3 * H + 0.6 * S + b.life + permLife) * (1 + (b.pct.LIFE ?? 0) / 100));
   const attack = Math.round((atk + b.atk + 0.4 * S + 0.1 * D) * (1 + (b.pct.ATK ?? 0) / 100));
   const maxMana = Math.round(99 + 1.7 * M + 0.3 * I);
   return {

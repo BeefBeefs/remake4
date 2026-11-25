@@ -219,3 +219,4 @@ Reproduced from the video (T1 around cell 30,42) and fixed three things:
 - Local typecheck note: plain `tsc` here stops at the missing node/vite types and misses real errors; use a stubbed config (`/tmp/tscheck/tsconfig.json` with `types: []` and a `declare module 'three'` stub) and watch CI.
 - Not done from the findings: weapon durability and blacksmith repair, carry weight, per-hero stats with a point-allocation screen, Skill (hit chance / ignore-damage) and attack speed from Dexterity.
 
+- Dragon Heart now gives a flat +100 Life for the whole party (story.lifeBonus, saved) instead of an approximate Health gain.

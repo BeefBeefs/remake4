@@ -8,6 +8,8 @@ export interface ItemEffect {
   mana?: number;
   /** permanent stat gains */
   stats?: Partial<Record<StatName, number>>;
+  /** permanent flat Life for the whole party (Dragon Heart "Life+100") */
+  maxLife?: number;
   money?: number;
   /** spell number learnt from a spell book (item 184 + n) */
   learn?: number;
@@ -68,7 +70,7 @@ export const SHIELD_SCROLL_SECONDS = 20;
 export function itemEffect(id: number, desc: string): ItemEffect | null {
   if (id >= 185 && id <= 196) return { learn: id - 184 };
   if (BUFFS[id]) return { buff: BUFFS[id] };
-  if (id === 160) return { stats: { HEALTH: 20 } }; // Dragon Heart "Life+100" = 20 Health at 5 life each
+  if (id === 160) return { maxLife: 100 }; // Dragon Heart "Life+100"
   if (id === 174) return { cast: 10 }; // Ice Ball: the Ice Rain effect
   if (id === 175) return { cast: 2 };
   if (id === 178) return { smite: true };

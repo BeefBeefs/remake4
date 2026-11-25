@@ -18,6 +18,7 @@ export interface SaveData {
     level: number;
     xp: number;
     stats: Record<StatName, number>;
+    lifeBonus?: number;
     magic: [number, number][];
     removed?: string[];
     gos?: [string, number][];
@@ -60,6 +61,7 @@ export function makeSave(
       level: story.level,
       xp: story.xp,
       stats: { ...story.stats },
+      lifeBonus: story.lifeBonus,
       magic: [...story.magic],
       removed: [...story.removed],
       gos: [...story.gos],
@@ -101,6 +103,7 @@ export function applyStory(story: StoryState, d: SaveData): void {
   story.level = d.story.level;
   story.xp = d.story.xp;
   story.stats = { ...story.stats, ...d.story.stats };
+  story.lifeBonus = isNum(d.story.lifeBonus) ? d.story.lifeBonus : 0;
   story.magic = new Map(d.story.magic);
   story.removed = new Set(d.story.removed ?? []);
   story.gos = new Map(d.story.gos ?? []);

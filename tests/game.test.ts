@@ -544,7 +544,7 @@ test('consumable effects are read from the item descriptions; passive and unsupp
   assert.deepEqual(fx(190), { learn: 6 });
   assert.deepEqual(fx(152), { buff: { taken: 0.2 } });
   assert.deepEqual(fx(154), { buff: { dealt: 3 } });
-  assert.deepEqual(fx(160), { stats: { HEALTH: 20 } });
+  assert.deepEqual(fx(160), { maxLife: 100 });
   assert.deepEqual(fx(175), { cast: 2 });
   assert.deepEqual(fx(178), { smite: true });
   assert.deepEqual(fx(176), { gate: true });
@@ -608,4 +608,14 @@ test('Darkness Echo / Holy Eye light up the map, Distant Viewer adds sight', asy
   assert.deepEqual(itemEffect(157, 'Remove the darkness'), { reveal: true });
   assert.deepEqual(itemEffect(177, 'Make a Holy Eye'), { reveal: true });
   assert.equal(itemEffect(158, 'Sight+2')?.buff?.sight, 2);
+});
+
+test('permanent life bonus adds flat life', async () => {
+  const { derive } = await import('../src/game/stats');
+  const { ItemDb } = await import('../src/game/itemdb');
+  const db = new ItemDb(json<LangData>('text/lang.json'), json<ItemStats>('text/itemstats.json'));
+  const base = { HEALTH: 23, STRENGTH: 25, MAGIC: 15, DEXTERITY: 14, BRAIN: 16, SKILL: 10 };
+  const a = derive(db, base, 1, {});
+  const b = derive(db, base, 1, {}, undefined, 100);
+  assert.equal(b.maxHp - a.maxHp, 100);
 });

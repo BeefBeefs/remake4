@@ -554,7 +554,7 @@ async function boot(): Promise<void> {
       toast('Not enough mana');
       return;
     }
-    const d = derive(db, story.stats, story.level, h.gear, traitOf(h.name));
+    const d = derive(db, story.stats, story.level, h.gear, traitOf(h.name), story.lifeBonus);
     const m = d.magic;
     h.mana -= cost;
     h.attack(); // cast with the attack animation
@@ -628,7 +628,7 @@ async function boot(): Promise<void> {
   }
   function refreshHeroStats(): void {
     for (const h of heroes) {
-      const d = derive(db, buffedStats(), story.level, h.gear, traitOf(h.name));
+      const d = derive(db, buffedStats(), story.level, h.gear, traitOf(h.name), story.lifeBonus);
       h.guard = buff.taken ?? 1;
       const frac = h.maxHp ? h.hp / h.maxHp : 1;
       h.maxHp = d.maxHp;
@@ -684,6 +684,11 @@ async function boot(): Promise<void> {
       }
       if (fx.stats) {
         for (const [k, v] of Object.entries(fx.stats)) story.stats[k as StatName] += v;
+        refreshHeroStats();
+        used = true;
+      }
+      if (fx.maxLife) {
+        story.lifeBonus += fx.maxLife;
         refreshHeroStats();
         used = true;
       }
@@ -751,7 +756,7 @@ async function boot(): Promise<void> {
     {
       names: HERO_DEFS.map((d) => d.name),
       gear: (i) => heroes[i].gear,
-      derived: (i) => derive(db, story.stats, story.level, heroes[i].gear, traitOf(heroes[i].name)),
+      derived: (i) => derive(db, story.stats, story.level, heroes[i].gear, traitOf(heroes[i].name), story.lifeBonus),
       hp: (i) => [Math.ceil(heroes[i].hp), heroes[i].maxHp],
       equip(i, id) {
         const slot = slotOf(db, id);
