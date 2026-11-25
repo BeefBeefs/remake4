@@ -868,6 +868,11 @@ async function boot(): Promise<void> {
   const quickEl = document.getElementById('quick')!;
   const yearNum = document.querySelector('#year span')!;
   const yearOrb = document.querySelector<HTMLElement>('#year b')!;
+  // ICON1 record 12: 40 frames of a spinning globe (15x15) - the Year panel orb is just that animation
+  const iconUrl = assetUrl(`sprites/${iconMeta.pages[0].file}`);
+  const orbFrames = (iconMeta.records[12]?.frames ?? []).filter((f) => f !== null);
+  let orbN = 0;
+  if (orbFrames.length) yearOrb.classList.add('globe');
   interface Quick { label: string; run: () => void | Promise<void> }
   let quickList: Quick[] = [];
   let quickSig = '';
@@ -1300,6 +1305,8 @@ async function boot(): Promise<void> {
         quickEl.style.visibility = dlg.open || menu.open ? 'hidden' : 'visible';
         yearNum.textContent = String(Math.floor(story.year));
         yearOrb.style.left = `${(story.year % 1) * 100}%`;
+        const of = orbFrames[(orbN = (orbN + 1) % orbFrames.length)];
+        if (of) yearOrb.style.background = `url(${iconUrl}) -${of.x}px -${of.y}px`;
         const l = party.leader;
         const near = dlg.open ? null : nearestNpc(lead.x, lead.y, 70);
         status.textContent = (near ? `[E / tap] talk to ${near.name} · ` : '') + `Year ${Math.floor(story.year)} · ${mapEntry.id.toUpperCase()} ${mapEntry.name} · ${l.name} cell ${Math.floor(l.x / TILE_W)},${Math.floor(l.y / TILE_H)} · tiles ${renderer.stats.drawnTiles}${lastEffect ? ' · fx: ' + lastEffect : ''}`;
