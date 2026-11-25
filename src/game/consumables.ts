@@ -19,6 +19,8 @@ export interface ItemEffect {
   cast?: number;
   /** kill the devils near the party (Soul Scroll) */
   smite?: boolean;
+  /** show the whole area on the minimap (Darkness Echo, Holy Eye) */
+  reveal?: boolean;
   /** timed party buff: multipliers for damage taken / dealt and the stats; lasts `BUFF_SECONDS` */
   buff?: Buff;
 }
@@ -29,6 +31,8 @@ export interface Buff {
   strength?: number;
   dexterity?: number;
   skill?: number;
+  /** extra sight: the minimap uncovers further around the party (Distant Viewer, Sight+2) */
+  sight?: number;
 }
 
 export const BUFF_SECONDS = 60;
@@ -41,6 +45,7 @@ const BUFFS: Record<number, Buff> = {
   154: { dealt: 3 },
   155: { dexterity: 1.5 },
   156: { strength: 1.3, dexterity: 1.3 },
+  158: { sight: 2 },
   159: { skill: 1.2 },
 };
 
@@ -58,7 +63,7 @@ export const SHIELD_SCROLL_SECONDS = 20;
 /**
  * Reads a LANG.GOS consumable description ("Fully recover Life and Mana, Health+1", "Mana+50%", "Strength+1", "All
  * attributes+1") into an effect. Items that work passively (Hawk Wings "Dexterity+50%", Angel's Touch, Dragon Heart "Life+100"...)
- * and the ones that need systems we do not have (Teleport Gate jewel, Holy Eye, Seal Magic, Ice / Fire Ball) give null.
+ * and the ones that need systems we do not have (Seal Magic) give null.
  */
 export function itemEffect(id: number, desc: string): ItemEffect | null {
   if (id >= 185 && id <= 196) return { learn: id - 184 };
@@ -67,6 +72,7 @@ export function itemEffect(id: number, desc: string): ItemEffect | null {
   if (id === 174) return { cast: 10 }; // Ice Ball: the Ice Rain effect
   if (id === 175) return { cast: 2 };
   if (id === 178) return { smite: true };
+  if (id === 157 || id === 177) return { reveal: true }; // Darkness Echo "Remove the darkness", Holy Eye: lights up the map
   if (id === 176) return { gate: true };
   const d = desc.toLowerCase();
   const fx: ItemEffect = {};

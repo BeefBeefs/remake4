@@ -302,18 +302,20 @@ test('stats: gear bonuses parse, derived numbers, mitigation, xp curve', async (
   assert.equal(b.pct.SKILL, 20);
   const base = { HEALTH: 10, STRENGTH: 10, MAGIC: 10, DEXTERITY: 10, BRAIN: 10, SKILL: 10 };
   const bare = derive(db, base, 1, {});
-  assert.equal(bare.maxHp, 100);
-  assert.equal(bare.attack, 4 + 5);
+  assert.equal(bare.maxHp, 83 + 1 + 13 + 6); // 83 + level + 1.3 Health + 0.6 Strength
+  assert.equal(bare.attack, 4 + 4 + 1); // unarmed + 0.4 Strength + 0.1 Dexterity
+  assert.equal(bare.maxMana, 99 + 17 + 3);
   const armed = derive(db, base, 1, { weapon: 1, armor: 81, shield: 62 }); // Copper Sword, Leather Armor, Brass Shield
-  assert.equal(armed.attack, 6 + 5);
-  assert.equal(armed.defense, 10 + 10);
+  assert.equal(armed.attack, 10); // 6 + 0.4 Strength + 0.1 Dexterity, and the Brass Shield's Dex-8 leaves Dexterity 2
+  assert.equal(armed.defense, 10 + 10 + 3); // gear + 0.2 Health + 0.1 Strength + 0.1 Dexterity
   assert.ok(mitigate(20, 20) < 20 && mitigate(1, 500) === 1);
   assert.equal(slotOf(db, 1), 'weapon');
   assert.equal(slotOf(db, 41), 'weapon'); // bows share the weapon slot
   assert.equal(slotOf(db, 161), null);
   assert.ok(xpToNext(2) > xpToNext(1));
-  // level 16 should reach the trainer's Dexterity requirement (>60) from the starting 10
-  assert.ok(base.DEXTERITY + 15 * LEVEL_GAIN.DEXTERITY > 50);
+  // level 16 should reach the trainer's Strength 60 from Elim's starting 25 (the printed guide says Dexterity 60 from 14)
+  assert.ok(25 + 15 * LEVEL_GAIN.STRENGTH >= 60);
+  assert.ok(14 + 15 * LEVEL_GAIN.DEXTERITY >= 55);
 });
 
 test('effects: arrows pick the 32-way frame, fire balls travel and burst, walls tick', async () => {
@@ -475,8 +477,8 @@ test('instant events: statue and table pools exclude map-bound puzzle blocks', a
 
 test('level growth makes the Mantis trainer requirement (level 16, strength 60) reachable', async () => {
   const { LEVEL_GAIN } = await import('../src/game/stats');
-  assert.ok(10 + 15 * LEVEL_GAIN.STRENGTH >= 60, 'strength at level 16');
-  assert.ok(10 + 17 * LEVEL_GAIN.DEXTERITY > 60, 'dexterity at level 18');
+  assert.ok(25 + 15 * LEVEL_GAIN.STRENGTH >= 60, 'strength at level 16 from Elim\'s starting 25');
+  assert.ok(14 + 17 * LEVEL_GAIN.DEXTERITY > 60, 'dexterity at level 18 from the starting 14');
 });
 
 test('ground cells hidden as collision markers get a visible floor tile (no black holes)', async () => {
@@ -546,7 +548,7 @@ test('consumable effects are read from the item descriptions; passive and unsupp
   assert.deepEqual(fx(175), { cast: 2 });
   assert.deepEqual(fx(178), { smite: true });
   assert.deepEqual(fx(176), { gate: true });
-  for (const none of [157, 158, 177, 184]) assert.equal(fx(none), null, `item ${none}`);
+  for (const none of [184]) assert.equal(fx(none), null, `item ${none}`);
 });
 
 test('pickBlock follows the game year: later quest entries unlock and replace earlier ones; a finished one waits for the next', () => {
@@ -570,4 +572,40 @@ test('save slot summaries: empty, year / level / place, junk', async () => {
   assert.equal(slotSummary(JSON.stringify(save), 3, () => 'Western Village'), 'Year 105 · Level 12 · Western Village');
   assert.equal(slotSummary(null, 3, (x) => x), 'Empty');
   assert.equal(slotSummary('{nope', 3, (x) => x), 'Empty');
+});
+
+test('cheat codes: the LANG ui words, spaces tolerated, numbers parsed', async () => {
+  const { parseCheat } = await import('../src/game/cheats');
+  const ui = json<LangData>('text/lang.json').ui as string[];
+  assert.deepEqual(parseCheat('Theblueearthisrollingnow 5', ui), { kind: 'years', n: 5 });
+  assert.deepEqual(parseCheat('the blue earth is rolling now 12', ui), { kind: 'years', n: 12 });
+  assert.deepEqual(parseCheat('SHOWMETHENARA', ui), { kind: 'reveal' });
+  assert.deepEqual(parseCheat("ThesoulHunter'sholyPower 3", ui), { kind: 'levels', n: 3 });
+  assert.deepEqual(parseCheat('IfIwantIgotit 33', ui), { kind: 'item', id: 33, count: 1 });
+  assert.deepEqual(parseCheat('Yougainasoneplease 161 5', ui), { kind: 'item', id: 161, count: 5 });
+  assert.equal(parseCheat('Theblueearthisrollingnow', ui), null); // needs a number
+  assert.equal(parseCheat('hello', ui), null);
+  assert.equal(parseCheat('SHOWMETHENARA please', ui), null);
+});
+
+test('explored cells: circle reveal, bit packing round trip', async () => {
+  const { revealCircle, packExplored, unpackExplored } = await import('../src/game/explored');
+  const w = 20;
+  const h = 10;
+  const bits = new Uint8Array(w * h);
+  const n = revealCircle(bits, w, h, 5, 5, 3);
+  assert.ok(n > 20 && n < 40);
+  assert.equal(revealCircle(bits, w, h, 5, 5, 3), 0); // nothing new the second time
+  assert.equal(bits[5 * w + 5], 1);
+  assert.equal(bits[0], 0);
+  const back = unpackExplored(packExplored(bits));
+  for (let i = 0; i < bits.length; i++) assert.equal(back[i], bits[i]);
+  revealCircle(bits, w, h, -50, -50, 3); // far outside the map: no crash, nothing marked
+});
+
+test('Darkness Echo / Holy Eye light up the map, Distant Viewer adds sight', async () => {
+  const { itemEffect } = await import('../src/game/consumables');
+  assert.deepEqual(itemEffect(157, 'Remove the darkness'), { reveal: true });
+  assert.deepEqual(itemEffect(177, 'Make a Holy Eye'), { reveal: true });
+  assert.equal(itemEffect(158, 'Sight+2')?.buff?.sight, 2);
 });

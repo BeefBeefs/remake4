@@ -92,8 +92,11 @@ export interface Derived {
 export const UNARMED_ATTACK = 4;
 
 /**
- * Party stats + one hero's gear -> numbers the game uses. The formulas are placeholders (the real ones live in the EXE):
- * max life 50 + 5 x Health + gear life, attack = weapon attack + Strength/2, defense = sum of gear defense.
+ * Party stats + one hero's gear -> numbers the game uses. The formulas are the original's, recovered from the manual's
+ * character screens (Elim level 1, Kusa level 10) and the Korean community wiki for Toema Jeonseol (the same game):
+ *   life = 83 + level + 1.3 Health + 0.6 Strength (+ gear Life), mana = 99 + 1.7 Magic + 0.3 Intelligence,
+ *   attack = weapon + 0.4 Strength + 0.1 Dexterity (Kusa: Saver Blade 75 + 12.8 + 1.4 = 89, as printed),
+ *   defense = gear + 0.2 Health + 0.1 Strength + 0.1 Dexterity. Shields cost Dexterity (Wooden Shield Dex-5: Elim's 14 -> 9).
  */
 /**
  * How the three heroes differ (the manual: Elim a swordsman with high Dexterity and Health, Kusa the spell caster, Raening the
@@ -112,8 +115,8 @@ export interface HeroTrait {
 }
 const NEUTRAL: HeroTrait = { hp: 1, mana: 1, attack: 1, speed: 1, spell: 1, bow: 1 };
 export const HERO_TRAITS: Record<string, HeroTrait> = {
-  Elim: { hp: 1.2, mana: 0.7, attack: 1.05, speed: 1.06, spell: 0.8, bow: 1 },
-  Kusa: { hp: 0.85, mana: 1.7, attack: 0.9, speed: 0.97, spell: 1.3, bow: 1 },
+  Elim: { hp: 1.05, mana: 0.8, attack: 1.05, speed: 1.06, spell: 0.8, bow: 1 },
+  Kusa: { hp: 0.85, mana: 1.5, attack: 0.9, speed: 0.97, spell: 1.3, bow: 1 },
   Raening: { hp: 0.95, mana: 0.9, attack: 1, speed: 1.03, spell: 0.9, bow: 1.25 },
 };
 export const traitOf = (name: string): HeroTrait => HERO_TRAITS[name] ?? NEUTRAL;
@@ -131,18 +134,23 @@ export function derive(db: ItemDb, base: Record<StatName, number>, level: number
     if (st.def) def += st.def;
   }
   const total = (k: StatName) => Math.round((base[k] + b.stats[k]) * (1 + (b.pct[k] ?? 0) / 100));
-  const maxHp = Math.round((50 + 5 * total('HEALTH') + b.life + (level - 1) * 4) * (1 + (b.pct.LIFE ?? 0) / 100));
-  const attack = Math.round((atk + b.atk + total('STRENGTH') / 2) * (1 + (b.pct.ATK ?? 0) / 100));
-  const maxMana = 20 + 3 * total('MAGIC');
+  const H = total('HEALTH');
+  const S = total('STRENGTH');
+  const M = total('MAGIC');
+  const D = total('DEXTERITY');
+  const I = total('BRAIN');
+  const maxHp = Math.round((83 + level + 1.3 * H + 0.6 * S + b.life) * (1 + (b.pct.LIFE ?? 0) / 100));
+  const attack = Math.round((atk + b.atk + 0.4 * S + 0.1 * D) * (1 + (b.pct.ATK ?? 0) / 100));
+  const maxMana = Math.round(99 + 1.7 * M + 0.3 * I);
   return {
     maxHp: Math.round(maxHp * trait.hp),
     maxMana: Math.round(maxMana * trait.mana),
     attack: Math.round(attack * trait.attack),
-    defense: def,
+    defense: def + Math.round(0.2 * H + 0.1 * S + 0.1 * D),
     speedMul: (1 + b.speed / 100) * trait.speed,
-    strength: total('STRENGTH'),
-    dexterity: total('DEXTERITY'),
-    magic: Math.round(total('MAGIC') * trait.spell),
+    strength: S,
+    dexterity: D,
+    magic: Math.round(M * trait.spell),
   };
 }
 
@@ -161,7 +169,7 @@ export function xpToNext(level: number): number {
  * strategy guide says Dexterity 60): starting from 10, level 16 gives Strength 70 and Dexterity 55, so both are in reach by
  * about level 18 even without gear.
  */
-export const LEVEL_GAIN: Record<StatName, number> = { HEALTH: 2, STRENGTH: 4, MAGIC: 1, DEXTERITY: 3, BRAIN: 1, SKILL: 1 };
+export const LEVEL_GAIN: Record<StatName, number> = { HEALTH: 1, STRENGTH: 3, MAGIC: 1, DEXTERITY: 3, BRAIN: 1, SKILL: 0 };
 
 export function enemyXp(power: number): number {
   return 4 + Math.floor(power / 2);

@@ -1,3 +1,4 @@
+import { packExplored, unpackExplored } from './explored';
 import { StatName, StoryState } from '../script/state';
 import { Loadout } from './stats';
 
@@ -23,6 +24,7 @@ export interface SaveData {
     entry?: [string, number][];
     sealed?: number[];
     placed?: [string, { x: number; y: number; rec: number }][];
+    explored?: [string, string][];
   };
   heroes: { hp: number; mana: number; gear: Loadout }[];
 }
@@ -64,6 +66,7 @@ export function makeSave(
       entry: [...story.entry],
       placed: [...story.placed],
       sealed: [...story.sealed],
+      explored: [...story.explored].map(([id, bits]) => [id, packExplored(bits)] as [string, string]),
     },
     heroes: heroes.map((h) => ({ hp: Math.ceil(h.hp), mana: Math.floor(h.mana), gear: { ...h.gear } })),
   };
@@ -104,4 +107,5 @@ export function applyStory(story: StoryState, d: SaveData): void {
   story.entry = new Map(d.story.entry ?? []);
   story.placed = new Map(d.story.placed ?? []);
   story.sealed = new Set(d.story.sealed ?? []);
+  story.explored = new Map((d.story.explored ?? []).map(([id, t]) => [id, unpackExplored(t)] as [string, Uint8Array]));
 }

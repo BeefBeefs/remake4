@@ -23,6 +23,8 @@ export interface MenuHost {
   sfxOn(): boolean;
   toggleSfx(): void;
   exitToTitle(): void;
+  /** ask for a cheat code and apply it */
+  cheat(): void;
   toast(msg: string): void;
 }
 
@@ -68,6 +70,7 @@ export class GameMenu {
         ['Load game', () => this.go('load'), ART.load],
         [`Music: ${h.musicOn() ? 'on' : 'off'}`, () => (h.toggleMusic(), this.render())],
         [`Sound effects: ${h.sfxOn() ? 'on' : 'off'}`, () => (h.toggleSfx(), this.render())],
+        ['Enter a code…', () => (this.toggle(), h.cheat())],
         ['Exit to title', () => confirm('Abort this game and exit to the title?') && h.exitToTitle(), ART.exitToMenu],
       ];
       for (const [label, on, art] of rows) {

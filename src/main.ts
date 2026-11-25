@@ -9,6 +9,7 @@ import { findPickup, GroundItem } from './game/ground';
 import { ItemDb } from './game/itemdb';
 import { directionFromVector } from './game/anim';
 import { arrow, aura, Effect, effectFrame, fireBall, fireWall, ghostBolt, lightning, rain, shell, updateEffect, visual } from './game/effects';
+import { parseCheat } from './game/cheats';
 import { derive, LEVEL_GAIN, mitigate, Slot, slotOf, traitOf, xpToNext } from './game/stats';
 import { InventoryUI } from './ui/inventory';
 import { advanceYear } from './game/clock';
@@ -234,7 +235,14 @@ async function boot(): Promise<void> {
     const map = await loadMap(entry.id);
     const meta = tilesets[map.tileset];
     world = new World(map, meta);
-    minimap.setWorld(world);
+    let seen = story.explored.get(entry.id);
+    if (!seen || seen.length < map.w * map.h) {
+      const fresh = new Uint8Array(map.w * map.h);
+      if (seen) fresh.set(seen.subarray(0, fresh.length));
+      seen = fresh;
+      story.explored.set(entry.id, seen);
+    }
+    minimap.setWorld(world, seen);
     await renderer.setWorld(world, meta, map.tileset);
     mapEntry = entry;
     if (/^t\d$/.test(entry.id)) lastTown = entry.id;
@@ -687,6 +695,11 @@ async function boot(): Promise<void> {
         dlg.trade?.learn(fx.learn);
         used = true;
       }
+      if (fx.reveal) {
+        minimap.revealAll();
+        toast('The whole area lights up');
+        used = true;
+      }
       if (fx.buff) {
         buff = { ...buff, ...fx.buff };
         buffT = BUFF_SECONDS;
@@ -805,6 +818,28 @@ async function boot(): Promise<void> {
     },
     sfxOn: () => audio.isSfxOn(),
     toggleSfx: () => void audio.toggleSfx(),
+    cheat() {
+      const text = window.prompt('Code:');
+      if (!text) return;
+      const c = parseCheat(text, lang.ui);
+      if (!c) {
+        toast('Nothing happened');
+        return;
+      }
+      if (c.kind === 'years') {
+        story.year += c.n;
+        toast(`Year ${Math.floor(story.year)}`);
+      } else if (c.kind === 'reveal') {
+        minimap.revealAll();
+        toast('The map is shown');
+      } else if (c.kind === 'levels') {
+        for (let i = 0; i < c.n; i++) addXp(xpToNext(story.level));
+      } else if (lang.items[String(c.id)] || lang.weapons[String(c.id)]) {
+        const l = party.leader;
+        for (let i = 0; i < Math.min(c.count, 8); i++) void dropItem(c.id, l.x + 30 + i * 14, l.y + 10);
+        toast(`Item ${c.id} dropped`);
+      } else toast('No such item');
+    },
     exitToTitle() {
       saveGame();
       restoring = true;
@@ -1296,6 +1331,7 @@ async function boot(): Promise<void> {
         }
       }
       renderer.render(party.leader.x, party.leader.y - 20);
+      for (const h of heroes) if (!h.dead) minimap.reveal(h.x, h.y, 14 + 4 * (buff.sight ?? 0));
       minimap.draw(party.leader.x, party.leader.y - 20, VIEW_W, VIEW_H, [
         ...npcs.map((n) => ({ x: n.x, y: n.y, color: '#ffd84a' })),
         ...enemies.filter((en) => !en.e.dead).map((en) => ({ x: en.e.x, y: en.e.y, color: '#ff3a3a' })),

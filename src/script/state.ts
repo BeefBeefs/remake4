@@ -20,11 +20,13 @@ export class StoryState {
   placed = new Map<string, { x: number; y: number; rec: number }>();
   /** game clock in years: starts at 100, scripts' entries unlock when their year (last header number) has come */
   year = 100;
+  /** map id -> seen cells (1 byte per cell, y * w + x) for the minimap */
+  explored = new Map<string, Uint8Array>();
   money = 0;
   level = 1;
   /** experience towards the next level (party-wide) */
   xp = 0;
-  stats: Record<StatName, number> = { HEALTH: 10, STRENGTH: 10, MAGIC: 10, DEXTERITY: 10, BRAIN: 10, SKILL: 10 };
+  stats: Record<StatName, number> = { HEALTH: 23, STRENGTH: 25, MAGIC: 15, DEXTERITY: 14, BRAIN: 16, SKILL: 10 } /* Elim's real level-1 numbers (manual character screen) */;
   magic = new Map<number, number>();
   /** the quest log's capacity is not known yet; scripts only test whether there is room */
   maxOrders = 8;
