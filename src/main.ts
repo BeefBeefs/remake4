@@ -16,6 +16,7 @@ import { Buff, BUFF_SECONDS, ItemEffect, itemEffect } from './game/consumables';
 import { QuestLog } from './ui/quests';
 import { GameMenu } from './ui/menu';
 import { Minimap } from './ui/minimap';
+import { setMenuArt } from './ui/artbutton';
 import { GAME_TRACKS, MoviePlayer, showSlides, showTitle, WorldMapUI } from './ui/overlays';
 import { Party } from './game/party';
 import { applyStory, makeSave, parseSave, SAVE_KEY, SaveData } from './game/save';
@@ -88,6 +89,7 @@ async function boot(): Promise<void> {
   const party = new Party(heroes);
   const itemMeta = await loadSpriteMeta('ITEM');
   const iconMeta = await loadSpriteMeta('ICON1');
+  setMenuArt(await loadSpriteMeta('MENUICON'));
   const spriteMeta = await loadSpriteMeta('SPRITE');
   const backMeta = await loadSpriteMeta('BACK');
   const ground: GroundItem[] = [];

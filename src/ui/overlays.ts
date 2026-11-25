@@ -1,4 +1,5 @@
 import { assetUrl } from '../data/loaders';
+import { ART, artButton } from './artbutton';
 import { MapIndexEntry } from '../data/types';
 
 /** The two world pictures with a marker per place, positioned from the EXE's map table. */
@@ -138,20 +139,25 @@ export function showTitle(el: HTMLElement, hasSave: boolean, onStart: () => void
     el.style.display = 'none';
     onStart();
   };
-  el.innerHTML = `<img src="${assetUrl('images/title-01.webp')}" alt="Akuma">` +
-    (hasSave
-      ? '<div class="menu"><button data-c>Continue</button><button data-n>New game</button></div>'
-      : '<div>click / tap to begin</div>');
+  el.innerHTML = `<img src="${assetUrl('images/title-01.webp')}" alt="Akuma">`;
   if (!hasSave) {
+    const hint = document.createElement('div');
+    hint.textContent = 'click / tap to begin';
+    el.appendChild(hint);
     el.onclick = start;
     return;
   }
   el.onclick = null;
-  el.querySelector<HTMLElement>('[data-c]')!.onclick = start;
-  el.querySelector<HTMLElement>('[data-n]')!.onclick = (e) => {
-    e.stopPropagation();
-    if (confirm('Erase the saved game and start over?')) onNewGame();
-  };
+  const menu = document.createElement('div');
+  menu.className = 'menu';
+  menu.append(
+    artButton(ART.continueGame, 'Continue', start),
+    artButton(ART.newGame, 'New game', (e) => {
+      e.stopPropagation();
+      if (confirm('Erase the saved game and start over?')) onNewGame();
+    }),
+  );
+  el.appendChild(menu);
 }
 
 /** CD tracks the original shuffles through while playing (audio tracks 7-14 = track08..track15); the shorter tracks are jingles. */

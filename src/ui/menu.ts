@@ -1,4 +1,5 @@
 import { parseSave, SaveData } from '../game/save';
+import { ART, artButton } from './artbutton';
 
 export const SLOT_COUNT = 5;
 export const slotKey = (i: number): string => `akuma.save.slot${i}`;
@@ -61,17 +62,17 @@ export class GameMenu {
     head.appendChild(this.button('✕', () => this.toggle()));
     this.el.appendChild(head);
     if (this.view === 'main') {
-      const rows: [string, () => void][] = [
-        ['Save game', () => this.go('save')],
-        ['Load game', () => this.go('load')],
+      const rows: [string, () => void, number?][] = [
+        ['Save game', () => this.go('save'), ART.saveGame],
+        ['Load game', () => this.go('load'), ART.load],
         [`Music: ${h.musicOn() ? 'on' : 'off'}`, () => (h.toggleMusic(), this.render())],
         [`Sound effects: ${h.sfxOn() ? 'on' : 'off'}`, () => (h.toggleSfx(), this.render())],
-        ['Exit to title', () => confirm('Abort this game and exit to the title?') && h.exitToTitle()],
+        ['Exit to title', () => confirm('Abort this game and exit to the title?') && h.exitToTitle(), ART.exitToMenu],
       ];
-      for (const [label, on] of rows) {
+      for (const [label, on, art] of rows) {
         const row = document.createElement('div');
         row.className = 'q';
-        row.appendChild(this.button(label, on));
+        row.appendChild(art === undefined ? this.button(label, on) : artButton(art, label, on, 1.3));
         this.el.appendChild(row);
       }
       return;
