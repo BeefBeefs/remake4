@@ -63,6 +63,7 @@ export class GameMenu {
     this.el.appendChild(head);
     if (this.view === 'main') {
       const rows: [string, () => void, number?][] = [
+        ['Continue game', () => this.toggle(), ART.continueGame],
         ['Save game', () => this.go('save'), ART.saveGame],
         ['Load game', () => this.go('load'), ART.load],
         [`Music: ${h.musicOn() ? 'on' : 'off'}`, () => (h.toggleMusic(), this.render())],
