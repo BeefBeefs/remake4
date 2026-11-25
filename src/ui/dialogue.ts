@@ -12,6 +12,12 @@ export interface ShopHost {
   sell(id: number): boolean;
   /** item ids the party holds that this kind of shop takes (equipment or consumables) */
   owned(equipment: boolean): number[];
+  /** blacksmith: equipment (carried or worn) that is worn down, what mending it costs, and mending it */
+  repairable(): number[];
+  repairCost(id: number): number;
+  repair(id: number): boolean;
+  /** "left/max" durability text of an item ('' if it does not wear) */
+  durability(id: number): string;
   /** magic training: label for spell `k`, and learning it (price unknown, so it is free for now) */
   spellLabel(k: number): string;
   learned(k: number): boolean;
@@ -187,6 +193,48 @@ export class DialogueUI implements ScriptHost {
           };
           box.appendChild(leave);
           this.lines = [{ text: `${prompt}${note ? '   ' + note : ''}`, color: this.color }];
+          this.render(box);
+        };
+        draw();
+      });
+    }
+    if (t && kind === 'REPAIR_WEAPON') {
+      let note = '';
+      return new Promise((done) => {
+        const draw = () => {
+          const box = document.createElement('div');
+          box.className = 'choices';
+          box.style.maxHeight = '38vh';
+          box.style.overflowY = 'auto';
+          const ids = t.repairable();
+          if (!ids.length) {
+            const e = document.createElement('div');
+            e.textContent = 'Nothing needs mending.';
+            box.appendChild(e);
+          }
+          for (const id of ids) {
+            const cost = t.repairCost(id);
+            const b = document.createElement('button');
+            b.textContent = `${t.nameOf(id)} (${t.durability(id)})  —  ${cost}`;
+            b.disabled = t.money < cost;
+            b.onclick = (e) => {
+              e.stopPropagation();
+              note = t.repair(id) ? `Mended ${t.nameOf(id)}.` : 'Not enough money.';
+              draw();
+            };
+            box.appendChild(b);
+          }
+          const leave = document.createElement('button');
+          leave.textContent = 'Leave';
+          leave.onclick = (e) => {
+            e.stopPropagation();
+            done();
+          };
+          box.appendChild(leave);
+          this.lines = [
+            { text: prompt, color: this.color },
+            { text: `Money: ${t.money}${note ? '   ' + note : ''}`, color: [255, 220, 120] },
+          ];
           this.render(box);
         };
         draw();

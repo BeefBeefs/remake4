@@ -171,6 +171,9 @@ export function xpToNext(level: number): number {
  */
 export const LEVEL_GAIN: Record<StatName, number> = { HEALTH: 1, STRENGTH: 3, MAGIC: 1, DEXTERITY: 3, BRAIN: 1, SKILL: 0 };
 
+/** carry weight limit: 200 + 3 per Strength + 1.5 per Health (base stats), as printed on the manual's character screens */
+export const carryCapacity = (base: Record<StatName, number>): number => Math.floor(200 + 3 * base.STRENGTH + 1.5 * base.HEALTH);
+
 export function enemyXp(power: number): number {
   return 4 + Math.floor(power / 2);
 }

@@ -10,6 +10,7 @@ import { ItemDb } from './game/itemdb';
 import { directionFromVector } from './game/anim';
 import { arrow, aura, Effect, effectFrame, fireBall, fireWall, ghostBolt, lightning, rain, shell, updateEffect, visual } from './game/effects';
 import { parseCheat } from './game/cheats';
+import { repair as repairItem, repairCost, wearChance, wearOut, workingGear, durabilityLeft, maxDurability } from './game/durability';
 import { derive, LEVEL_GAIN, mitigate, Slot, slotOf, traitOf, xpToNext } from './game/stats';
 import { InventoryUI } from './ui/inventory';
 import { advanceYear } from './game/clock';
@@ -419,6 +420,20 @@ async function boot(): Promise<void> {
       story.money += p;
       return true;
     },
+    repairable: () => {
+      const ids = new Set<number>([...story.items.keys(), ...heroes.flatMap((h) => Object.values(h.gear) as number[])]);
+      return [...ids].filter((id) => story.wear.get(id)).sort((a, b) => a - b);
+    },
+    repairCost: (id) => repairCost(db, story.wear, id),
+    repair(id) {
+      const c = repairCost(db, story.wear, id);
+      if (!c || story.money < c) return false;
+      story.money -= c;
+      repairItem(story.wear, id);
+      refreshHeroStats();
+      return true;
+    },
+    durability: (id) => (maxDurability(db, id) ? `${durabilityLeft(db, story.wear, id)}/${maxDurability(db, id)}` : ''),
     spellLabel: (k) => `${lang.magic[String(k)]?.name ?? 'Spell ' + k} (mana ${itemStats[String(184 + k)]?.mana ?? '?'})${SPELL_IMPL.has(k) ? '' : ' - not playable yet'}`,
     learned: (k) => story.magic.has(k),
     learn: (k) => {
@@ -554,7 +569,7 @@ async function boot(): Promise<void> {
       toast('Not enough mana');
       return;
     }
-    const d = derive(db, story.stats, story.level, h.gear, traitOf(h.name), story.lifeBonus);
+    const d = derive(db, story.stats, story.level, workingGear(db, story.wear, h.gear), traitOf(h.name), story.lifeBonus);
     const m = d.magic;
     h.mana -= cost;
     h.attack(); // cast with the attack animation
@@ -626,9 +641,23 @@ async function boot(): Promise<void> {
     s.SKILL = Math.round(s.SKILL * (buff.skill ?? 1));
     return s;
   }
+  /** a swing or a blow costs the gear in `slots` a point of durability now and then; broken pieces stop counting */
+  function wearGear(h: Hero, slots: Slot[]): void {
+    const chance = wearChance(story.stats.BRAIN);
+    let broke = false;
+    for (const s of slots) {
+      const id = h.gear[s];
+      if (!id || Math.random() > chance) continue;
+      if (wearOut(db, story.wear, id)) {
+        toast(`${db.name(id)} broke - a blacksmith can repair it`);
+        broke = true;
+      }
+    }
+    if (broke) refreshHeroStats();
+  }
   function refreshHeroStats(): void {
     for (const h of heroes) {
-      const d = derive(db, buffedStats(), story.level, h.gear, traitOf(h.name), story.lifeBonus);
+      const d = derive(db, buffedStats(), story.level, workingGear(db, story.wear, h.gear), traitOf(h.name), story.lifeBonus);
       h.guard = buff.taken ?? 1;
       const frac = h.maxHp ? h.hp / h.maxHp : 1;
       h.maxHp = d.maxHp;
@@ -756,8 +785,9 @@ async function boot(): Promise<void> {
     {
       names: HERO_DEFS.map((d) => d.name),
       gear: (i) => heroes[i].gear,
-      derived: (i) => derive(db, story.stats, story.level, heroes[i].gear, traitOf(heroes[i].name), story.lifeBonus),
+      derived: (i) => derive(db, story.stats, story.level, workingGear(db, story.wear, heroes[i].gear), traitOf(heroes[i].name), story.lifeBonus),
       hp: (i) => [Math.ceil(heroes[i].hp), heroes[i].maxHp],
+      durability: (id) => (maxDurability(db, id) ? `${durabilityLeft(db, story.wear, id)}/${maxDurability(db, id)}` : ''),
       equip(i, id) {
         const slot = slotOf(db, id);
         if (!slot || story.itemCount(id) < 1) return;
@@ -1180,6 +1210,7 @@ async function boot(): Promise<void> {
         const w = lead.gear.weapon!;
         void addEffect(arrow(lead.x, lead.y, lead.dir, Math.round(lead.attackPower * traitOf(lead.name).bow), (db.stat(w).range ?? 6) * 32));
         void audio.play('arrow1.wav', 0.5);
+        wearGear(lead, ['weapon']);
       }
       if (attackTarget && !attackTarget.dead && !running) {
         const dx = attackTarget.x - lead.x;
@@ -1211,7 +1242,10 @@ async function boot(): Promise<void> {
       for (const en of enemies) {
         const e = en.e;
         e.update(dt, world, metas.get(e.sheet)!, lead);
-        if (lead.swung && !isBow(lead) && !e.dead && Math.hypot(e.x - lead.x, (e.y - lead.y) / 0.625) < 64) e.damage(lead.attackPower);
+        if (lead.swung && !isBow(lead) && !e.dead && Math.hypot(e.x - lead.x, (e.y - lead.y) / 0.625) < 64) {
+          e.damage(lead.attackPower);
+          wearGear(lead, ['weapon']);
+        }
         if (e.swung) {
           e.swung = false;
           // the swing hits the nearest living hero in reach
@@ -1226,7 +1260,10 @@ async function boot(): Promise<void> {
             }
           }
           best?.takeDamage(mitigate(e.damageOut, best.defense));
-          if (best) void audio.play('attack1.wav', 0.5);
+          if (best) {
+            void audio.play('attack1.wav', 0.5);
+            wearGear(best, ['shield', 'cap', 'armor', 'shoes']);
+          }
         }
       }
       for (let i = enemies.length - 1; i >= 0; i--)

@@ -220,3 +220,4 @@ Reproduced from the video (T1 around cell 30,42) and fixed three things:
 - Not done from the findings: weapon durability and blacksmith repair, carry weight, per-hero stats with a point-allocation screen, Skill (hit chance / ignore-damage) and attack speed from Dexterity.
 
 - Dragon Heart now gives a flat +100 Life for the whole party (story.lifeBonus, saved) instead of an approximate Health gain.
+- Gear durability (guesses flagged in game/durability.ts): itemstats `life` is durability, tracked per item id and saved. Melee/arrow hits wear the weapon; blows taken wear shield/cap/armour/shoes; Intelligence makes wear rarer (100/(100+Int)). A broken piece gives nothing until mended; the REPAIR_WEAPON shop now lists worn gear with a price (half the shop price, in proportion to the damage - a guess). Inventory shows durability and weight against the carry limit (200 + 3 Str + 1.5 Health, floored; matches the manual). The limit is shown, not enforced.

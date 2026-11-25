@@ -1,7 +1,7 @@
 import { ItemDb } from '../game/itemdb';
 import { ItemEffect, itemEffect } from '../game/consumables';
 import { StoryState } from '../script/state';
-import { Derived, Loadout, SLOTS, slotOf } from '../game/stats';
+import { carryCapacity, Derived, Loadout, SLOTS, slotOf } from '../game/stats';
 
 /** what the inventory needs to show and change the heroes' gear */
 export interface EquipHost {
@@ -9,6 +9,8 @@ export interface EquipHost {
   gear(i: number): Loadout;
   derived(i: number): Derived;
   hp(i: number): [number, number];
+  /** "left/max" durability of an item, '' if it does not wear */
+  durability(id: number): string;
   equip(i: number, id: number): void;
   unequip(i: number, slot: string): void;
 }
@@ -51,7 +53,10 @@ export class InventoryUI {
     const eh = this.equipHost;
     const sheet = document.createElement('div');
     sheet.className = 'sheet';
-    sheet.textContent = `Level ${this.state.level} · xp ${this.state.xp}`;
+    let load = 0;
+    for (const [id, n] of this.state.items) load += (this.db.stat(id).weight ?? 0) * n;
+    for (let i = 0; i < eh.names.length; i++) for (const id of Object.values(eh.gear(i))) if (id) load += this.db.stat(id).weight ?? 0;
+    sheet.textContent = `Level ${this.state.level} · xp ${this.state.xp} · weight ${load}/${carryCapacity(this.state.stats)}`;
     this.el.appendChild(sheet);
     eh.names.forEach((nm, i) => {
       const d = eh.derived(i);
@@ -70,7 +75,7 @@ export class InventoryUI {
         if (!id) continue;
         t.appendChild(document.createElement('br'));
         const w = document.createElement('small');
-        w.textContent = `${slot}: ${this.db.name(id)} `;
+        w.textContent = `${slot}: ${this.db.name(id)} ${eh.durability(id)} `;
         const x = document.createElement('button');
         x.textContent = 'take off';
         x.onclick = () => {
@@ -97,7 +102,7 @@ export class InventoryUI {
       const n = this.state.itemCount(id);
       label.innerHTML = '';
       const nm = document.createElement('b');
-      nm.textContent = this.db.name(id) + (n > 1 ? ` ×${n}` : '');
+      nm.textContent = this.db.name(id) + (n > 1 ? ` ×${n}` : '') + (eh.durability(id) ? ` (${eh.durability(id)})` : '');
       const d = document.createElement('small');
       d.textContent = this.db.desc(id);
       label.append(nm, document.createElement('br'), d);

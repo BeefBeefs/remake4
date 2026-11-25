@@ -619,3 +619,23 @@ test('permanent life bonus adds flat life', async () => {
   const b = derive(db, base, 1, {}, undefined, 100);
   assert.equal(b.maxHp - a.maxHp, 100);
 });
+
+test('durability: wear, breaking, repair cost, working gear', async () => {
+  const { ItemDb } = await import('../src/game/itemdb');
+  const { maxDurability, wearOut, isBroken, repairCost, workingGear, repair, wearChance } = await import('../src/game/durability');
+  const { carryCapacity } = await import('../src/game/stats');
+  const db = new ItemDb(json<LangData>('text/lang.json'), json<ItemStats>('text/itemstats.json'));
+  const wear = new Map<number, number>();
+  assert.equal(maxDurability(db, 1), 30); // Copper Sword
+  for (let i = 0; i < 29; i++) assert.equal(wearOut(db, wear, 1), false);
+  assert.equal(isBroken(db, wear, 1), false);
+  assert.equal(repairCost(db, wear, 1), 58); // half of 120 in proportion to 29/30
+  assert.equal(wearOut(db, wear, 1), true);
+  assert.equal(wearOut(db, wear, 1), false); // already broken: nothing more to lose
+  assert.deepEqual(workingGear(db, wear, { weapon: 1, armor: 81 }), { armor: 81 });
+  repair(wear, 1);
+  assert.deepEqual(workingGear(db, wear, { weapon: 1, armor: 81 }), { weapon: 1, armor: 81 });
+  assert.equal(repairCost(db, wear, 1), 0);
+  assert.ok(wearChance(100) < wearChance(10));
+  assert.equal(carryCapacity({ HEALTH: 23, STRENGTH: 25, MAGIC: 15, DEXTERITY: 14, BRAIN: 16, SKILL: 10 }), 309); // Elim's screen
+});

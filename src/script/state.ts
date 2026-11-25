@@ -26,6 +26,8 @@ export class StoryState {
   level = 1;
   /** experience towards the next level (party-wide) */
   xp = 0;
+  /** durability points used per item id (see game/durability.ts) */
+  wear = new Map<number, number>();
   /** permanent Life gained from the Dragon Heart (flat, not a stat) */
   lifeBonus = 0;
   stats: Record<StatName, number> = { HEALTH: 23, STRENGTH: 25, MAGIC: 15, DEXTERITY: 14, BRAIN: 16, SKILL: 10 } /* Elim's real level-1 numbers (manual character screen) */;
