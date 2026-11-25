@@ -5,6 +5,8 @@ import { SpriteSheetMeta } from '../data/types';
 /** The three heroes. One leads (player controlled); the others trail behind it. */
 export class Party {
   leaderIndex = 0;
+  /** where a follower should go to fight instead of trailing the leader (set by the game each frame) */
+  engage = new Map<Hero, { x: number; y: number }>();
   constructor(readonly heroes: Hero[]) {}
 
   get leader(): Hero {
@@ -48,7 +50,8 @@ export class Party {
         const d = Math.hypot(lead.x - h.x, lead.y - h.y);
         const want = 34 + slot * 26;
         h.input.x = h.input.y = 0;
-        h.target = d > want ? { x: lead.x, y: lead.y } : null;
+        const foe = this.engage.get(h);
+        h.target = foe ? { x: foe.x, y: foe.y } : d > want ? { x: lead.x, y: lead.y } : null;
         slot++;
       }
       h.update(dt, world, metas.get(h.sheet)!);

@@ -657,6 +657,7 @@ async function boot(): Promise<void> {
     if (broke) refreshHeroStats();
   }
   let encumb = 1;
+  const fightCd = new Map<Hero, number>();
   function refreshHeroStats(): void {
     for (const h of heroes) {
       const d = derive(db, buffedStats(h.name), story.level, workingGear(db, story.wear, h.gear), traitOf(h.name), story.lifeBonus);
@@ -1241,11 +1242,38 @@ async function boot(): Promise<void> {
           if (drop) void dropItem(drop, p.x, p.y + 6);
         }
       }
-      if (lead.swung && isBow(lead)) {
-        const w = lead.gear.weapon!;
-        void addEffect(arrow(lead.x, lead.y, lead.dir, Math.round(lead.attackPower * traitOf(lead.name).bow), (db.stat(w).range ?? 6) * 32));
+      for (const h of heroes) {
+        if (!h.swung || !isBow(h)) continue;
+        const w = h.gear.weapon!;
+        void addEffect(arrow(h.x, h.y, h.dir, Math.round(h.attackPower * traitOf(h.name).bow), (db.stat(w).range ?? 6) * 32));
         void audio.play('arrow1.wav', 0.5);
-        wearGear(lead, ['weapon']);
+        wearGear(h, ['weapon']);
+      }
+      // the heroes the player is not steering fight on their own: they step up to a foe near the leader and swing or shoot
+      party.engage.clear();
+      for (const h of heroes) {
+        if (h === lead || h.dead || running || dlg.open) continue;
+        fightCd.set(h, Math.max(0, (fightCd.get(h) ?? 0) - dt));
+        const reach = isBow(h) ? 170 : 44;
+        let foe: Enemy | null = null;
+        let fd = Infinity;
+        for (const en of enemies) {
+          if (en.e.dead) continue;
+          const ld = Math.hypot(en.e.x - lead.x, (en.e.y - lead.y) / 0.625);
+          const d = Math.hypot(en.e.x - h.x, (en.e.y - h.y) / 0.625);
+          if (ld < 240 && d < fd) {
+            fd = d;
+            foe = en.e;
+          }
+        }
+        if (!foe) continue;
+        if (fd < reach) {
+          h.dir = directionFromVector(foe.x - h.x, (foe.y - h.y) / 0.625);
+          if ((fightCd.get(h) ?? 0) <= 0 && h.state !== 'attack') {
+            h.attack();
+            fightCd.set(h, 0.5);
+          }
+        } else if (!isBow(h) || fd > 220) party.engage.set(h, { x: foe.x, y: foe.y });
       }
       if (attackTarget && !attackTarget.dead && !running) {
         const dx = attackTarget.x - lead.x;
@@ -1277,9 +1305,10 @@ async function boot(): Promise<void> {
       for (const en of enemies) {
         const e = en.e;
         e.update(dt, world, metas.get(e.sheet)!, lead);
-        if (lead.swung && !isBow(lead) && !e.dead && Math.hypot(e.x - lead.x, (e.y - lead.y) / 0.625) < 64) {
-          e.damage(lead.attackPower);
-          wearGear(lead, ['weapon']);
+        for (const h of heroes) {
+          if (!h.swung || isBow(h) || e.dead || Math.hypot(e.x - h.x, (e.y - h.y) / 0.625) >= 64) continue;
+          e.damage(h.attackPower);
+          wearGear(h, ['weapon']);
         }
         if (e.swung) {
           e.swung = false;
