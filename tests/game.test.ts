@@ -514,12 +514,43 @@ test('unscripted NPC-model objects (kinds 9-12) are editor filler, containers an
   assert.deepEqual([44, 45, 47, 51, 53, 57, 58].map((k) => isEditorFiller(o(0, k))), [false, true, true, false, true, true, false]); // 51 is the flame
 });
 
-test('hero traits: Elim tougher, Kusa more mana and spell power, Raening hits harder with a bow', async () => {
-  const { HERO_TRAITS, traitOf } = await import('../src/game/stats');
-  assert.ok(HERO_TRAITS.Elim.hp > HERO_TRAITS.Kusa.hp);
-  assert.ok(HERO_TRAITS.Kusa.mana > HERO_TRAITS.Elim.mana && HERO_TRAITS.Kusa.spell > HERO_TRAITS.Raening.spell);
+test('heroes have their own stats: Kusa is the mage, Raening the archer, Elim the fighter; only the bow trait is left', async () => {
+  const { HERO_TRAITS, traitOf, START_STATS, derive } = await import('../src/game/stats');
+  const { ItemDb } = await import('../src/game/itemdb');
+  const db = new ItemDb(json<LangData>('text/lang.json'), json<ItemStats>('text/itemstats.json'));
+  const d = (n: string) => derive(db, START_STATS[n], 1, {});
+  assert.ok(d('Kusa').maxMana > d('Elim').maxMana && d('Kusa').magic > d('Raening').magic);
+  assert.ok(d('Elim').attack > d('Kusa').attack && d('Raening').dexterity > d('Elim').dexterity);
+  assert.equal(d('Elim').maxHp, 129); // the manual's level-1 screen
   assert.ok(HERO_TRAITS.Raening.bow > 1);
   assert.equal(traitOf('nobody').hp, 1);
+});
+
+test('level-up points: auto spread adds up, stat gains reach every hero, weight slows the party', async () => {
+  const { autoSpread, POINTS_PER_LEVEL } = await import('../src/game/stats');
+  const { StoryState } = await import('../src/script/state');
+  const { encumbrance } = await import('../src/game/weight');
+  for (const n of ['Elim', 'Kusa', 'Raening']) for (const pts of [1, 9, 18, 23]) assert.equal(Object.values(autoSpread(n, pts)).reduce((a, b) => a + (b ?? 0), 0), pts);
+  assert.equal(POINTS_PER_LEVEL, 9);
+  const st = new StoryState();
+  const kusa = st.statsOf('Kusa').STRENGTH;
+  st.addStat('STRENGTH', 2);
+  assert.equal(st.stats.STRENGTH, 27);
+  assert.equal(st.statsOf('Kusa').STRENGTH, kusa + 2);
+  assert.equal(st.statsOf('Elim'), st.stats);
+  assert.equal(encumbrance(300, 309), 1);
+  assert.ok(encumbrance(400, 309) < 1 && encumbrance(10000, 309) === 0.6);
+});
+
+test('an old save with one shared stat pool gives every hero Elim\'s gains', async () => {
+  const { StoryState } = await import('../src/script/state');
+  const { makeSave, applyStory } = await import('../src/game/save');
+  void makeSave;
+  const st = new StoryState();
+  const save = { story: { money: 0, level: 5, xp: 0, stats: { HEALTH: 28, STRENGTH: 40, MAGIC: 15, DEXTERITY: 14, BRAIN: 16, SKILL: 10 } } } as never;
+  applyStory(st, save);
+  assert.equal(st.statsOf('Kusa').STRENGTH, 15 + 15);
+  assert.equal(st.statsOf('Raening').HEALTH, 18 + 5);
 });
 
 test('consumable effects are read from the item descriptions; passive and unsupported items give none', async () => {

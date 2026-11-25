@@ -114,10 +114,11 @@ export interface HeroTrait {
   bow: number;
 }
 const NEUTRAL: HeroTrait = { hp: 1, mana: 1, attack: 1, speed: 1, spell: 1, bow: 1 };
+/** with real per-hero stats the old life / mana / attack multipliers are gone; only Raening's bow bonus is left (a placeholder) */
 export const HERO_TRAITS: Record<string, HeroTrait> = {
-  Elim: { hp: 1.05, mana: 0.8, attack: 1.05, speed: 1.06, spell: 0.8, bow: 1 },
-  Kusa: { hp: 0.85, mana: 1.5, attack: 0.9, speed: 0.97, spell: 1.3, bow: 1 },
-  Raening: { hp: 0.95, mana: 0.9, attack: 1, speed: 1.03, spell: 0.9, bow: 1.25 },
+  Elim: { ...NEUTRAL },
+  Kusa: { ...NEUTRAL },
+  Raening: { ...NEUTRAL, bow: 1.25 },
 };
 export const traitOf = (name: string): HeroTrait => HERO_TRAITS[name] ?? NEUTRAL;
 
@@ -165,7 +166,42 @@ export function xpToNext(level: number): number {
 }
 
 /**
- * stat points gained per level-up (placeholder). The Mantis Village trainer asks for level 16 and Strength 60 (the printed
+ * Every hero has his own stats and the player spends the points a level-up brings (the yellow + on the HUD portraits). The
+ * manual shows Elim at level 1 (23/25/15/14/16: 93 points) and Kusa at level 10 (14/32/71/14/44: 175 points); if Kusa began
+ * near 93 too, nine levels add about 9 points each. Kusa's and Raening's starting stats are guesses around that total.
+ */
+export const POINTS_PER_LEVEL = 9;
+export const ALLOC_STATS: StatName[] = ['HEALTH', 'STRENGTH', 'MAGIC', 'DEXTERITY', 'BRAIN'];
+export const START_STATS: Record<string, Record<StatName, number>> = {
+  Elim: { HEALTH: 23, STRENGTH: 25, MAGIC: 15, DEXTERITY: 14, BRAIN: 16, SKILL: 10 },
+  Kusa: { HEALTH: 14, STRENGTH: 15, MAGIC: 28, DEXTERITY: 10, BRAIN: 20, SKILL: 10 },
+  Raening: { HEALTH: 18, STRENGTH: 18, MAGIC: 10, DEXTERITY: 22, BRAIN: 14, SKILL: 10 },
+};
+/** how "Auto" spreads a hero's points (shares of 10) */
+export const AUTO_WEIGHTS: Record<string, Partial<Record<StatName, number>>> = {
+  Elim: { HEALTH: 2, STRENGTH: 5, DEXTERITY: 2, BRAIN: 1 },
+  Kusa: { HEALTH: 1, MAGIC: 6, BRAIN: 2, DEXTERITY: 1 },
+  Raening: { HEALTH: 2, STRENGTH: 1, MAGIC: 2, DEXTERITY: 4, BRAIN: 1 },
+};
+/** spread `n` points over a hero's weights; the remainder goes to the heaviest stat */
+export function autoSpread(name: string, n: number): Partial<Record<StatName, number>> {
+  const w = AUTO_WEIGHTS[name] ?? AUTO_WEIGHTS.Elim;
+  const total = Object.values(w).reduce((a, b) => a + (b ?? 0), 0);
+  const out: Partial<Record<StatName, number>> = {};
+  let used = 0;
+  let top: StatName = 'STRENGTH';
+  for (const k of ALLOC_STATS) {
+    const share = Math.floor((n * (w[k] ?? 0)) / total);
+    if (share) out[k] = share;
+    used += share;
+    if ((w[k] ?? 0) > (w[top] ?? 0)) top = k;
+  }
+  if (n > used) out[top] = (out[top] ?? 0) + (n - used);
+  return out;
+}
+
+/**
+ * old shared-pool level gain (placeholder, kept for the old tests). The Mantis Village trainer asks for level 16 and Strength 60 (the printed
  * strategy guide says Dexterity 60): starting from 10, level 16 gives Strength 70 and Dexterity 55, so both are in reach by
  * about level 18 even without gear.
  */

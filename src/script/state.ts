@@ -30,7 +30,24 @@ export class StoryState {
   wear = new Map<number, number>();
   /** permanent Life gained from the Dragon Heart (flat, not a stat) */
   lifeBonus = 0;
-  stats: Record<StatName, number> = { HEALTH: 23, STRENGTH: 25, MAGIC: 15, DEXTERITY: 14, BRAIN: 16, SKILL: 10 } /* Elim's real level-1 numbers (manual character screen) */;
+  /** Elim's stats (the manual's level-1 screen); scripts test and change these, and stat gains reach every hero */
+  stats: Record<StatName, number> = { HEALTH: 23, STRENGTH: 25, MAGIC: 15, DEXTERITY: 14, BRAIN: 16, SKILL: 10 };
+  /** the other heroes' own stats (starting values are guesses, see game/stats.ts) */
+  heroStats: Record<string, Record<StatName, number>> = {
+    Kusa: { HEALTH: 14, STRENGTH: 15, MAGIC: 28, DEXTERITY: 10, BRAIN: 20, SKILL: 10 },
+    Raening: { HEALTH: 18, STRENGTH: 18, MAGIC: 10, DEXTERITY: 22, BRAIN: 14, SKILL: 10 },
+  };
+  /** level-up points each hero has not spent yet */
+  points: Record<string, number> = { Elim: 0, Kusa: 0, Raening: 0 };
+
+  statsOf(name: string): Record<StatName, number> {
+    return this.heroStats[name] ?? this.stats;
+  }
+  /** a potion or script reward: every hero gains it */
+  addStat(k: StatName, n: number): void {
+    this.stats[k] += n;
+    for (const s of Object.values(this.heroStats)) s[k] += n;
+  }
   magic = new Map<number, number>();
   /** the quest log's capacity is not known yet; scripts only test whether there is room */
   maxOrders = 8;

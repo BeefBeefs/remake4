@@ -1,7 +1,8 @@
 import { ItemDb } from '../game/itemdb';
 import { ItemEffect, itemEffect } from '../game/consumables';
-import { StoryState } from '../script/state';
-import { carryCapacity, Derived, Loadout, SLOTS, slotOf } from '../game/stats';
+import { StatName, StoryState } from '../script/state';
+import { ALLOC_STATS, Derived, Loadout, SLOTS, slotOf } from '../game/stats';
+import { partyLoad } from '../game/weight';
 
 /** what the inventory needs to show and change the heroes' gear */
 export interface EquipHost {
@@ -11,6 +12,13 @@ export interface EquipHost {
   hp(i: number): [number, number];
   /** "left/max" durability of an item, '' if it does not wear */
   durability(id: number): string;
+  /** this hero's own stats, the level-up points he has left, and spending one or all of them */
+  stats(i: number): Record<StatName, number>;
+  points(i: number): number;
+  spend(i: number, stat: StatName): void;
+  autoSpend(i: number): void;
+  /** what the party can carry */
+  capacity(): number;
   equip(i: number, id: number): void;
   unequip(i: number, slot: string): void;
 }
@@ -53,10 +61,8 @@ export class InventoryUI {
     const eh = this.equipHost;
     const sheet = document.createElement('div');
     sheet.className = 'sheet';
-    let load = 0;
-    for (const [id, n] of this.state.items) load += (this.db.stat(id).weight ?? 0) * n;
-    for (let i = 0; i < eh.names.length; i++) for (const id of Object.values(eh.gear(i))) if (id) load += this.db.stat(id).weight ?? 0;
-    sheet.textContent = `Level ${this.state.level} · xp ${this.state.xp} · weight ${load}/${carryCapacity(this.state.stats)}`;
+    const load = partyLoad(this.db, this.state.items, eh.names.map((_, i) => eh.gear(i)));
+    sheet.textContent = `Level ${this.state.level} · xp ${this.state.xp} · weight ${load}/${eh.capacity()}`;
     this.el.appendChild(sheet);
     eh.names.forEach((nm, i) => {
       const d = eh.derived(i);
@@ -69,6 +75,39 @@ export class InventoryUI {
       const sm = document.createElement('small');
       sm.textContent = ` HP ${hp}/${max} · atk ${d.attack} · def ${d.defense} · str ${d.strength} dex ${d.dexterity} mag ${d.magic}`;
       t.append(b, sm);
+      const st = eh.stats(i);
+      const pts = eh.points(i);
+      const line = document.createElement('div');
+      line.className = 'stats';
+      const labels: Record<string, string> = { HEALTH: 'Health', STRENGTH: 'Strength', MAGIC: 'Magic', DEXTERITY: 'Dexterity', BRAIN: 'Intelligence' };
+      for (const k of ALLOC_STATS) {
+        const cell = document.createElement('span');
+        cell.textContent = `${labels[k]} ${st[k]} `;
+        if (pts > 0) {
+          const plus = document.createElement('button');
+          plus.textContent = '+';
+          plus.className = 'plus';
+          plus.onclick = () => {
+            eh.spend(i, k);
+            this.render();
+          };
+          cell.appendChild(plus);
+        }
+        line.append(cell, ' ');
+      }
+      if (pts > 0) {
+        const left = document.createElement('b');
+        left.style.color = '#ffd24a';
+        left.textContent = `${pts} points `;
+        const auto = document.createElement('button');
+        auto.textContent = 'Auto';
+        auto.onclick = () => {
+          eh.autoSpend(i);
+          this.render();
+        };
+        line.append(left, auto);
+      }
+      t.appendChild(line);
       const g = eh.gear(i);
       for (const slot of SLOTS) {
         const id = g[slot];

@@ -10,8 +10,9 @@ import { ItemDb } from './game/itemdb';
 import { directionFromVector } from './game/anim';
 import { arrow, aura, Effect, effectFrame, fireBall, fireWall, ghostBolt, lightning, rain, shell, updateEffect, visual } from './game/effects';
 import { parseCheat } from './game/cheats';
+import { encumbrance, partyLoad } from './game/weight';
 import { repair as repairItem, repairCost, wearChance, wearOut, workingGear, durabilityLeft, maxDurability } from './game/durability';
-import { derive, LEVEL_GAIN, mitigate, Slot, slotOf, traitOf, xpToNext } from './game/stats';
+import { autoSpread, carryCapacity, derive, mitigate, POINTS_PER_LEVEL, Slot, slotOf, traitOf, xpToNext } from './game/stats';
 import { InventoryUI } from './ui/inventory';
 import { advanceYear } from './game/clock';
 import { Buff, BUFF_SECONDS, ItemEffect, itemEffect } from './game/consumables';
@@ -569,7 +570,7 @@ async function boot(): Promise<void> {
       toast('Not enough mana');
       return;
     }
-    const d = derive(db, story.stats, story.level, workingGear(db, story.wear, h.gear), traitOf(h.name), story.lifeBonus);
+    const d = derive(db, story.statsOf(h.name), story.level, workingGear(db, story.wear, h.gear), traitOf(h.name), story.lifeBonus);
     const m = d.magic;
     h.mana -= cost;
     h.attack(); // cast with the attack animation
@@ -634,8 +635,8 @@ async function boot(): Promise<void> {
   let buff: Buff = {};
   let buffT = 0;
   /** the base stats with the running potion-like buff applied */
-  function buffedStats(): typeof story.stats {
-    const s = { ...story.stats };
+  function buffedStats(name: string): typeof story.stats {
+    const s = { ...story.statsOf(name) };
     s.STRENGTH = Math.round(s.STRENGTH * (buff.strength ?? 1));
     s.DEXTERITY = Math.round(s.DEXTERITY * (buff.dexterity ?? 1));
     s.SKILL = Math.round(s.SKILL * (buff.skill ?? 1));
@@ -643,7 +644,7 @@ async function boot(): Promise<void> {
   }
   /** a swing or a blow costs the gear in `slots` a point of durability now and then; broken pieces stop counting */
   function wearGear(h: Hero, slots: Slot[]): void {
-    const chance = wearChance(story.stats.BRAIN);
+    const chance = wearChance(story.statsOf(h.name).BRAIN);
     let broke = false;
     for (const s of slots) {
       const id = h.gear[s];
@@ -655,9 +656,10 @@ async function boot(): Promise<void> {
     }
     if (broke) refreshHeroStats();
   }
+  let encumb = 1;
   function refreshHeroStats(): void {
     for (const h of heroes) {
-      const d = derive(db, buffedStats(), story.level, workingGear(db, story.wear, h.gear), traitOf(h.name), story.lifeBonus);
+      const d = derive(db, buffedStats(h.name), story.level, workingGear(db, story.wear, h.gear), traitOf(h.name), story.lifeBonus);
       h.guard = buff.taken ?? 1;
       const frac = h.maxHp ? h.hp / h.maxHp : 1;
       h.maxHp = d.maxHp;
@@ -667,17 +669,20 @@ async function boot(): Promise<void> {
       h.mana = Math.round(d.maxMana * mf);
       h.attackPower = Math.round(d.attack * (buff.dealt ?? 1));
       h.defense = d.defense;
-      h.speedMul = d.speedMul;
+      h.speedMul = d.speedMul * encumb;
     }
   }
   refreshHeroStats();
+  /** what the party carries against what it can carry (all three heroes' limits together) */
+  const capacityNow = () => HERO_DEFS.reduce((n, d) => n + carryCapacity(story.statsOf(d.name)), 0);
+  const loadNow = () => partyLoad(db, story.items, heroes.map((x) => x.gear));
   function addXp(n: number): void {
     story.xp += n;
     let up = false;
     while (story.xp >= xpToNext(story.level)) {
       story.xp -= xpToNext(story.level);
       story.level++;
-      for (const k of Object.keys(LEVEL_GAIN) as StatName[]) story.stats[k] += LEVEL_GAIN[k];
+      for (const h of HERO_DEFS) story.points[h.name] = (story.points[h.name] ?? 0) + POINTS_PER_LEVEL;
       up = true;
     }
     if (up) {
@@ -712,7 +717,7 @@ async function boot(): Promise<void> {
         }
       }
       if (fx.stats) {
-        for (const [k, v] of Object.entries(fx.stats)) story.stats[k as StatName] += v;
+        for (const [k, v] of Object.entries(fx.stats)) story.addStat(k as StatName, v);
         refreshHeroStats();
         used = true;
       }
@@ -785,8 +790,26 @@ async function boot(): Promise<void> {
     {
       names: HERO_DEFS.map((d) => d.name),
       gear: (i) => heroes[i].gear,
-      derived: (i) => derive(db, story.stats, story.level, workingGear(db, story.wear, heroes[i].gear), traitOf(heroes[i].name), story.lifeBonus),
+      derived: (i) => derive(db, story.statsOf(heroes[i].name), story.level, workingGear(db, story.wear, heroes[i].gear), traitOf(heroes[i].name), story.lifeBonus),
       hp: (i) => [Math.ceil(heroes[i].hp), heroes[i].maxHp],
+      stats: (i) => story.statsOf(heroes[i].name),
+      points: (i) => story.points[heroes[i].name] ?? 0,
+      spend(i, stat) {
+        const name = heroes[i].name;
+        if ((story.points[name] ?? 0) < 1) return;
+        story.points[name]--;
+        story.statsOf(name)[stat]++;
+        refreshHeroStats();
+      },
+      autoSpend(i) {
+        const name = heroes[i].name;
+        const n = story.points[name] ?? 0;
+        if (n < 1) return;
+        for (const [k, v] of Object.entries(autoSpread(name, n))) story.statsOf(name)[k as StatName] += v ?? 0;
+        story.points[name] = 0;
+        refreshHeroStats();
+      },
+      capacity: () => capacityNow(),
       durability: (id) => (maxDurability(db, id) ? `${durabilityLeft(db, story.wear, id)}/${maxDurability(db, id)}` : ''),
       equip(i, id) {
         const slot = slotOf(db, id);
@@ -1016,9 +1039,19 @@ async function boot(): Promise<void> {
       const k = 36 / fr.w; // the 80x78 portrait, scaled down
       face.style.cssText = `width:36px;height:${Math.round(fr.h * k)}px;background:url(${assetUrl(`sprites/${iconMeta.pages[0].file}`)}) -${fr.x * k}px -${fr.y * k}px / ${iconMeta.pages[0].w * k}px auto`;
     }
-    row.append(name, bar, mbar, face);
+    const plus = document.createElement('button');
+    plus.className = 'plus';
+    plus.textContent = '+';
+    plus.title = 'Spend stat points';
+    plus.style.display = 'none';
+    plus.onclick = (e) => {
+      e.stopPropagation();
+      if (!inv.open) inv.toggle();
+      else inv.render();
+    };
+    row.append(name, bar, mbar, face, plus);
     partyEl.appendChild(row);
-    return { row, fill, mfill, face };
+    return { row, fill, mfill, face, plus };
   });
   const lvEl = document.createElement('div');
   lvEl.style.textAlign = 'right';
@@ -1352,6 +1385,7 @@ async function boot(): Promise<void> {
       heroes.forEach((h, i) => {
         lvEl.textContent = `Lv ${story.level} · xp ${story.xp}/${xpToNext(story.level)}`;
         bars[i].mfill.style.width = `${(100 * h.mana) / Math.max(1, h.maxMana)}%`;
+        bars[i].plus.style.display = (story.points[h.name] ?? 0) > 0 ? 'block' : 'none';
         bars[i].fill.style.width = `${(100 * h.hp) / h.maxHp}%`;
         bars[i].row.className = 'row' + (h === party.leader ? ' lead' : '') + (h.dead ? ' down' : '');
         bars[i].row.style.opacity = h.dead ? '0.4' : '1';
@@ -1395,6 +1429,12 @@ async function boot(): Promise<void> {
         statusT = 0;
         quickEl.style.visibility = dlg.open || menu.open ? 'hidden' : 'visible';
         yearNum.textContent = String(Math.floor(story.year));
+        const enc = encumbrance(loadNow(), capacityNow());
+        if (Math.abs(enc - encumb) > 0.001) {
+          encumb = enc;
+          refreshHeroStats();
+          if (enc < 1) toast('Too heavy: you walk slower');
+        }
         updatePlace();
         yearOrb.style.left = `${(story.year % 1) * 100}%`;
         const of = orbFrames[(orbN = (orbN + 1) % orbFrames.length)];

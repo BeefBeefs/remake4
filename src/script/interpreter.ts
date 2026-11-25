@@ -238,7 +238,7 @@ export class EvtInterpreter {
       case 'INCREASE':
       case 'DECREASE': {
         const stat = kw(args[0]) as StatName;
-        if (STAT_NAMES.has(stat)) this.state.stats[stat] += (name === 'INCREASE' ? 1 : -1) * num(args[1]);
+        if (STAT_NAMES.has(stat)) this.state.addStat(stat, (name === 'INCREASE' ? 1 : -1) * num(args[1]));
         return;
       }
       case 'FULL_LIFE':

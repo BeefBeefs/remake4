@@ -1,6 +1,6 @@
 import { packExplored, unpackExplored } from './explored';
 import { StatName, StoryState } from '../script/state';
-import { Loadout } from './stats';
+import { Loadout, START_STATS } from './stats';
 
 /** Everything needed to carry on: story state, the party's condition and where it stands. Plain JSON. */
 export interface SaveData {
@@ -20,6 +20,8 @@ export interface SaveData {
     stats: Record<StatName, number>;
     lifeBonus?: number;
     wear?: [number, number][];
+    heroStats?: Record<string, Record<StatName, number>>;
+    points?: Record<string, number>;
     magic: [number, number][];
     removed?: string[];
     gos?: [string, number][];
@@ -64,6 +66,8 @@ export function makeSave(
       stats: { ...story.stats },
       lifeBonus: story.lifeBonus,
       wear: [...story.wear],
+      heroStats: JSON.parse(JSON.stringify(story.heroStats)),
+      points: { ...story.points },
       magic: [...story.magic],
       removed: [...story.removed],
       gos: [...story.gos],
@@ -105,6 +109,12 @@ export function applyStory(story: StoryState, d: SaveData): void {
   story.level = d.story.level;
   story.xp = d.story.xp;
   story.stats = { ...story.stats, ...d.story.stats };
+  if (!d.story.heroStats) {
+    // an older save had one shared pool: every hero keeps his own start plus the gains Elim made
+    for (const st of Object.values(story.heroStats)) for (const k of Object.keys(st) as StatName[]) st[k] += story.stats[k] - START_STATS.Elim[k];
+  }
+  for (const [name, st] of Object.entries(d.story.heroStats ?? {})) if (story.heroStats[name]) story.heroStats[name] = { ...story.heroStats[name], ...st };
+  for (const [name, n] of Object.entries(d.story.points ?? {})) if (isNum(n)) story.points[name] = n;
   story.lifeBonus = isNum(d.story.lifeBonus) ? d.story.lifeBonus : 0;
   story.wear = new Map((d.story.wear ?? []).filter((w) => isNum(w[0]) && isNum(w[1])));
   story.magic = new Map(d.story.magic);
