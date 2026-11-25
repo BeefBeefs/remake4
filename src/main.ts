@@ -872,6 +872,19 @@ async function boot(): Promise<void> {
   const iconUrl = assetUrl(`sprites/${iconMeta.pages[0].file}`);
   const orbFrames = (iconMeta.records[12]?.frames ?? []).filter((f) => f !== null);
   let orbN = 0;
+  // ICON1 records 17 (overworld, 22 labels) and 18 (underworld, 20): the area name picture drawn over the corner of the play field
+  const placeEl = document.getElementById('place')!;
+  let placeId = '';
+  const updatePlace = (): void => {
+    const r = canvas.getBoundingClientRect();
+    placeEl.style.left = `${r.left + 6}px`;
+    placeEl.style.top = `${r.top + 4}px`;
+    if (placeId === mapEntry.id) return;
+    placeId = mapEntry.id;
+    const fr = iconMeta.records[mapEntry.world === 2 ? 18 : 17]?.frames[mapEntry.world === 2 ? mapEntry.order - 22 : mapEntry.order];
+    placeEl.style.display = fr ? 'block' : 'none';
+    if (fr) placeEl.style.cssText += `;width:${fr.w}px;height:${fr.h}px;background:url(${iconUrl}) -${fr.x}px -${fr.y}px`;
+  };
   if (orbFrames.length) yearOrb.classList.add('globe');
   interface Quick { label: string; run: () => void | Promise<void> }
   let quickList: Quick[] = [];
@@ -1304,6 +1317,7 @@ async function boot(): Promise<void> {
         statusT = 0;
         quickEl.style.visibility = dlg.open || menu.open ? 'hidden' : 'visible';
         yearNum.textContent = String(Math.floor(story.year));
+        updatePlace();
         yearOrb.style.left = `${(story.year % 1) * 100}%`;
         const of = orbFrames[(orbN = (orbN + 1) % orbFrames.length)];
         if (of) yearOrb.style.background = `url(${iconUrl}) -${of.x}px -${of.y}px`;
