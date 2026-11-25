@@ -561,13 +561,14 @@ async function boot(): Promise<void> {
     fx.length = 0;
   }
   const HERO_SFX: Record<string, string> = { LEELIM: 'lee', KUSA: 'kusa', RINING: 'ren' };
-  function castSpell(free?: number): void {
-    const h = party.leader;
-    const k = free ?? (knownSpells().includes(spellSel) ? spellSel : knownSpells()[0]);
+  /** `who` is a follower casting on his own (see the party AI); by default the leader casts what the player picked */
+  function castSpell(free?: number, who?: Hero, pick?: number): void {
+    const h = who ?? party.leader;
+    const k = pick ?? free ?? (knownSpells().includes(spellSel) ? spellSel : knownSpells()[0]);
     if (!k || h.dead || running || dlg.open) return;
     const cost = free ? 0 : manaCost(k);
     if (h.mana < cost) {
-      toast('Not enough mana');
+      if (!who) toast('Not enough mana');
       return;
     }
     const d = derive(db, story.statsOf(h.name), story.level, workingGear(db, story.wear, h.gear), traitOf(h.name), story.lifeBonus);
@@ -658,6 +659,7 @@ async function boot(): Promise<void> {
   }
   let encumb = 1;
   const fightCd = new Map<Hero, number>();
+  const spellCd = new Map<Hero, number>();
   function refreshHeroStats(): void {
     for (const h of heroes) {
       const d = derive(db, buffedStats(h.name), story.level, workingGear(db, story.wear, h.gear), traitOf(h.name), story.lifeBonus);
@@ -1254,7 +1256,32 @@ async function boot(): Promise<void> {
       for (const h of heroes) {
         if (h === lead || h.dead || running || dlg.open) continue;
         fightCd.set(h, Math.max(0, (fightCd.get(h) ?? 0) - dt));
+        spellCd.set(h, Math.max(0, (spellCd.get(h) ?? 0) - dt));
         const reach = isBow(h) ? 170 : 44;
+        if ((spellCd.get(h) ?? 0) <= 0 && h.state !== 'attack' && h.state !== 'hurt') {
+          const known = knownSpells();
+          const fallen = heroes.some((x) => x.dead);
+          const worst = heroes.filter((x) => !x.dead).sort((a, b) => a.hp / a.maxHp - b.hp / b.maxHp)[0];
+          // the support hero (Raening) raises the fallen and heals anyone below half; the mage (Kusa) casts at what is near
+          let pick = 0;
+          if (h.name === 'Raening') {
+            if (fallen && known.includes(12) && h.mana >= manaCost(12) + 20) pick = 12;
+            else if (worst && worst.hp < worst.maxHp * 0.5 && known.includes(9) && h.mana >= manaCost(9)) pick = 9;
+          } else if (h.name === 'Kusa') {
+            const near = enemies.filter((en) => !en.e.dead && Math.hypot(en.e.x - h.x, (en.e.y - h.y) / 0.625) < 190);
+            if (near.length) {
+              const foe0 = near.sort((a, b) => Math.hypot(a.e.x - h.x, a.e.y - h.y) - Math.hypot(b.e.x - h.x, b.e.y - h.y))[0].e;
+              h.dir = directionFromVector(foe0.x - h.x, (foe0.y - h.y) / 0.625);
+              const order = near.length >= 3 ? [11, 10, 6, 5, 3, 2] : [3, 2, 5, 6, 10];
+              pick = order.find((s) => known.includes(s) && h.mana >= manaCost(s) + 10) ?? 0;
+            }
+          }
+          if (pick) {
+            castSpell(undefined, h, pick);
+            spellCd.set(h, 3);
+            continue;
+          }
+        }
         let foe: Enemy | null = null;
         let fd = Infinity;
         for (const en of enemies) {
