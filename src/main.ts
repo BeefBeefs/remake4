@@ -1295,7 +1295,7 @@ async function boot(): Promise<void> {
         const py = pm.o.y * TILE_H + TILE_H - 2;
         if (Math.hypot(px - lead.x, (py - lead.y) / 0.625) < 340) {
           pm.done = true;
-          void spawnEnemy(sheetForKind(pm.o.kind, monsterTable), px, py, pm.o.kind, 6 + pm.o.kind * 3, pm.o.extra);
+          void spawnEnemy(sheetForKind(pm.o.kind, monsterTable), px, py, pm.o.kind, 6 + pm.o.kind * 3, pm.o.extra >= 8 ? pm.o.extra : 0); // extra 1-7 is on a thousand monsters: not an item or event
         }
       }
       for (const p of props) {

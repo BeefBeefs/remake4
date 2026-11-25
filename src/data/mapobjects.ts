@@ -36,14 +36,15 @@ export type ObjectRole = 'prop' | 'scenery' | 'monster' | 'unknown';
  * What a placed object is (inferred; checked by drawing the maps):
  *  - class 0        a SPRITE.GOS record `kind` (barrels, chests, villagers, statues, skeletons...)
  *  - class 98 / 99  a BACK.GOS record `kind` (grass, plants, fountains, pillars, trees)
- *  - class 1-47     a monster, `kind` = LANG.GOS monster number (class: behaviour / group, not understood)
- *  - class 49       unexplained, skipped
+ *  - class 1-60     a monster, `kind` = LANG.GOS monster number (class: behaviour / group, not understood)
  * Objects bound to a script (object ids in the EVT headers) are NPCs and are handled separately.
  */
 export function objectRole(o: MapObject): ObjectRole {
   if (o.cls === 0) return o.kind < 70 ? 'prop' : 'unknown';
   if (o.cls === 98 || o.cls === 99) return o.kind < 70 ? 'scenery' : 'unknown';
-  if (o.cls < 48 && o.kind >= 1 && o.kind <= 60) return 'monster';
+  // classes 1-60: 430 objects with class 48-60 sit on walkable ground (2% blocked against 11% for props) and carry valid monster
+  // numbers, so they are monsters too (the class itself is still not understood)
+  if (o.cls >= 1 && o.cls < 98 && o.kind >= 1 && o.kind <= 60) return 'monster';
   return 'unknown';
 }
 

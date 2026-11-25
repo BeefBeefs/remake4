@@ -78,7 +78,7 @@ Object ids in the EVT headers are indices into this table, so scripted NPCs get 
 Roles (inferred by drawing the maps and checking against scripts):
 - class 0: record `kind` of SPRITE.GOS - barrels, chests, villagers, guards, bull statues (26-28), skeletons.
 - class 98 / 99: record `kind` of BACK.GOS - grass, plants, fountain, pillars, trees (scenery, animated frames).
-- class 1-47: monster, `kind` = LANG.GOS monster number; `extra` looks like the drop item; class meaning unknown.
+- class 1-60: monster, `kind` = LANG.GOS monster number; class meaning unknown (classes 48-60 are 430 monsters on walkable ground, 2% blocked vs 11% for props; they used to be skipped). `extra`: 0-7 on ~1,900 of 2,400 monsters (0 790, 1 355, 4 432, 3 143, 5 66...), so not a drop; values 8+ (21-24, 31-34, 41-45...) are item or event numbers (Hellminor = 34).
 - NPC sprites: SPRITE.GOS record chosen from the NPC's script name (`src/game/npcs.ts`; Blacksmith 9, Jeweler 12, ...).
 
 ## AKUMA.EXE data tables (.data section, file offset 0x8c000)
