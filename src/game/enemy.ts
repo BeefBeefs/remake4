@@ -9,8 +9,8 @@ export type EnemyState = 'idle' | 'walk' | 'attack';
 
 const FRAME_TIME: Record<EnemyState, number> = { idle: 1 / 4, walk: 1 / 12, attack: 1 / 14 };
 const HALF_WIDTH = 8;
-const HP_SCALE = 0.25;
-const DAMAGE_SCALE = 0.4;
+const HP_SCALE = 0.5;
+const DAMAGE_SCALE = 0.55;
 
 /** Placeholder AI: notice the hero, walk to it, swing. Stats and real behaviour are not decoded yet. */
 export class Enemy {
@@ -32,6 +32,7 @@ export class Enemy {
   private cooldown = 0;
   /** set when a swing reaches its hit frame; the game decides what that means */
   swung = false;
+  private swingFired = false;
 
   constructor(
     readonly sheet: string,
@@ -48,7 +49,7 @@ export class Enemy {
       this.damageOut = Math.max(2, Math.round(stat.atk * DAMAGE_SCALE));
       this.defense = stat.def;
       this.moveSpeed = 30 + stat.speed * 3.5;
-      this.xp = Math.round((stat.hp + stat.atk * 4 + stat.def * 3) / 12);
+      this.xp = Math.round((stat.hp + stat.atk * 4 + stat.def * 3) / 20);
     } else {
       this.hp = 8 + power;
       this.damageOut = 3 + Math.floor(power / 8);
@@ -75,6 +76,7 @@ export class Enemy {
   private set(s: EnemyState): void {
     if (this.state !== s) {
       this.state = s;
+      this.swingFired = false;
       this.frame = 0;
       this.t = 0;
     }
@@ -120,7 +122,11 @@ export class Enemy {
     }
     const n = meta.records[recordIndex(this.action(), this.dir).index]?.frames.length ?? 0;
     if (this.state === 'attack') {
-      if (this.frame === Math.floor(n / 2)) this.swung = true;
+      // the blow lands once, when the swing reaches its middle frame (this runs every tick, so remember that it did)
+      if (this.frame >= Math.floor(n / 2) && !this.swingFired) {
+        this.swingFired = true;
+        this.swung = true;
+      }
       if (this.frame >= n) this.set('idle');
     } else if (n > 0) this.frame %= n;
   }

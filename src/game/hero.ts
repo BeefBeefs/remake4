@@ -132,14 +132,15 @@ export class Hero {
       } else this.setState('idle');
     }
 
-    this.t += this.state === 'attack' ? dt * this.attackRate : dt;
+    const step = this.state === 'attack' ? dt * this.attackRate : dt;
+    this.t += step;
     const ft = FRAME_TIME[this.state];
     while (this.t >= ft) {
       this.t -= ft;
       this.frame++;
     }
     const n = this.frameCountNow(meta);
-    if (this.state === 'attack' && this.frame === Math.floor(n / 2) && this.t < dt + 1e-6) this.swung = true;
+    if (this.state === 'attack' && this.frame === Math.floor(n / 2) && this.t < step + 1e-6) this.swung = true;
     if ((this.state === 'attack' || this.state === 'hurt') && this.frame >= n) {
       this.state = 'idle';
       this.frame = 0;

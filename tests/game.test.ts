@@ -355,7 +355,7 @@ test('monster table: records line up with the string table and drive Enemy stats
   assert.equal(table['16'].name, 'Satan');
   assert.ok(table['16'].hp === 300 && table['44'].hp === 600, 'two Satans: the story one is tougher');
   const tiger = new Enemy('ENEMY-J', 0, 0, 10, 20, 0, table['10']);
-  assert.equal(tiger.hp, 50);
+  assert.equal(tiger.hp, 100);
   const before = tiger.hp;
   tiger.damage(10);
   assert.ok(before - tiger.hp < 10 && before - tiger.hp >= 1, 'defense softens the hit');
@@ -681,4 +681,21 @@ test('skill and speed: Intelligence feeds Skill, Dexterity speeds walking and at
   const fast = derive(db, { ...START_STATS.Elim, DEXTERITY: 60 }, 1, {});
   assert.ok(fast.attackRate > e.attackRate && fast.speedMul > e.speedMul);
   assert.ok(derive(db, { ...START_STATS.Elim, DEXTERITY: 9999 }, 1, {}).speedMul <= 1.5 + 1e-9, 'move speed bonus is capped at 50');
+});
+
+test('an enemy swing lands exactly once however many ticks the swing frame lasts', async () => {
+  const { Enemy } = await import('../src/game/enemy');
+  const meta = { records: Array.from({ length: 40 }, () => ({ frames: new Array(6).fill({}) })) } as never;
+  const world = { blockedAt: () => false } as never;
+  const e = new Enemy('ENEMY-A', 0, 0, 0, 20, 0);
+  let hits = 0;
+  for (let i = 0; i < 120; i++) {
+    e.update(1 / 60, world, meta, { x: 10, y: 0 });
+    if (e.swung) {
+      e.swung = false;
+      hits++;
+    }
+    if (i === 60) assert.equal(hits, 1, 'one hit for the first swing');
+  }
+  assert.equal(hits, 2, 'the second swing comes after the 1.4 s cooldown');
 });
