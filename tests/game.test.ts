@@ -670,3 +670,15 @@ test('durability: wear, breaking, repair cost, working gear', async () => {
   assert.ok(wearChance(100) < wearChance(10));
   assert.equal(carryCapacity({ HEALTH: 23, STRENGTH: 25, MAGIC: 15, DEXTERITY: 14, BRAIN: 16, SKILL: 10 }), 309); // Elim's screen
 });
+
+test('skill and speed: Intelligence feeds Skill, Dexterity speeds walking and attacking', async () => {
+  const { derive, START_STATS, ignoreChance } = await import('../src/game/stats');
+  const { ItemDb } = await import('../src/game/itemdb');
+  const db = new ItemDb(json<LangData>('text/lang.json'), json<ItemStats>('text/itemstats.json'));
+  const e = derive(db, START_STATS.Elim, 1, {});
+  assert.equal(e.skill, 16); // 10 + 0.4 x 16
+  assert.ok(Math.abs(ignoreChance(e.skill) - 0.08) < 1e-9 && ignoreChance(9999) === 0.5);
+  const fast = derive(db, { ...START_STATS.Elim, DEXTERITY: 60 }, 1, {});
+  assert.ok(fast.attackRate > e.attackRate && fast.speedMul > e.speedMul);
+  assert.ok(derive(db, { ...START_STATS.Elim, DEXTERITY: 9999 }, 1, {}).speedMul <= 1.5 + 1e-9, 'move speed bonus is capped at 50');
+});

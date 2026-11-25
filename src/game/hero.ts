@@ -34,6 +34,9 @@ export class Hero {
   attackPower = UNARMED_ATTACK;
   defense = 0;
   speedMul = 1;
+  /** attack animation speed (weapon speed and Dexterity) and the chance to ignore a blow (Skill) */
+  attackRate = 1;
+  ignore = 0;
   /** seconds of Buddha Shield left: no damage while above 0 */
   invuln = 0;
   /** multiplier on damage taken (Angel's Touch / Shield buffs) */
@@ -57,6 +60,7 @@ export class Hero {
   /** placeholder combat: flat damage, brief stagger, death animation at 0 hp */
   takeDamage(n: number): void {
     if (this.dead || this.invuln > 0) return;
+    if (this.ignore > 0 && Math.random() < this.ignore) return; // Skill: the blow is shrugged off
     this.hp = Math.max(0, this.hp - Math.max(1, Math.round(n * this.guard)));
     this.target = null;
     this.setState(this.dead ? 'dead' : 'hurt');
@@ -128,7 +132,7 @@ export class Hero {
       } else this.setState('idle');
     }
 
-    this.t += dt;
+    this.t += this.state === 'attack' ? dt * this.attackRate : dt;
     const ft = FRAME_TIME[this.state];
     while (this.t >= ft) {
       this.t -= ft;

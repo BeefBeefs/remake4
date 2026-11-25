@@ -87,7 +87,14 @@ export interface Derived {
   strength: number;
   dexterity: number;
   magic: number;
+  /** Skill: Intelligence x 0.4 plus the Skill stat and gear (necklaces/rings) */
+  skill: number;
+  /** attack animation speed factor from the weapon's speed and Dexterity (a guess at the units) */
+  attackRate: number;
 }
+
+/** chance that Skill lets a hero shrug off a blow (no damage, no flinch); the wiki gives no figure, so Skill / 200 up to 50% */
+export const ignoreChance = (skill: number): number => Math.min(0.5, Math.max(0, skill) / 200);
 
 export const UNARMED_ATTACK = 4;
 
@@ -126,12 +133,16 @@ export function derive(db: ItemDb, base: Record<StatName, number>, level: number
   const b = emptyBonuses();
   let atk = UNARMED_ATTACK;
   let def = 0;
+  let aspeed = 4;
   for (const slot of SLOTS) {
     const id = gear[slot];
     if (!id) continue;
     parseBonuses(db.lang.weapons[String(id)]?.stats ?? '', b);
     const st = db.stat(id);
-    if (slot === 'weapon') atk = st.atk ?? atk;
+    if (slot === 'weapon') {
+      atk = st.atk ?? atk;
+      aspeed = st.aspeed ?? aspeed;
+    }
     if (st.def) def += st.def;
   }
   const total = (k: StatName) => Math.round((base[k] + b.stats[k]) * (1 + (b.pct[k] ?? 0) / 100));
@@ -143,15 +154,19 @@ export function derive(db: ItemDb, base: Record<StatName, number>, level: number
   const maxHp = Math.round((83 + level + 1.3 * H + 0.6 * S + b.life + permLife) * (1 + (b.pct.LIFE ?? 0) / 100));
   const attack = Math.round((atk + b.atk + 0.4 * S + 0.1 * D) * (1 + (b.pct.ATK ?? 0) / 100));
   const maxMana = Math.round(99 + 1.7 * M + 0.3 * I);
+  const skill = Math.round((base.SKILL + b.stats.SKILL + 0.4 * I) * (1 + (b.pct.SKILL ?? 0) / 100));
   return {
     maxHp: Math.round(maxHp * trait.hp),
     maxMana: Math.round(maxMana * trait.mana),
     attack: Math.round(attack * trait.attack),
     defense: def + Math.round(0.2 * H + 0.1 * S + 0.1 * D),
-    speedMul: (1 + b.speed / 100) * trait.speed,
+    speedMul: (1 + (b.speed + Math.min(50, 0.3 * D)) / 100) * trait.speed,
     strength: S,
     dexterity: D,
     magic: Math.round(M * trait.spell),
+    skill,
+    // a weapon speed of 4 is the baseline; each point is 5%, each Dexterity point 0.4%
+    attackRate: (0.8 + 0.05 * aspeed) * (1 + (0.4 * D) / 100),
   };
 }
 

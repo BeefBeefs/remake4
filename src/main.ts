@@ -12,7 +12,7 @@ import { arrow, aura, Effect, effectFrame, fireBall, fireWall, ghostBolt, lightn
 import { parseCheat } from './game/cheats';
 import { encumbrance, partyLoad } from './game/weight';
 import { repair as repairItem, repairCost, wearChance, wearOut, workingGear, durabilityLeft, maxDurability } from './game/durability';
-import { autoSpread, carryCapacity, derive, mitigate, POINTS_PER_LEVEL, Slot, slotOf, traitOf, xpToNext } from './game/stats';
+import { autoSpread, carryCapacity, derive, ignoreChance, mitigate, POINTS_PER_LEVEL, Slot, slotOf, traitOf, xpToNext } from './game/stats';
 import { InventoryUI } from './ui/inventory';
 import { advanceYear } from './game/clock';
 import { Buff, BUFF_SECONDS, ItemEffect, itemEffect } from './game/consumables';
@@ -670,6 +670,8 @@ async function boot(): Promise<void> {
       h.attackPower = Math.round(d.attack * (buff.dealt ?? 1));
       h.defense = d.defense;
       h.speedMul = d.speedMul * encumb;
+      h.attackRate = d.attackRate;
+      h.ignore = ignoreChance(d.skill);
     }
   }
   refreshHeroStats();

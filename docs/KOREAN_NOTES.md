@@ -52,3 +52,10 @@ starts black and fills in as the party walks (manual screenshots); those items a
 ## Still unknown
 Length of a game year, monster stats and experience, shop stock (prices are in itemstats.json), which gear gives Skill, damage
 formula (how Attack and Defense combine, how Skill's damage-ignore chance rolls), exact fog/"darkness" behaviour on the main view.
+
+## What the port does with it (guesses marked)
+- Per-hero stats and 9 points per level for the player to spend (guess from Elim 93 at level 1 and Kusa 175 at level 10). Kusa's and
+  Raening's starting stats are guesses; Elim's are printed in the manual.
+- Skill = Intelligence x 0.4 + Skill stat; chance to ignore a blow = Skill / 200 (capped 50%) - the wiki gives no figure.
+- Dexterity: move speed +0.3% per point (cap 50%), attack animation +0.4% per point; weapon speed 4 is the baseline, 5% per point (guess).
+- Durability, repair prices and the over-weight slowdown are guesses (see `game/durability.ts`, `game/weight.ts`).
